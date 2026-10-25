@@ -1,7 +1,7 @@
 {
   "name": "seo-forecast",
-  "version": "1.0.0",
-  "description": "Transparent SEO traffic forecast: search volume × sourced CTR curves × AI Overview impact, with every assumption visible.",
+  "version": "1.1.0",
+  "description": "Transparent SEO forecast: search volume × sourced CTR curves × AI Overview impact, through your own business funnel to revenue, profit and ROI. Every assumption visible.",
   "type": "module",
   "license": "MIT",
   "author": "Thorsten Litzki (Litzki Systems)",
@@ -11,6 +11,7 @@
     ".": "./dist/forecast.js",
     "./csv": "./dist/csv.js",
     "./data": "./dist/data.js",
+    "./funnel": "./dist/funnel.js",
     "./ctr-curves.json": "./data/ctr-curves.json"
   },
   "files": ["dist", "data"],

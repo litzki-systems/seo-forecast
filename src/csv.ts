@@ -3,7 +3,8 @@
  * Accepts comma, semicolon or tab as separator, quoted fields, German and English headers,
  * and German or English number formats. MIT License.
  */
-import type { ForecastResult, Keyword, SearchConsoleRow } from './forecast.js';
+import type { ForecastResult, Intent, Keyword, SearchConsoleRow } from './forecast.js';
+import type { FunnelResult } from './funnel.js';
 
 export function parseCsv(text: string): string[][] {
   const clean = text.replace(/^﻿/, '');
@@ -67,7 +68,19 @@ const KEYWORD_HEADERS: Record<keyof Keyword, string[]> = {
   currentPosition: ['current_position', 'position', 'aktuelle_position'],
   targetPosition: ['target_position', 'zielposition', 'ziel_position'],
   aio: ['aio', 'ai_overview', 'ai_overviews'],
+  brand: ['brand', 'marke', 'branded'],
+  intent: ['intent', 'intention', 'suchintention', 'search_intent'],
 };
+
+/** Reads info/informational/informativ, comm/commercial/kommerziell, trans/transactional/transaktional. */
+export function parseIntent(v: string): Intent | null {
+  const s = String(v || '').trim().toLowerCase();
+  if (!s) return null;
+  if (s.startsWith('info')) return 'informational';
+  if (s.startsWith('comm') || s.startsWith('komm')) return 'commercial';
+  if (s.startsWith('trans')) return 'transactional';
+  return null;
+}
 
 function indexOf(header: string[], names: string[]): number {
   const h = header.map(norm);
@@ -95,6 +108,8 @@ export function keywordsFromCsv(text: string): { keywords: Keyword[]; errors: st
     currentPosition: indexOf(header, KEYWORD_HEADERS.currentPosition),
     targetPosition: indexOf(header, KEYWORD_HEADERS.targetPosition),
     aio: indexOf(header, KEYWORD_HEADERS.aio),
+    brand: indexOf(header, KEYWORD_HEADERS.brand),
+    intent: indexOf(header, KEYWORD_HEADERS.intent),
   };
   for (const k of ['keyword', 'volume', 'targetPosition'] as const) {
     if (col[k] < 0) errors.push(`column missing: ${KEYWORD_HEADERS[k][0]}`);
@@ -113,7 +128,15 @@ export function keywordsFromCsv(text: string): { keywords: Keyword[]; errors: st
     if (!Number.isFinite(volume) || volume < 0) { errors.push(`line ${line}: volume is not a number`); return; }
     if (!Number.isFinite(target) || target < 1) { errors.push(`line ${line}: target position is not a number ≥ 1`); return; }
     if (current !== null && (!Number.isFinite(current) || current < 1)) { errors.push(`line ${line}: current position is not a number ≥ 1`); return; }
-    keywords.push({ keyword, volume, currentPosition: current, targetPosition: target, aio: col.aio >= 0 ? truthy(r[col.aio]) : false });
+    const intentRaw = col.intent >= 0 ? r[col.intent] : '';
+    const intent = parseIntent(intentRaw);
+    if (intentRaw && intentRaw.trim() && !intent) { errors.push(`line ${line}: intent must be informational, commercial or transactional`); return; }
+    keywords.push({
+      keyword, volume, currentPosition: current, targetPosition: target,
+      aio: col.aio >= 0 ? truthy(r[col.aio]) : false,
+      brand: col.brand >= 0 ? truthy(r[col.brand]) : false,
+      intent,
+    });
   });
   return { keywords, errors };
 }
@@ -147,11 +170,33 @@ const esc = (v: string | number): string => {
 /** Result table as CSV: one row per keyword, one column per month, plus a total row. */
 export function resultToCsv(result: ForecastResult): string {
   const months = result.totals.monthly.map((_, i) => `month_${i + 1}`);
-  const head = ['keyword', 'volume', 'current_position', 'target_position', 'aio', 'current_ctr_percent', 'target_ctr_percent', 'current_clicks', 'target_clicks', ...months];
+  const head = ['keyword', 'volume', 'current_position', 'target_position', 'aio', 'brand', 'intent', 'curve', 'current_ctr_percent', 'target_ctr_percent', 'current_clicks', 'target_clicks', ...months];
   const lines = [head.join(',')];
   for (const k of result.keywords) {
-    lines.push([k.keyword, k.volume, k.currentPosition ?? '', k.targetPosition, k.aio ? 'yes' : 'no', k.currentCtr, k.targetCtr, k.currentClicks, k.targetClicks, ...k.monthly].map(esc).join(','));
+    lines.push([k.keyword, k.volume, k.currentPosition ?? '', k.targetPosition, k.aio ? 'yes' : 'no', k.brand ? 'yes' : 'no', k.intent ?? '', k.curveId, k.currentCtr, k.targetCtr, k.currentClicks, k.targetClicks, ...k.monthly].map(esc).join(','));
   }
-  lines.push(['TOTAL', '', '', '', '', '', '', result.totals.currentClicks, result.totals.targetClicks, ...result.totals.monthly].map(esc).join(','));
+  lines.push(['TOTAL', '', '', '', '', '', '', '', '', '', result.totals.currentClicks, result.totals.targetClicks, ...result.totals.monthly].map(esc).join(','));
+  return lines.join('\n') + '\n';
+}
+
+/** Funnel table as CSV: one row per month plus a total row. */
+export function funnelToCsv(f: FunnelResult): string {
+  const head = ['month', 'clicks', 'leads', 'customers', 'revenue', 'gross_profit', 'investment', 'net_profit', 'cumulative_revenue', 'cumulative_gross_profit', 'cumulative_investment', 'cumulative_net_profit', 'cumulative_roi_percent'];
+  const lines = [head.join(',')];
+  for (const m of f.months) {
+    lines.push([m.month, m.clicks, m.leads, m.customers, m.revenue, m.grossProfit, m.investment, m.netProfit, m.cumulativeRevenue, m.cumulativeGrossProfit, m.cumulativeInvestment, m.cumulativeNetProfit, m.cumulativeRoi ?? ''].map(esc).join(','));
+  }
+  const t = f.totals;
+  lines.push(['TOTAL', t.clicks, t.leads, t.customers, t.revenue, t.grossProfit, t.investment, t.netProfit, '', '', '', '', t.roi ?? ''].map(esc).join(','));
+  const s = f.settings;
+  lines.push('');
+  lines.push(['basis', s.basis].join(','));
+  lines.push(['lead_rate_percent', s.leadRate].join(','));
+  for (const [k, v] of Object.entries(s.leadRateByIntent || {})) lines.push([`lead_rate_${k}_percent`, v].join(','));
+  lines.push(['close_rate_percent', s.closeRate].join(','));
+  lines.push(['customer_value', s.customerValue].join(','));
+  lines.push(['margin_percent', s.margin].join(','));
+  lines.push(['monthly_investment', s.monthlyInvestment ?? 0].join(','));
+  lines.push(['one_off_investment', s.oneOffInvestment ?? 0].join(','));
   return lines.join('\n') + '\n';
 }

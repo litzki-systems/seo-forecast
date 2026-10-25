@@ -90,3 +90,20 @@ body { margin: 0; background: var(--sf-off-white); color: var(--sf-gray-800); fo
   .sf-table--input td:last-child { justify-content: flex-end; }
   .sf-input--num { max-width: none; }
 }
+
+/* ---------- funnel ---------- */
+.sf-help { font-size: 0.875rem; color: var(--sf-gray-600); margin: 0.15rem 0 0; line-height: 1.45; }
+.sf-card > .sf-grid + .sf-grid { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--sf-gray-200); }
+.sf-kpi--accent { border-left-color: var(--sf-navy); }
+.sf-kpis--second { margin-top: 1.25rem; }
+.sf-line--invest { stroke: var(--sf-gray-500); stroke-width: 2.5; stroke-dasharray: 7 6; }
+.sf-gap { margin-top: 1.5rem; }
+.sf-table--kpi td:not(:first-child), .sf-table--kpi th:not(:first-child) { text-align: right; }
+.sf-table--kpi td:first-child { font-weight: 700; color: var(--sf-navy); }
+.sf-details { margin-top: 1.25rem; }
+.sf-details summary { cursor: pointer; font-weight: 700; color: var(--sf-navy); font-size: 0.9375rem; }
+.sf-details summary:focus-visible { outline: 3px solid var(--sf-gold); outline-offset: 2px; }
+.sf-msg:empty { display: none; }
+.sf-btn:disabled { cursor: not-allowed; color: var(--sf-gray-500); border-color: var(--sf-gray-300); background: var(--sf-gray-50); }
+.sf-example { font-weight: 700; color: var(--sf-gold-dark); }
+.sf-card > .sf-note + .sf-grid { margin-top: 1rem; }

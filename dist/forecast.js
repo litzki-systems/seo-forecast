@@ -53,15 +53,21 @@ function validate(k) {
     }
     return errors;
 }
-export function forecast(curve, keywords, settings) {
+function resolve(choice, k) {
+    return 'pick' in choice ? choice.pick(k) : { curve: choice };
+}
+export function forecast(choice, keywords, settings) {
     const ramp = Math.max(1, Math.round(settings.rampMonths));
     const horizon = Math.max(1, Math.round(settings.horizonMonths));
-    const limit = maxPosition(curve.ctr);
     const results = keywords.map((k) => {
         const errors = validate(k);
         if (errors.length)
             throw new Error(`${k.keyword || '(empty)'}: ${errors.join(', ')}`);
+        const { curve, note } = resolve(choice, k);
+        const limit = maxPosition(curve.ctr);
         const warnings = [];
+        if (note)
+            warnings.push({ type: 'curve-note', which: 'both', position: k.targetPosition, maxPosition: limit, message: note });
         const cur = ctrFor(curve, k.currentPosition, k.aio);
         const tgt = ctrFor(curve, k.targetPosition, k.aio);
         const beyond = (which, position) => ({
@@ -97,6 +103,9 @@ export function forecast(curve, keywords, settings) {
             currentPosition: k.currentPosition,
             targetPosition: k.targetPosition,
             aio: k.aio,
+            brand: !!k.brand,
+            intent: k.intent ?? null,
+            curveId: curve.id,
             currentCtr: round2(currentCtr),
             targetCtr: round2(targetCtr),
             currentClicks: round2(currentClicks),
@@ -110,7 +119,7 @@ export function forecast(curve, keywords, settings) {
     const targetClicks = round2(results.reduce((s, r) => s + r.targetClicks, 0));
     const additional = round2(monthly.reduce((s, v) => s + (v - currentClicks), 0));
     return {
-        curveId: curve.id,
+        curveId: choice.id,
         settings: { rampMonths: ramp, horizonMonths: horizon },
         keywords: results,
         totals: { currentClicks, targetClicks, monthly, additionalClicksOverHorizon: additional },

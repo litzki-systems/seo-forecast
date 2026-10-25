@@ -19,6 +19,8 @@ export type AioModel =
 export interface Curve {
   id: string;
   label: string;
+  /** Short name for table headers. */
+  shortLabel?: string;
   ctr: CtrTable;
   aio: AioModel;
   source?: string;
@@ -34,7 +36,20 @@ export interface Keyword {
   targetPosition: number;
   /** An AI Overview appears on the results page for this keyword. */
   aio: boolean;
+  /** Brand keyword (your own brand name). Selects the brand curve where a curve set has one. */
+  brand?: boolean;
+  /** Search intent. Only used to pick your own lead rate per intent in the funnel. */
+  intent?: Intent | null;
 }
+
+export type Intent = 'informational' | 'commercial' | 'transactional';
+
+/**
+ * Either one curve for all keywords, or a picker that chooses a curve per keyword
+ * (e.g. brand vs. non-brand, or by query length). The picker may return a note,
+ * which is reported with the keyword.
+ */
+export type CurveChoice = Curve | { id: string; pick: (k: Keyword) => { curve: Curve; note?: string } };
 
 export interface Settings {
   /** Months until the target position is reached. */
@@ -45,8 +60,8 @@ export interface Settings {
 
 export interface ForecastWarning {
   /** beyond-data: no CTR for this position in the curve (beyond its range or a gap); no-aio-reduction: no published reduction, base CTR used. */
-  type: 'beyond-data' | 'no-aio-reduction';
-  which: 'current' | 'target';
+  type: 'beyond-data' | 'no-aio-reduction' | 'curve-note';
+  which: 'current' | 'target' | 'both';
   position: number;
   /** Highest position with data in the curve. */
   maxPosition: number;
@@ -59,6 +74,10 @@ export interface KeywordResult {
   currentPosition: number | null;
   targetPosition: number;
   aio: boolean;
+  brand: boolean;
+  intent: Intent | null;
+  /** Curve used for this keyword. */
+  curveId: string;
   currentCtr: number;
   targetCtr: number;
   currentClicks: number;
@@ -125,16 +144,22 @@ function validate(k: Keyword): string[] {
   return errors;
 }
 
-export function forecast(curve: Curve, keywords: Keyword[], settings: Settings): ForecastResult {
+function resolve(choice: CurveChoice, k: Keyword): { curve: Curve; note?: string } {
+  return 'pick' in choice ? choice.pick(k) : { curve: choice };
+}
+
+export function forecast(choice: CurveChoice, keywords: Keyword[], settings: Settings): ForecastResult {
   const ramp = Math.max(1, Math.round(settings.rampMonths));
   const horizon = Math.max(1, Math.round(settings.horizonMonths));
-  const limit = maxPosition(curve.ctr);
 
   const results: KeywordResult[] = keywords.map((k) => {
     const errors = validate(k);
     if (errors.length) throw new Error(`${k.keyword || '(empty)'}: ${errors.join(', ')}`);
 
+    const { curve, note } = resolve(choice, k);
+    const limit = maxPosition(curve.ctr);
     const warnings: ForecastWarning[] = [];
+    if (note) warnings.push({ type: 'curve-note', which: 'both', position: k.targetPosition, maxPosition: limit, message: note });
     const cur = ctrFor(curve, k.currentPosition, k.aio);
     const tgt = ctrFor(curve, k.targetPosition, k.aio);
     const beyond = (which: 'current' | 'target', position: number): ForecastWarning => ({
@@ -169,6 +194,9 @@ export function forecast(curve: Curve, keywords: Keyword[], settings: Settings):
       currentPosition: k.currentPosition,
       targetPosition: k.targetPosition,
       aio: k.aio,
+      brand: !!k.brand,
+      intent: k.intent ?? null,
+      curveId: curve.id,
       currentCtr: round2(currentCtr),
       targetCtr: round2(targetCtr),
       currentClicks: round2(currentClicks),
@@ -184,7 +212,7 @@ export function forecast(curve: Curve, keywords: Keyword[], settings: Settings):
   const additional = round2(monthly.reduce((s, v) => s + (v - currentClicks), 0));
 
   return {
-    curveId: curve.id,
+    curveId: choice.id,
     settings: { rampMonths: ramp, horizonMonths: horizon },
     keywords: results,
     totals: { currentClicks, targetClicks, monthly, additionalClicksOverHorizon: additional },

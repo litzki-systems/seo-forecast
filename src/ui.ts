@@ -3,90 +3,134 @@
  * Mounts into <div id="seo-forecast">. No inline scripts, no storage, no network
  * besides loading the curve data file. Language from data-lang or <html lang>.
  * Optional data-src: URL of ctr-curves.json (default: data/ctr-curves.json).
+ * Optional data-currency: ISO currency code for the funnel (default: EUR).
  * MIT License.
  */
-import { forecast, ctrFor, maxPosition, curveFromSearchConsole, type Curve, type Keyword, type ForecastResult } from './forecast.js';
-import { keywordsFromCsv, searchConsoleFromCsv, resultToCsv } from './csv.js';
-import { curvesFromFile, type CurveFile, type Lang } from './data.js';
+import { forecast, ctrFor, maxPosition, curveFromSearchConsole, type Curve, type Keyword, type ForecastResult, type Intent } from './forecast.js';
+import { funnel, validateFunnel, type FunnelResult, type FunnelSettings } from './funnel.js';
+import { keywordsFromCsv, searchConsoleFromCsv, resultToCsv, funnelToCsv } from './csv.js';
+import { presetsFromFile, type CurveFile, type Lang, type Preset } from './data.js';
 
-const T = {
-  de: {
+function strings(lang: Lang, currency: string) {
+  const locale = lang === 'de' ? 'de-DE' : 'en-US';
+  const nf = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const nf0 = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  const nf2 = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+  const cur = new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 });
+  const cur2 = new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 2 });
+  const pct = (n: number) => nf2.format(n) + (lang === 'de' ? ' %' : '%');
+  const base = { nf, nf0, nf2, cur, cur2, pct };
+  if (lang === 'de') return { ...base,
     loadFailed: 'Die CTR-Daten konnten nicht geladen werden. Bitte laden Sie die Seite neu.',
-    setup: 'Grundlage',
-    curve: 'CTR-Kurve',
-    ownCurve: 'Eigene Kurve aus der Search Console',
-    ramp: 'Monate bis zur Zielposition',
-    horizon: 'Prognosezeitraum (Monate)',
-    keywords: 'Keywords',
-    keywordsHelp: 'Suchvolumen aus Ihrem Keyword-Tool oder der Search Console. Der Rechner schätzt kein Suchvolumen. Aktuelle Position leer lassen, wenn die Seite nicht rankt.',
-    colKeyword: 'Keyword', colVolume: 'Suchvolumen / Monat', colCurrent: 'Aktuelle Position', colTarget: 'Zielposition', colAio: 'AI Overview',
+    setup: '1. Grundlage', curve: 'CTR-Kurve', ownCurve: 'Eigene Kurve aus der Search Console',
+    ramp: 'Monate bis zur Zielposition', horizon: 'Prognosezeitraum (Monate)',
+    keywords: '2. Keywords',
+    keywordsHelp: 'Suchvolumen aus Ihrem Keyword-Tool oder der Search Console. Der Rechner schätzt kein Suchvolumen. Aktuelle Position leer lassen, wenn die Seite nicht rankt. „Marke“ wirkt bei der Kurve mit Marken-Aufteilung, die Suchabsicht nur auf Ihre Lead-Raten im Funnel.',
+    colKeyword: 'Keyword', colVolume: 'Suchvolumen / Monat', colCurrent: 'Aktuelle Position', colTarget: 'Zielposition', colIntent: 'Suchabsicht', colBrand: 'Marke', colAio: 'AI Overview',
+    intents: { '': '–', informational: 'Info', commercial: 'Kommerziell', transactional: 'Transaktional' } as Record<string, string>,
     remove: 'Entfernen', addRow: 'Zeile hinzufügen',
     importKeywords: 'Keywords aus CSV laden', importGsc: 'Search-Console-Export als eigene Kurve laden', template: 'CSV-Vorlage',
-    example: 'Beispiel',
-    result: 'Ergebnis',
+    example: 'Die zwei Zeilen sind Beispielwerte. Ersetzen Sie sie durch Ihre Keywords oder laden Sie eine CSV-Datei.',
+    funnelH: '3. Business-Funnel (optional)',
+    funnelHelp: 'Tragen Sie Ihre eigenen Zahlen ein, zum Beispiel aus GA4, Ihrem CRM oder Ihrer Buchhaltung. Ohne Lead-Rate, Abschlussrate und Kundenwert rechnet der Rechner nur Klicks und erfindet keinen Umsatz.',
+    basis: 'Grundlage der Rechnung', basisAdditional: 'Nur zusätzliche Klicks (was die SEO-Arbeit bringt)', basisTotal: 'Alle prognostizierten Klicks',
+    leadRate: 'Lead-Rate (%)', leadRateHelp: 'Anteil der Besucher, die anfragen, sich eintragen oder bestellen.',
+    leadRateIntent: (i: string) => `Lead-Rate ${i} (%)`, leadRateIntentHelp: 'Optional, nur wenn Sie für diese Suchabsicht eine eigene Rate kennen.',
+    closeRate: 'Abschlussrate (%)', closeRateHelp: 'Anteil der Leads, die Kunde werden. Im Shop, wo der Lead die Bestellung ist: 100.',
+    customerValue: (c: string) => `Kundenwert (${c})`, customerValueHelp: 'Customer Lifetime Value oder durchschnittlicher Auftragswert.',
+    margin: 'Marge (%)', marginHelp: 'Anteil des Umsatzes, der als Rohertrag bleibt. 100 = Umsatz zählt voll.',
+    invest: (c: string) => `SEO-Investition pro Monat (${c})`, oneOff: (c: string) => `Einmalige Investition im 1. Monat (${c})`, investHelp: 'Optional. Nur mit Investition rechnet der Rechner ROI und Break-even.',
+    result: '4. Ergebnis: Klicks',
     today: 'Klicks pro Monat heute', target: 'Klicks pro Monat bei Zielposition', extra: (n: number) => `Zusätzliche Klicks in ${n} Monaten`,
-    chartTitle: 'Organische Klicks pro Monat (Summe aller Keywords)', month: 'Monat',
-    colCtrNow: 'CTR heute', colCtrTarget: 'CTR Ziel', colClicksNow: 'Klicks heute', colClicksTarget: 'Klicks Ziel',
-    exportCsv: 'Ergebnis als CSV',
-    assumptions: 'Annahmen',
+    chartClicks: 'Organische Klicks pro Monat (Summe aller Keywords, gestrichelt: heute)', month: 'Monat',
+    colCurve: 'Kurve', colCtrNow: 'CTR heute', colCtrTarget: 'CTR Ziel', colClicksNow: 'Klicks heute', colClicksTarget: 'Klicks Ziel',
+    exportCsv: 'Klicks als CSV',
+    funnelResult: '5. Ergebnis: Business-Funnel',
+    funnelMissing: 'Für den Funnel fehlen noch Lead-Rate, Abschlussrate oder Kundenwert.',
+    kpiTraffic: (b: string) => b === 'additional' ? 'Zusatz-Klicks pro Monat im Ziel' : 'Klicks pro Monat im Ziel',
+    kpiLeads: 'Leads pro Monat im Ziel', kpiCustomers: 'Kunden pro Monat im Ziel', kpiRevenue: 'Umsatz pro Monat im Ziel', kpiGross: 'Rohertrag pro Monat im Ziel', kpiNet: 'Reingewinn pro Monat im Ziel',
+    kpiRoi: (n: number) => `ROI nach ${n} Monaten`, kpiReturn: (n: number) => `Rohertrag je investiertem Euro (${n} Monate)`, kpiBreakEven: 'Break-even', breakEvenMonth: (m: number) => `Monat ${m}`, breakEvenNone: (n: number) => `nicht in ${n} Monaten`,
+    chartFunnel: 'Kumuliert: Rohertrag (durchgezogen) und Investition (gestrichelt)',
+    kpiTable: 'Kennzahlen', colPerMonth: 'Monatlich (Ziel)', colCumulative: (n: number) => `Kumuliert (${n} Monate)`,
+    rowClicks: 'Klicks', rowLeads: 'Leads', rowCustomers: 'Kunden', rowRevenue: 'Umsatz', rowGross: 'Rohertrag', rowInvest: 'Investition', rowNet: 'Reingewinn',
+    monthlyTable: 'Monat für Monat', colMonth: 'Monat', colCumNet: 'Reingewinn kumuliert', colRoi: 'ROI kumuliert',
+    exportFunnel: 'Funnel als CSV',
+    assumptions: '6. Annahmen',
     formula: 'Klicks pro Monat = Suchvolumen × CTR der Position × AI-Overview-Faktor. Zwischen heute und dem Erreichen der Zielposition steigen die Klicks linear.',
-    source: 'Quelle', position: 'Position', ctrBase: 'CTR', ctrAio: 'CTR mit AI Overview',
+    formulaFunnel: 'Leads = Klicks × Lead-Rate (je Keyword nach Suchabsicht, falls angegeben) · Kunden = Leads × Abschlussrate · Umsatz = Kunden × Kundenwert · Rohertrag = Umsatz × Marge · Reingewinn = Rohertrag − Investition · ROI = (Rohertrag − Investition) ÷ Investition, kumuliert.',
+    source: 'Quelle', position: 'Position', ctrAioShort: 'mit AIO',
     aioReduction: (s: string) => `Mit AI Overview wird die CTR um den veröffentlichten Abschlag je Position gesenkt (${s}).`,
     aioCurve: 'Mit AI Overview gilt die eigene CTR-Spalte derselben Quelle.',
     aioNone: 'Für die eigene Kurve ist kein AI-Overview-Abschlag hinterlegt. Ihre Search-Console-Daten enthalten den Effekt bereits.',
-    noData: 'keine Daten, zählt als 0',
+    presetBrand: 'Keywords mit Häkchen bei „Marke“ nutzen die Marken-Kurve, alle anderen die Kurve ohne Marke.',
+    presetLength: 'Jedes Keyword nutzt die Kurve für seine Wortzahl (1 bis 4 Wörter).',
+    noData: 'keine Daten',
     gscInfo: (n: number) => `Eigene Kurve aus ${n} Zeilen Ihres Search-Console-Exports. Positionen mit weniger als 100 Impressionen sind ausgelassen.`,
-    warnings: 'Hinweise',
+    notTaken: 'Bewusst nicht übernommen aus früheren Fassungen (keine Quelle): Branchenfaktoren auf die CTR, Branchen-Standardwerte für Conversion-Raten, pauschaler Lead-Aufschlag für kommerzielle Keywords, Aufschläge für Ads (×1,1), Featured Snippet (×1,2) und „KI-Sichtbarkeit“ (×1,15 bis ×1,25), Mobil-Abschlag (×0,75), Long-Tail-Aufschlag (×1,2, ersetzt durch die Kurve nach Länge der Suchanfrage), exponentielles Wachstum.',
+    warnings: 'Hinweise', errors: 'Bitte prüfen', noKeywords: 'Tragen Sie mindestens ein Keyword ein.',
     warnBeyond: (which: string, p: number) => `Für die ${which === 'current' ? 'aktuelle Position' : 'Zielposition'} ${p} enthält diese Kurve keine Daten; sie zählt als 0 Klicks.`,
     warnNoAio: (p: number) => `Für Position ${p} ist kein AI-Overview-Abschlag veröffentlicht; es gilt die CTR ohne AI Overview.`,
     invalid: (kw: string) => `${kw || '(ohne Keyword)'}: Bitte Suchvolumen (≥ 0), Zielposition (≥ 1) und, falls die Seite rankt, die aktuelle Position (≥ 1) eintragen.`,
-    errors: 'Bitte prüfen',
-    noKeywords: 'Tragen Sie mindestens ein Keyword ein.',
+    funnelInvalid: 'Raten und Marge müssen zwischen 0 und 100 liegen, Beträge dürfen nicht negativ sein.',
     local: 'Alle Eingaben bleiben in Ihrem Browser. Nichts wird gespeichert oder übertragen.',
-    nf: new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }),
-    nf0: new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }),
-    pct: (n: number) => new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 }).format(n) + ' %',
-  },
-  en: {
+  };
+  return { ...base,
     loadFailed: 'The CTR data could not be loaded. Please reload the page.',
-    setup: 'Basis',
-    curve: 'CTR curve',
-    ownCurve: 'Your own curve from Search Console',
-    ramp: 'Months until the target position',
-    horizon: 'Forecast period (months)',
-    keywords: 'Keywords',
-    keywordsHelp: 'Search volume from your keyword tool or Search Console. The calculator does not estimate search volume. Leave the current position empty if the page does not rank.',
-    colKeyword: 'Keyword', colVolume: 'Search volume / month', colCurrent: 'Current position', colTarget: 'Target position', colAio: 'AI Overview',
+    setup: '1. Basis', curve: 'CTR curve', ownCurve: 'Your own curve from Search Console',
+    ramp: 'Months until the target position', horizon: 'Forecast period (months)',
+    keywords: '2. Keywords',
+    keywordsHelp: 'Search volume from your keyword tool or Search Console. The calculator does not estimate search volume. Leave the current position empty if the page does not rank. “Brand” applies with the brand-split curve; intent only affects your lead rates in the funnel.',
+    colKeyword: 'Keyword', colVolume: 'Search volume / month', colCurrent: 'Current position', colTarget: 'Target position', colIntent: 'Intent', colBrand: 'Brand', colAio: 'AI Overview',
+    intents: { '': '–', informational: 'Informational', commercial: 'Commercial', transactional: 'Transactional' } as Record<string, string>,
     remove: 'Remove', addRow: 'Add row',
     importKeywords: 'Load keywords from CSV', importGsc: 'Load Search Console export as your own curve', template: 'CSV template',
-    example: 'Example',
-    result: 'Result',
+    example: 'The two rows are example values. Replace them with your keywords or load a CSV file.',
+    funnelH: '3. Business funnel (optional)',
+    funnelHelp: 'Enter your own figures, for example from GA4, your CRM or your accounts. Without lead rate, close rate and customer value the calculator only forecasts clicks and invents no revenue.',
+    basis: 'What to count', basisAdditional: 'Additional clicks only (what the SEO work adds)', basisTotal: 'All forecast clicks',
+    leadRate: 'Lead rate (%)', leadRateHelp: 'Share of visitors who enquire, sign up or order.',
+    leadRateIntent: (i: string) => `Lead rate ${i} (%)`, leadRateIntentHelp: 'Optional, only if you know a separate rate for this intent.',
+    closeRate: 'Close rate (%)', closeRateHelp: 'Share of leads who become customers. For shops where the lead is the order: 100.',
+    customerValue: (c: string) => `Customer value (${c})`, customerValueHelp: 'Customer lifetime value or average order value.',
+    margin: 'Margin (%)', marginHelp: 'Share of revenue that remains as gross profit. 100 = count revenue in full.',
+    invest: (c: string) => `SEO investment per month (${c})`, oneOff: (c: string) => `One-off investment in month 1 (${c})`, investHelp: 'Optional. ROI and break-even are only calculated with an investment.',
+    result: '4. Result: clicks',
     today: 'Clicks per month today', target: 'Clicks per month at target position', extra: (n: number) => `Additional clicks over ${n} months`,
-    chartTitle: 'Organic clicks per month (all keywords)', month: 'Month',
-    colCtrNow: 'CTR today', colCtrTarget: 'CTR target', colClicksNow: 'Clicks today', colClicksTarget: 'Clicks target',
-    exportCsv: 'Result as CSV',
-    assumptions: 'Assumptions',
+    chartClicks: 'Organic clicks per month (all keywords, dashed: today)', month: 'Month',
+    colCurve: 'Curve', colCtrNow: 'CTR today', colCtrTarget: 'CTR target', colClicksNow: 'Clicks today', colClicksTarget: 'Clicks target',
+    exportCsv: 'Clicks as CSV',
+    funnelResult: '5. Result: business funnel',
+    funnelMissing: 'The funnel still needs lead rate, close rate or customer value.',
+    kpiTraffic: (b: string) => b === 'additional' ? 'Additional clicks per month at target' : 'Clicks per month at target',
+    kpiLeads: 'Leads per month at target', kpiCustomers: 'Customers per month at target', kpiRevenue: 'Revenue per month at target', kpiGross: 'Gross profit per month at target', kpiNet: 'Net profit per month at target',
+    kpiRoi: (n: number) => `ROI after ${n} months`, kpiReturn: (n: number) => `Gross profit per euro invested (${n} months)`, kpiBreakEven: 'Break-even', breakEvenMonth: (m: number) => `Month ${m}`, breakEvenNone: (n: number) => `not within ${n} months`,
+    chartFunnel: 'Cumulative: gross profit (solid) and investment (dashed)',
+    kpiTable: 'Key figures', colPerMonth: 'Per month (target)', colCumulative: (n: number) => `Cumulative (${n} months)`,
+    rowClicks: 'Clicks', rowLeads: 'Leads', rowCustomers: 'Customers', rowRevenue: 'Revenue', rowGross: 'Gross profit', rowInvest: 'Investment', rowNet: 'Net profit',
+    monthlyTable: 'Month by month', colMonth: 'Month', colCumNet: 'Net profit, cumulative', colRoi: 'ROI, cumulative',
+    exportFunnel: 'Funnel as CSV',
+    assumptions: '6. Assumptions',
     formula: 'Clicks per month = search volume × CTR of the position × AI Overview factor. Between today and reaching the target position, clicks rise linearly.',
-    source: 'Source', position: 'Position', ctrBase: 'CTR', ctrAio: 'CTR with AI Overview',
+    formulaFunnel: 'Leads = clicks × lead rate (per keyword by intent, if given) · Customers = leads × close rate · Revenue = customers × customer value · Gross profit = revenue × margin · Net profit = gross profit − investment · ROI = (gross profit − investment) ÷ investment, cumulative.',
+    source: 'Source', position: 'Position', ctrAioShort: 'with AIO',
     aioReduction: (s: string) => `With an AI Overview, CTR is lowered by the published reduction per position (${s}).`,
     aioCurve: 'With an AI Overview, the separate CTR column of the same source applies.',
     aioNone: 'No AI Overview reduction is applied to your own curve. Your Search Console data already contains the effect.',
-    noData: 'no data, counts as 0',
+    presetBrand: 'Keywords ticked as “Brand” use the brand curve, all others the non-brand curve.',
+    presetLength: 'Each keyword uses the curve for its word count (1 to 4 words).',
+    noData: 'no data',
     gscInfo: (n: number) => `Your own curve from ${n} rows of your Search Console export. Positions with fewer than 100 impressions are left out.`,
-    warnings: 'Notes',
+    notTaken: 'Deliberately not carried over from earlier versions (no source): industry factors on CTR, industry default conversion rates, a flat lead bonus for commercial keywords, boosts for ads (×1.1), featured snippets (×1.2) and “AI visibility” (×1.15 to ×1.25), a mobile discount (×0.75), a long-tail boost (×1.2, replaced by the query-length curves), exponential growth.',
+    warnings: 'Notes', errors: 'Please check', noKeywords: 'Enter at least one keyword.',
     warnBeyond: (which: string, p: number) => `This curve has no data for the ${which === 'current' ? 'current' : 'target'} position ${p}, so it counts as 0 clicks.`,
     warnNoAio: (p: number) => `No published AI Overview reduction for position ${p}; the CTR without AI Overview is used.`,
     invalid: (kw: string) => `${kw || '(no keyword)'}: please enter search volume (≥ 0), target position (≥ 1) and, if it ranks, a current position (≥ 1).`,
-    errors: 'Please check',
-    noKeywords: 'Enter at least one keyword.',
+    funnelInvalid: 'Rates and margin must be between 0 and 100, amounts must not be negative.',
     local: 'All input stays in your browser. Nothing is stored or transmitted.',
-    nf: new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }),
-    nf0: new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }),
-    pct: (n: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n) + '%',
-  },
-};
+  };
+}
 
-type Strings = typeof T.de;
+type Strings = ReturnType<typeof strings>;
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
   const n = document.createElement(tag);
@@ -95,8 +139,8 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: 
   return n;
 }
 
-function download(name: string, text: string, type: string): void {
-  const url = URL.createObjectURL(new Blob([text], { type }));
+function download(name: string, text: string): void {
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
   const a = el('a');
   a.href = url;
   a.download = name;
@@ -108,74 +152,151 @@ function download(name: string, text: string, type: string): void {
 
 function readFile(input: HTMLInputElement): Promise<string> {
   const f = input.files && input.files[0];
-  if (!f) return Promise.resolve('');
-  return f.text();
+  return f ? f.text() : Promise.resolve('');
+}
+
+function table(headers: string[], rows: string[][], cls = 'sf-table'): HTMLDivElement {
+  const wrap = el('div', 'sf-table-wrap');
+  const t = el('table', cls);
+  const thead = el('thead');
+  const hr = el('tr');
+  headers.forEach((h) => hr.appendChild(el('th', undefined, h)));
+  thead.appendChild(hr);
+  const tbody = el('tbody');
+  rows.forEach((r) => {
+    const tr = el('tr');
+    r.forEach((c) => tr.appendChild(el('td', undefined, c)));
+    tbody.appendChild(tr);
+  });
+  t.append(thead, tbody);
+  wrap.appendChild(t);
+  return wrap;
+}
+
+interface Series { values: number[]; cls: string }
+
+function lineChart(host: HTMLElement, title: string, series: Series[], fmt: (n: number) => string): void {
+  host.textContent = '';
+  const months = series[0]?.values.length || 0;
+  if (!months) return;
+  const W = Math.max(300, Math.min(960, Math.round(host.clientWidth || 720)));
+  const H = W < 500 ? 220 : 280, R = 16, TOP = 20, B = 36;
+  const max = Math.max(1, ...series.flatMap((s) => s.values));
+  const L = Math.max(48, Math.min(96, fmt(max).length * 8 + 12));
+  const x = (i: number) => L + (months === 1 ? 0 : (i * (W - L - R)) / (months - 1));
+  const y = (v: number) => TOP + (1 - Math.max(0, v) / max) * (H - TOP - B);
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('class', 'sf-svg');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', title);
+  const add = (tag: string, attrs: Record<string, string | number>, text?: string) => {
+    const n = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
+    if (text !== undefined) n.textContent = text;
+    svg.appendChild(n);
+  };
+  for (let g = 0; g <= 4; g++) {
+    const v = (max * g) / 4;
+    add('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), class: 'sf-grid-line' });
+    add('text', { x: L - 8, y: y(v) + 5, 'text-anchor': 'end', class: 'sf-axis' }, fmt(v));
+  }
+  const step = W < 500 ? Math.ceil(months / 6) : (months <= 12 ? 1 : 3);
+  for (let i = 0; i < months; i++) {
+    if (i === 0 || (i + 1) % step === 0) add('text', { x: x(i), y: H - 10, 'text-anchor': 'middle', class: 'sf-axis' }, String(i + 1));
+  }
+  for (const s of series) {
+    if (s.values.every((v) => v === s.values[0]) && s.cls.includes('baseline')) {
+      add('line', { x1: L, x2: W - R, y1: y(s.values[0]), y2: y(s.values[0]), class: s.cls });
+      continue;
+    }
+    add('polyline', { points: s.values.map((v, i) => `${x(i)},${y(v)}`).join(' '), class: s.cls });
+    if (s.cls === 'sf-line') s.values.forEach((v, i) => add('circle', { cx: x(i), cy: y(v), r: 4, class: 'sf-dot' }));
+  }
+  host.appendChild(el('p', 'sf-label', title));
+  host.appendChild(svg);
 }
 
 export function mount(root: HTMLElement): void {
   const lang: Lang = ((root.dataset.lang || document.documentElement.lang || 'de').slice(0, 2).toLowerCase() === 'en') ? 'en' : 'de';
-  const t: Strings = T[lang] as Strings;
+  const currency = (root.dataset.currency || 'EUR').toUpperCase();
+  const t: Strings = strings(lang, currency);
+  const curSym = (0).toLocaleString(lang === 'de' ? 'de-DE' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).replace(/[\d\s.,]/g, '') || currency;
   const src = root.dataset.src || 'data/ctr-curves.json';
 
   let file: CurveFile;
-  let curves: Curve[] = [];
-  let ownCurve: Curve | null = null;
+  let presets: Preset[] = [];
+  let own: Preset | null = null;
   let ownInfo = '';
+  let last: ForecastResult | null = null;
+  let lastFunnel: FunnelResult | null = null;
   const rows: Keyword[] = lang === 'de'
     ? [
-        { keyword: `${t.example}: briefing erstellen`, volume: 1300, currentPosition: null, targetPosition: 3, aio: true },
-        { keyword: `${t.example}: content briefing vorlage`, volume: 390, currentPosition: 8, targetPosition: 2, aio: false },
+        { keyword: 'briefing erstellen', volume: 1300, currentPosition: null, targetPosition: 3, aio: true, brand: false, intent: 'informational' },
+        { keyword: 'seo agentur', volume: 880, currentPosition: 12, targetPosition: 5, aio: false, brand: false, intent: 'commercial' },
       ]
     : [
-        { keyword: `${t.example}: how to write a brief`, volume: 1900, currentPosition: null, targetPosition: 3, aio: true },
-        { keyword: `${t.example}: content brief template`, volume: 720, currentPosition: 8, targetPosition: 2, aio: false },
+        { keyword: 'how to write a brief', volume: 1900, currentPosition: null, targetPosition: 3, aio: true, brand: false, intent: 'informational' },
+        { keyword: 'seo agency', volume: 1300, currentPosition: 12, targetPosition: 5, aio: false, brand: false, intent: 'commercial' },
       ];
-  let last: ForecastResult | null = null;
 
-  // ---------- layout ----------
   root.textContent = '';
   root.classList.add('sf');
 
+  const field = (label: string, input: HTMLElement, help?: string): HTMLDivElement => {
+    const f = el('div', 'sf-field');
+    const id = 'sf-' + Math.random().toString(36).slice(2, 9);
+    input.id = id;
+    const l = el('label', 'sf-label', label);
+    l.htmlFor = id;
+    f.append(l, input);
+    if (help) {
+      const h = el('p', 'sf-help', help);
+      h.id = id + '-help';
+      input.setAttribute('aria-describedby', h.id);
+      f.appendChild(h);
+    }
+    return f;
+  };
+  const numInput = (value: string, min = '0', step = 'any', max?: string): HTMLInputElement => {
+    const i = el('input', 'sf-input');
+    i.type = 'number'; i.min = min; i.step = step; i.value = value; i.inputMode = 'decimal';
+    if (max) i.max = max;
+    return i;
+  };
+  const button = (text: string, cls: string): HTMLButtonElement => {
+    const b = el('button', 'sf-btn ' + cls, text);
+    b.type = 'button';
+    return b;
+  };
+
+  // ---------- 1. basis ----------
   const setup = el('section', 'sf-card');
   setup.appendChild(el('h2', 'sf-h', t.setup));
   const grid = el('div', 'sf-grid');
   const curveSel = el('select', 'sf-input');
-  curveSel.id = 'sf-curve';
-  const ramp = el('input', 'sf-input');
-  ramp.type = 'number'; ramp.min = '1'; ramp.max = '36'; ramp.value = '6'; ramp.id = 'sf-ramp';
-  const horizon = el('input', 'sf-input');
-  horizon.type = 'number'; horizon.min = '1'; horizon.max = '36'; horizon.value = '12'; horizon.id = 'sf-horizon';
-  for (const [id, label, input] of [['sf-curve', t.curve, curveSel], ['sf-ramp', t.ramp, ramp], ['sf-horizon', t.horizon, horizon]] as const) {
-    const f = el('div', 'sf-field');
-    const l = el('label', 'sf-label', label);
-    l.htmlFor = id;
-    f.append(l, input);
-    grid.appendChild(f);
-  }
+  const ramp = numInput('6', '1', '1', '36');
+  const horizon = numInput('12', '1', '1', '36');
+  grid.append(field(t.curve, curveSel), field(t.ramp, ramp), field(t.horizon, horizon));
   setup.appendChild(grid);
-  const ownNote = el('p', 'sf-note');
-  setup.appendChild(ownNote);
+  const presetNote = el('p', 'sf-note');
+  setup.appendChild(presetNote);
 
+  // ---------- 2. keywords ----------
   const kwCard = el('section', 'sf-card');
-  kwCard.appendChild(el('h2', 'sf-h', t.keywords));
-  kwCard.appendChild(el('p', 'sf-note', t.keywordsHelp));
-  const tableWrap = el('div', 'sf-table-wrap');
+  kwCard.append(el('h2', 'sf-h', t.keywords), el('p', 'sf-note', t.keywordsHelp), el('p', 'sf-note sf-example', t.example));
+  const kwWrap = el('div', 'sf-table-wrap');
   const kwTable = el('table', 'sf-table sf-table--input');
-  tableWrap.appendChild(kwTable);
-  kwCard.appendChild(tableWrap);
+  kwWrap.appendChild(kwTable);
+  kwCard.appendChild(kwWrap);
   const kwActions = el('div', 'sf-actions');
-  const addBtn = el('button', 'sf-btn sf-btn--outline', t.addRow);
-  addBtn.type = 'button';
-  const kwFile = el('input');
-  kwFile.type = 'file'; kwFile.accept = '.csv,text/csv,text/plain'; kwFile.hidden = true;
-  const kwImport = el('button', 'sf-btn sf-btn--outline', t.importKeywords);
-  kwImport.type = 'button';
-  const gscFile = el('input');
-  gscFile.type = 'file'; gscFile.accept = '.csv,text/csv,text/plain'; gscFile.hidden = true;
-  const gscImport = el('button', 'sf-btn sf-btn--outline', t.importGsc);
-  gscImport.type = 'button';
-  const templateBtn = el('button', 'sf-btn sf-btn--secondary', t.template);
-  templateBtn.type = 'button';
+  const addBtn = button(t.addRow, 'sf-btn--outline');
+  const kwFile = el('input'); kwFile.type = 'file'; kwFile.accept = '.csv,text/csv,text/plain'; kwFile.hidden = true;
+  const kwImport = button(t.importKeywords, 'sf-btn--outline');
+  const gscFile = el('input'); gscFile.type = 'file'; gscFile.accept = '.csv,text/csv,text/plain'; gscFile.hidden = true;
+  const gscImport = button(t.importGsc, 'sf-btn--outline');
+  const templateBtn = button(t.template, 'sf-btn--secondary');
   kwActions.append(addBtn, kwImport, kwFile, gscImport, gscFile, templateBtn);
   kwCard.appendChild(kwActions);
   const messages = el('div', 'sf-messages');
@@ -183,42 +304,68 @@ export function mount(root: HTMLElement): void {
   messages.setAttribute('aria-live', 'polite');
   kwCard.appendChild(messages);
 
+  // ---------- 3. funnel inputs ----------
+  const fCard = el('section', 'sf-card');
+  fCard.append(el('h2', 'sf-h', t.funnelH), el('p', 'sf-note', t.funnelHelp));
+  const basisSel = el('select', 'sf-input');
+  for (const [v, l] of [['additional', t.basisAdditional], ['total', t.basisTotal]]) { const o = el('option', undefined, l); o.value = v; basisSel.appendChild(o); }
+  const leadRate = numInput('', '0', 'any', '100');
+  const leadInfo = numInput('', '0', 'any', '100');
+  const leadComm = numInput('', '0', 'any', '100');
+  const leadTrans = numInput('', '0', 'any', '100');
+  const closeRate = numInput('', '0', 'any', '100');
+  const custValue = numInput('', '0', 'any');
+  const margin = numInput('100', '0', 'any', '100');
+  const invest = numInput('', '0', 'any');
+  const oneOff = numInput('', '0', 'any');
+  const fGrid1 = el('div', 'sf-grid');
+  fGrid1.append(field(t.basis, basisSel), field(t.leadRate, leadRate, t.leadRateHelp), field(t.closeRate, closeRate, t.closeRateHelp),
+    field(t.customerValue(curSym), custValue, t.customerValueHelp), field(t.margin, margin, t.marginHelp));
+  const fGrid2 = el('div', 'sf-grid');
+  fGrid2.append(field(t.leadRateIntent(t.intents.informational), leadInfo, t.leadRateIntentHelp), field(t.leadRateIntent(t.intents.commercial), leadComm),
+    field(t.leadRateIntent(t.intents.transactional), leadTrans));
+  const fGrid3 = el('div', 'sf-grid');
+  fGrid3.append(field(t.invest(curSym), invest, t.investHelp), field(t.oneOff(curSym), oneOff));
+  fCard.append(fGrid1, fGrid2, fGrid3);
+
+  // ---------- 4. clicks result ----------
   const resCard = el('section', 'sf-card');
   resCard.appendChild(el('h2', 'sf-h', t.result));
   const kpis = el('div', 'sf-kpis');
   const chart = el('div', 'sf-chart');
-  const resWrap = el('div', 'sf-table-wrap');
-  const resTable = el('table', 'sf-table');
-  resWrap.appendChild(resTable);
+  const resTableHost = el('div');
   const warnBox = el('div', 'sf-warnings');
-  const exportBtn = el('button', 'sf-btn sf-btn--primary', t.exportCsv);
-  exportBtn.type = 'button';
   const resActions = el('div', 'sf-actions');
+  const exportBtn = button(t.exportCsv, 'sf-btn--primary');
   resActions.appendChild(exportBtn);
-  resCard.append(kpis, chart, resWrap, warnBox, resActions);
+  resCard.append(kpis, chart, resTableHost, warnBox, resActions);
 
+  // ---------- 5. funnel result ----------
+  const fRes = el('section', 'sf-card');
+  fRes.appendChild(el('h2', 'sf-h', t.funnelResult));
+  const fBody = el('div');
+  const fActions = el('div', 'sf-actions');
+  const exportFunnelBtn = button(t.exportFunnel, 'sf-btn--primary');
+  fActions.appendChild(exportFunnelBtn);
+  fRes.append(fBody, fActions);
+
+  // ---------- 6. assumptions ----------
   const assCard = el('section', 'sf-card');
   assCard.appendChild(el('h2', 'sf-h', t.assumptions));
   const assBody = el('div', 'sf-assumptions');
   assCard.appendChild(assBody);
 
-  const local = el('p', 'sf-note sf-local', t.local);
-  root.append(setup, kwCard, resCard, assCard, local);
+  root.append(setup, kwCard, fCard, resCard, fRes, assCard, el('p', 'sf-note sf-local', t.local));
 
-  // ---------- keyword table ----------
-  function numOrNull(v: string): number | null {
-    if (v.trim() === '') return null;
-    const n = Number(v.replace(',', '.'));
-    return Number.isFinite(n) ? n : NaN;
-  }
+  // ---------- keyword rows ----------
+  const numOrNull = (v: string): number | null => (v.trim() === '' ? null : Number(v.replace(',', '.')));
 
   function renderRows(): void {
     kwTable.textContent = '';
     const head = el('thead');
     const hr = el('tr');
-    for (const h of [t.colKeyword, t.colVolume, t.colCurrent, t.colTarget, t.colAio, '']) hr.appendChild(el('th', undefined, h));
+    for (const h of [t.colKeyword, t.colVolume, t.colCurrent, t.colTarget, t.colIntent, t.colBrand, t.colAio, '']) hr.appendChild(el('th', undefined, h));
     head.appendChild(hr);
-    kwTable.appendChild(head);
     const body = el('tbody');
     rows.forEach((r, i) => {
       const tr = el('tr');
@@ -231,253 +378,286 @@ export function mount(root: HTMLElement): void {
       };
       const kw = el('input', 'sf-input'); kw.type = 'text'; kw.value = r.keyword;
       kw.addEventListener('input', () => { r.keyword = kw.value.trim(); update(); });
-      const vol = el('input', 'sf-input sf-input--num'); vol.type = 'number'; vol.min = '0'; vol.value = String(r.volume);
+      const vol = numInput(String(r.volume)); vol.classList.add('sf-input--num');
       vol.addEventListener('input', () => { r.volume = vol.value === '' ? NaN : Number(vol.value); update(); });
-      const cur = el('input', 'sf-input sf-input--num'); cur.type = 'number'; cur.min = '1'; cur.step = '0.1'; cur.value = r.currentPosition === null ? '' : String(r.currentPosition);
+      const cur = numInput(r.currentPosition === null ? '' : String(r.currentPosition), '1', '0.1'); cur.classList.add('sf-input--num');
       cur.addEventListener('input', () => { r.currentPosition = numOrNull(cur.value); update(); });
-      const tgt = el('input', 'sf-input sf-input--num'); tgt.type = 'number'; tgt.min = '1'; tgt.step = '1'; tgt.value = String(r.targetPosition);
+      const tgt = numInput(String(r.targetPosition), '1', '1'); tgt.classList.add('sf-input--num');
       tgt.addEventListener('input', () => { r.targetPosition = tgt.value === '' ? NaN : Number(tgt.value); update(); });
+      const intent = el('select', 'sf-input');
+      for (const [v, l] of Object.entries(t.intents)) { const o = el('option', undefined, l); o.value = v; intent.appendChild(o); }
+      intent.value = r.intent || '';
+      intent.addEventListener('change', () => { r.intent = (intent.value || null) as Intent | null; update(); });
+      const brand = el('input'); brand.type = 'checkbox'; brand.checked = !!r.brand;
+      brand.addEventListener('change', () => { r.brand = brand.checked; update(); });
       const aio = el('input'); aio.type = 'checkbox'; aio.checked = r.aio;
       aio.addEventListener('change', () => { r.aio = aio.checked; update(); });
-      const del = el('button', 'sf-btn sf-btn--secondary sf-btn--small', t.remove); del.type = 'button';
+      const del = button(t.remove, 'sf-btn--secondary sf-btn--small');
       del.addEventListener('click', () => { rows.splice(i, 1); renderRows(); update(); });
-      cell(kw, t.colKeyword); cell(vol, t.colVolume); cell(cur, t.colCurrent); cell(tgt, t.colTarget); cell(aio, t.colAio);
+      cell(kw, t.colKeyword); cell(vol, t.colVolume); cell(cur, t.colCurrent); cell(tgt, t.colTarget);
+      cell(intent, t.colIntent); cell(brand, t.colBrand); cell(aio, t.colAio);
       const td = el('td'); td.appendChild(del); tr.appendChild(td);
       body.appendChild(tr);
     });
-    kwTable.appendChild(body);
+    kwTable.append(head, body);
   }
 
-  // ---------- curves ----------
-  function renderCurveOptions(): void {
+  // ---------- presets ----------
+  function renderPresetOptions(): void {
     const selected = curveSel.value;
     curveSel.textContent = '';
-    for (const c of curves) {
-      const o = el('option', undefined, c.label); o.value = c.id; curveSel.appendChild(o);
-    }
-    if (ownCurve) {
-      const o = el('option', undefined, t.ownCurve); o.value = ownCurve.id; curveSel.appendChild(o);
-    }
-    curveSel.value = selected && [...curveSel.options].some((o) => o.value === selected) ? selected : curves[0].id;
+    for (const p of [...presets, ...(own ? [own] : [])]) { const o = el('option', undefined, p.label); o.value = p.id; curveSel.appendChild(o); }
+    curveSel.value = selected && [...curveSel.options].some((o) => o.value === selected) ? selected : presets[0].id;
   }
+  const currentPreset = (): Preset => (own && curveSel.value === own.id ? own : presets.find((p) => p.id === curveSel.value) || presets[0]);
 
-  function currentCurve(): Curve {
-    if (ownCurve && curveSel.value === ownCurve.id) return ownCurve;
-    return curves.find((c) => c.id === curveSel.value) || curves[0];
-  }
-
-  // ---------- output ----------
-  function showMessages(list: string[], cls: string, title: string): void {
+  // ---------- messages ----------
+  function showMessages(list: string[]): void {
     messages.textContent = '';
     if (!list.length) return;
-    const box = el('div', cls);
-    box.appendChild(el('p', 'sf-label', title));
+    const box = el('div', 'sf-msg sf-msg--error');
+    box.appendChild(el('p', 'sf-label', t.errors));
     const ul = el('ul');
-    for (const m of list) ul.appendChild(el('li', undefined, m));
+    list.forEach((m) => ul.appendChild(el('li', undefined, m)));
     box.appendChild(ul);
     messages.appendChild(box);
   }
 
-  function renderChart(result: ForecastResult): void {
-    chart.textContent = '';
-    const values = result.totals.monthly;
-    // Draw at the real container width so the 14px axis labels stay 14px on phones.
-    const W = Math.max(300, Math.min(960, Math.round(chart.clientWidth || resCard.clientWidth || 720)));
-    const H = W < 500 ? 220 : 280, L = 56, R = 16, TOP = 20, B = 36;
-    const max = Math.max(1, ...values, result.totals.currentClicks);
-    const x = (i: number) => L + (values.length === 1 ? 0 : (i * (W - L - R)) / (values.length - 1));
-    const y = (v: number) => TOP + (1 - v / max) * (H - TOP - B);
-    const ns = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(ns, 'svg');
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    svg.setAttribute('class', 'sf-svg');
-    svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', t.chartTitle);
-    const add = (tag: string, attrs: Record<string, string | number>, text?: string) => {
-      const n = document.createElementNS(ns, tag);
-      for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
-      if (text !== undefined) n.textContent = text;
-      svg.appendChild(n);
-      return n;
-    };
-    for (let g = 0; g <= 4; g++) {
-      const v = (max * g) / 4;
-      add('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), class: 'sf-grid-line' });
-      add('text', { x: L - 8, y: y(v) + 5, 'text-anchor': 'end', class: 'sf-axis' }, t.nf0.format(v));
-    }
-    values.forEach((_, i) => {
-      const step = W < 500 ? Math.ceil(values.length / 6) : (values.length <= 12 ? 1 : 3);
-      if (i === 0 || (i + 1) % step === 0) add('text', { x: x(i), y: H - 10, 'text-anchor': 'middle', class: 'sf-axis' }, String(i + 1));
-    });
-    add('line', { x1: L, x2: W - R, y1: y(result.totals.currentClicks), y2: y(result.totals.currentClicks), class: 'sf-baseline' });
-    add('polyline', { points: values.map((v, i) => `${x(i)},${y(v)}`).join(' '), class: 'sf-line' });
-    values.forEach((v, i) => add('circle', { cx: x(i), cy: y(v), r: 4, class: 'sf-dot' }));
-    chart.appendChild(el('p', 'sf-label', t.chartTitle));
-    chart.appendChild(svg);
-  }
+  const kpi = (host: HTMLElement, value: string, label: string, accent = false) => {
+    const k = el('div', 'sf-kpi' + (accent ? ' sf-kpi--accent' : ''));
+    k.append(el('p', 'sf-kpi__value', value), el('p', 'sf-kpi__label', label));
+    host.appendChild(k);
+  };
 
+  // ---------- clicks result ----------
   function renderResult(result: ForecastResult): void {
     kpis.textContent = '';
-    for (const [label, value] of [
-      [t.today, result.totals.currentClicks],
-      [t.target, result.totals.targetClicks],
-      [t.extra(result.settings.horizonMonths), result.totals.additionalClicksOverHorizon],
-    ] as const) {
-      const k = el('div', 'sf-kpi');
-      k.append(el('p', 'sf-kpi__value', t.nf0.format(value)), el('p', 'sf-kpi__label', label));
-      kpis.appendChild(k);
-    }
-    renderChart(result);
-
-    resTable.textContent = '';
-    const head = el('thead');
-    const hr = el('tr');
-    for (const h of [t.colKeyword, t.colVolume, t.colCurrent, t.colTarget, t.colCtrNow, t.colCtrTarget, t.colClicksNow, t.colClicksTarget]) hr.appendChild(el('th', undefined, h));
-    head.appendChild(hr);
-    resTable.appendChild(head);
-    const body = el('tbody');
-    for (const k of result.keywords) {
-      const tr = el('tr');
-      for (const v of [k.keyword + (k.aio ? ' · AIO' : ''), t.nf0.format(k.volume), k.currentPosition === null ? '–' : t.nf.format(k.currentPosition), t.nf.format(k.targetPosition), t.pct(k.currentCtr), t.pct(k.targetCtr), t.nf.format(k.currentClicks), t.nf.format(k.targetClicks)]) tr.appendChild(el('td', undefined, v));
-      body.appendChild(tr);
-    }
-    resTable.appendChild(body);
-
+    kpi(kpis, t.nf0.format(result.totals.currentClicks), t.today);
+    kpi(kpis, t.nf0.format(result.totals.targetClicks), t.target);
+    kpi(kpis, t.nf0.format(result.totals.additionalClicksOverHorizon), t.extra(result.settings.horizonMonths), true);
+    lineChart(chart, t.chartClicks, [
+      { values: result.totals.monthly.map(() => result.totals.currentClicks), cls: 'sf-baseline' },
+      { values: result.totals.monthly, cls: 'sf-line' },
+    ], (n) => t.nf0.format(n));
+    const preset = currentPreset();
+    const curveName = (id: string) => { const c = preset.curves.find((x) => x.id === id); return c ? (c.shortLabel || c.label) : id; };
+    resTableHost.textContent = '';
+    resTableHost.appendChild(table(
+      [t.colKeyword, t.colVolume, t.colCurrent, t.colTarget, ...(preset.curves.length > 1 ? [t.colCurve] : []), t.colCtrNow, t.colCtrTarget, t.colClicksNow, t.colClicksTarget],
+      result.keywords.map((k) => [
+        k.keyword + (k.aio ? ' · AIO' : ''), t.nf0.format(k.volume), k.currentPosition === null ? '–' : t.nf.format(k.currentPosition), t.nf.format(k.targetPosition),
+        ...(preset.curves.length > 1 ? [curveName(k.curveId)] : []),
+        t.pct(k.currentCtr), t.pct(k.targetCtr), t.nf.format(k.currentClicks), t.nf.format(k.targetClicks),
+      ]),
+    ));
     warnBox.textContent = '';
-    const warns = result.keywords.flatMap((k) => k.warnings.map((w) => `${k.keyword}: ${w.type === 'beyond-data' ? t.warnBeyond(w.which, Math.round(w.position)) : t.warnNoAio(w.position)}`));
+    const warns = result.keywords.flatMap((k) => k.warnings.map((w) => `${k.keyword}: ${
+      w.type === 'beyond-data' ? t.warnBeyond(w.which, Math.round(w.position)) : w.type === 'no-aio-reduction' ? t.warnNoAio(w.position) : w.message}`));
     if (warns.length) {
       warnBox.appendChild(el('p', 'sf-label', t.warnings));
       const ul = el('ul');
-      for (const w of warns) ul.appendChild(el('li', undefined, w));
+      warns.forEach((w) => ul.appendChild(el('li', undefined, w)));
       warnBox.appendChild(ul);
     }
   }
 
-  function renderAssumptions(curve: Curve): void {
+  // ---------- funnel ----------
+  const num = (i: HTMLInputElement): number | undefined => (i.value.trim() === '' ? undefined : Number(i.value));
+
+  function funnelSettings(): FunnelSettings | null {
+    const lr = num(leadRate), cr = num(closeRate), cv = num(custValue);
+    if (lr === undefined || cr === undefined || cv === undefined) return null;
+    const byIntent: Partial<Record<Intent, number>> = {};
+    const li = num(leadInfo), lc = num(leadComm), lt = num(leadTrans);
+    if (li !== undefined) byIntent.informational = li;
+    if (lc !== undefined) byIntent.commercial = lc;
+    if (lt !== undefined) byIntent.transactional = lt;
+    return {
+      leadRate: lr, closeRate: cr, customerValue: cv, margin: num(margin) ?? 100,
+      leadRateByIntent: byIntent, monthlyInvestment: num(invest), oneOffInvestment: num(oneOff),
+      basis: basisSel.value === 'total' ? 'total' : 'additional',
+    };
+  }
+
+  function renderFunnel(result: ForecastResult | null): void {
+    fBody.textContent = '';
+    lastFunnel = null;
+    exportFunnelBtn.disabled = true;
+    const fs = funnelSettings();
+    if (!result || !fs) { fBody.appendChild(el('p', 'sf-note', t.funnelMissing)); return; }
+    if (validateFunnel(fs).length) { fBody.appendChild(el('p', 'sf-msg sf-msg--error', t.funnelInvalid)); return; }
+    const f = funnel(result, fs);
+    lastFunnel = f;
+    exportFunnelBtn.disabled = false;
+    const n = f.months.length;
+    const hasInv = f.totals.investment > 0;
+
+    const k1 = el('div', 'sf-kpis');
+    kpi(k1, t.nf0.format(f.atTarget.clicks), t.kpiTraffic(fs.basis));
+    kpi(k1, t.nf.format(f.atTarget.leads), t.kpiLeads);
+    kpi(k1, t.nf.format(f.atTarget.customers), t.kpiCustomers);
+    kpi(k1, t.cur.format(f.atTarget.revenue), t.kpiRevenue);
+    kpi(k1, t.cur.format(f.atTarget.grossProfit), t.kpiGross, !hasInv);
+    if (hasInv) kpi(k1, t.cur.format(f.atTarget.netProfit), t.kpiNet, true);
+    fBody.appendChild(k1);
+    if (hasInv) {
+      const k2 = el('div', 'sf-kpis sf-kpis--second');
+      kpi(k2, f.totals.roi === null ? '–' : t.pct(Math.round(f.totals.roi)), t.kpiRoi(n), true);
+      kpi(k2, f.totals.returnPerEuro === null ? '–' : t.cur2.format(f.totals.returnPerEuro), t.kpiReturn(n));
+      kpi(k2, f.totals.breakEvenMonth === null ? t.breakEvenNone(n) : t.breakEvenMonth(f.totals.breakEvenMonth), t.kpiBreakEven);
+      fBody.appendChild(k2);
+    }
+
+    const fc = el('div', 'sf-chart');
+    fBody.appendChild(fc);
+    lineChart(fc, hasInv ? t.chartFunnel : t.rowGross, [
+      ...(hasInv ? [{ values: f.months.map((m) => m.cumulativeInvestment), cls: 'sf-line sf-line--invest' }] : []),
+      { values: f.months.map((m) => m.cumulativeGrossProfit), cls: 'sf-line' },
+    ], (v) => t.cur.format(v));
+
+    fBody.appendChild(el('p', 'sf-label sf-gap', t.kpiTable));
+    const rowsKpi: string[][] = [
+      [t.rowClicks, t.nf0.format(f.atTarget.clicks), t.nf0.format(f.totals.clicks)],
+      [t.rowLeads, t.nf.format(f.atTarget.leads), t.nf0.format(f.totals.leads)],
+      [t.rowCustomers, t.nf.format(f.atTarget.customers), t.nf.format(f.totals.customers)],
+      [t.rowRevenue, t.cur.format(f.atTarget.revenue), t.cur.format(f.totals.revenue)],
+      [t.rowGross, t.cur.format(f.atTarget.grossProfit), t.cur.format(f.totals.grossProfit)],
+    ];
+    if (hasInv) {
+      rowsKpi.push([t.rowInvest, t.cur.format(fs.monthlyInvestment || 0), t.cur.format(f.totals.investment)]);
+      rowsKpi.push([t.rowNet, t.cur.format(f.atTarget.netProfit), t.cur.format(f.totals.netProfit)]);
+    }
+    fBody.appendChild(table(['', t.colPerMonth, t.colCumulative(n)], rowsKpi, 'sf-table sf-table--kpi'));
+
+    const det = el('details', 'sf-details');
+    det.appendChild(el('summary', undefined, t.monthlyTable));
+    det.appendChild(table(
+      [t.colMonth, t.rowClicks, t.rowLeads, t.rowCustomers, t.rowRevenue, t.rowGross, ...(hasInv ? [t.rowInvest, t.colCumNet, t.colRoi] : [])],
+      f.months.map((m) => [String(m.month), t.nf0.format(m.clicks), t.nf.format(m.leads), t.nf2.format(m.customers), t.cur.format(m.revenue), t.cur.format(m.grossProfit),
+        ...(hasInv ? [t.cur.format(m.investment), t.cur.format(m.cumulativeNetProfit), m.cumulativeRoi === null ? '–' : t.pct(Math.round(m.cumulativeRoi))] : [])]),
+    ));
+    fBody.appendChild(det);
+  }
+
+  // ---------- assumptions ----------
+  function renderAssumptions(preset: Preset): void {
     assBody.textContent = '';
-    assBody.appendChild(el('p', undefined, t.formula));
-    const srcId = curve.source;
-    const s = srcId ? file.sources[srcId] : null;
+    assBody.append(el('p', undefined, t.formula), el('p', undefined, t.formulaFunnel));
+    const first = preset.curves[0];
+    const s = first.source ? file.sources[first.source] : null;
     const p = el('p');
     if (s) {
-      p.appendChild(document.createTextNode(`${t.curve}: ${curve.label}. `));
-      p.appendChild(document.createTextNode(`${t.source}: `));
+      p.appendChild(document.createTextNode(`${t.curve}: ${preset.label}. ${t.source}: `));
       const a = el('a', undefined, `${s.publisher}, ${s.title}`);
       a.href = s.url; a.target = '_blank'; a.rel = 'noopener';
-      p.append(a, document.createTextNode(` (${s.market}, ${s.data_period}). ${s.method}`));
+      p.append(a, document.createTextNode(` (${s.market}, ${s.data_period}). ${(lang === 'de' && s.method_de) || s.method}`));
     } else {
-      p.appendChild(document.createTextNode(ownInfo));
+      p.textContent = ownInfo;
     }
     assBody.appendChild(p);
+    if (preset.type === 'brand') assBody.appendChild(el('p', undefined, t.presetBrand));
+    if (preset.type === 'query-length') assBody.appendChild(el('p', undefined, t.presetLength));
 
-    if (curve.aio.type === 'reduction') {
-      const r = curve.aio.source ? file.sources[curve.aio.source] : null;
+    if (first.aio.type === 'reduction') {
+      const r = first.aio.source ? file.sources[first.aio.source] : null;
       const ap = el('p');
       ap.appendChild(document.createTextNode(t.aioReduction(r ? `${r.publisher}, ${r.data_period}` : '')));
       if (r) {
-        ap.appendChild(document.createTextNode(' '));
         const a = el('a', undefined, r.title); a.href = r.url; a.target = '_blank'; a.rel = 'noopener';
-        ap.append(a, document.createTextNode(`. ${r.method}`));
+        ap.append(document.createTextNode(' '), a, document.createTextNode(`. ${(lang === 'de' && r.method_de) || r.method}`));
       }
       assBody.appendChild(ap);
     } else {
-      assBody.appendChild(el('p', undefined, curve.aio.type === 'curve' ? t.aioCurve : t.aioNone));
+      assBody.appendChild(el('p', undefined, first.aio.type === 'curve' ? t.aioCurve : t.aioNone));
     }
 
-    const wrap = el('div', 'sf-table-wrap');
-    const tbl = el('table', 'sf-table sf-table--compact');
-    const head = el('thead');
-    const hr = el('tr');
-    for (const h of [t.position, t.ctrBase, t.ctrAio]) hr.appendChild(el('th', undefined, h));
-    head.appendChild(hr);
-    tbl.appendChild(head);
-    const body = el('tbody');
-    const maxP = Math.max(10, maxPosition(curve.ctr));
+    const maxP = Math.max(10, ...preset.curves.map((c) => maxPosition(c.ctr)));
+    const short = (c: Curve) => c.shortLabel || c.label;
+    const headers = [t.position, ...preset.curves.flatMap((c) => preset.curves.length > 1 ? [short(c), `${short(c)} ${t.ctrAioShort}`] : ['CTR', `CTR ${t.ctrAioShort}`])];
+    const rowsA: string[][] = [];
     for (let pos = 1; pos <= maxP; pos++) {
-      const b = ctrFor(curve, pos, false);
-      const a = ctrFor(curve, pos, true);
-      const tr = el('tr');
-      tr.append(el('td', undefined, String(pos)), el('td', undefined, b === null ? t.noData : t.pct(b)), el('td', undefined, a === null ? t.noData : t.pct(Math.round(a * 100) / 100)));
-      body.appendChild(tr);
+      rowsA.push([String(pos), ...preset.curves.flatMap((c) => {
+        const b = ctrFor(c, pos, false), a = ctrFor(c, pos, true);
+        return [b === null ? t.noData : t.pct(b), a === null ? t.noData : t.pct(Math.round(a * 100) / 100)];
+      })]);
     }
-    tbl.appendChild(body);
-    wrap.appendChild(tbl);
-    assBody.appendChild(wrap);
+    assBody.appendChild(table(headers, rowsA, 'sf-table sf-table--compact'));
 
     const ul = el('ul', 'sf-caveats');
-    for (const c of file.caveats[lang]) ul.appendChild(el('li', undefined, c));
+    file.caveats[lang].forEach((c) => ul.appendChild(el('li', undefined, c)));
+    ul.appendChild(el('li', undefined, t.notTaken));
     assBody.appendChild(ul);
   }
 
+  // ---------- update ----------
   function update(): void {
-    const curve = currentCurve();
-    ownNote.textContent = ownCurve && curve === ownCurve ? ownInfo : '';
-    renderAssumptions(curve);
-    if (!rows.length) { showMessages([t.noKeywords], 'sf-msg sf-msg--error', t.errors); return; }
+    const preset = currentPreset();
+    presetNote.textContent = own && preset === own ? ownInfo : (preset.type === 'brand' ? t.presetBrand : preset.type === 'query-length' ? t.presetLength : '');
+    renderAssumptions(preset);
+    last = null;
+    if (!rows.length) { showMessages([t.noKeywords]); renderFunnel(null); return; }
     const invalid = rows.filter((r) => !r.keyword || !Number.isFinite(r.volume) || r.volume < 0 || !Number.isFinite(r.targetPosition) || r.targetPosition < 1
       || (r.currentPosition !== null && (!Number.isFinite(r.currentPosition) || r.currentPosition < 1)));
-    if (invalid.length) { showMessages(invalid.map((r) => t.invalid(r.keyword)), 'sf-msg sf-msg--error', t.errors); return; }
+    if (invalid.length) { showMessages(invalid.map((r) => t.invalid(r.keyword))); renderFunnel(null); return; }
     try {
-      last = forecast(curve, rows, { rampMonths: Number(ramp.value) || 1, horizonMonths: Number(horizon.value) || 12 });
-      showMessages([], '', '');
+      last = forecast(preset.choice, rows, { rampMonths: Number(ramp.value) || 1, horizonMonths: Number(horizon.value) || 12 });
+      showMessages([]);
       renderResult(last);
     } catch (e) {
-      showMessages([(e as Error).message], 'sf-msg sf-msg--error', t.errors);
+      showMessages([(e as Error).message]);
     }
+    renderFunnel(last);
   }
 
   // ---------- events ----------
   curveSel.addEventListener('change', update);
-  ramp.addEventListener('input', update);
+  for (const i of [ramp, horizon, leadRate, leadInfo, leadComm, leadTrans, closeRate, custValue, margin, invest, oneOff]) i.addEventListener('input', update);
+  basisSel.addEventListener('change', update);
   let resizeTimer: ReturnType<typeof setTimeout> | undefined;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { if (last) renderChart(last); }, 150);
-  });
-  horizon.addEventListener('input', update);
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(update, 150); });
   addBtn.addEventListener('click', () => {
-    rows.push({ keyword: '', volume: 0, currentPosition: null, targetPosition: 1, aio: false });
+    rows.push({ keyword: '', volume: 0, currentPosition: null, targetPosition: 1, aio: false, brand: false, intent: null });
     renderRows();
-    const inputs = kwTable.querySelectorAll<HTMLInputElement>('tbody tr:last-child input');
-    if (inputs[0]) inputs[0].focus();
+    const first = kwTable.querySelector<HTMLInputElement>('tbody tr:last-child input');
+    if (first) first.focus();
   });
   kwImport.addEventListener('click', () => kwFile.click());
   kwFile.addEventListener('change', async () => {
     const { keywords, errors } = keywordsFromCsv(await readFile(kwFile));
     kwFile.value = '';
     if (keywords.length) { rows.splice(0, rows.length, ...keywords); renderRows(); update(); }
-    if (errors.length) showMessages(errors, 'sf-msg sf-msg--error', t.errors);
+    if (errors.length) showMessages(errors);
   });
   gscImport.addEventListener('click', () => gscFile.click());
   gscFile.addEventListener('change', async () => {
     const { rows: gsc, errors } = searchConsoleFromCsv(await readFile(gscFile));
     gscFile.value = '';
-    if (errors.length) { showMessages(errors, 'sf-msg sf-msg--error', t.errors); return; }
+    if (errors.length) { showMessages(errors); return; }
     const { ctr } = curveFromSearchConsole(gsc);
-    if (!Object.keys(ctr).length) { showMessages(['no position with at least 100 impressions'], 'sf-msg sf-msg--error', t.errors); return; }
-    ownCurve = { id: 'own-search-console', label: t.ownCurve, ctr, aio: { type: 'none' } };
+    if (!Object.keys(ctr).length) { showMessages(['no position with at least 100 impressions']); return; }
+    const curve: Curve = { id: 'own-search-console', label: t.ownCurve, ctr, aio: { type: 'none' } };
+    own = { id: curve.id, label: t.ownCurve, type: 'single', curves: [curve], choice: curve };
     ownInfo = t.gscInfo(gsc.length);
-    renderCurveOptions();
-    curveSel.value = ownCurve.id;
+    renderPresetOptions();
+    curveSel.value = own.id;
     update();
   });
   templateBtn.addEventListener('click', () => {
     const csv = lang === 'de'
-      ? 'keyword;suchvolumen;aktuelle_position;zielposition;ai_overview\nbriefing erstellen;1300;;3;ja\ncontent briefing vorlage;390;8;2;nein\n'
-      : 'keyword,volume,current_position,target_position,aio\nhow to write a brief,1900,,3,yes\ncontent brief template,720,8,2,no\n';
-    download(lang === 'de' ? 'seo-prognose-vorlage.csv' : 'seo-forecast-template.csv', csv, 'text/csv;charset=utf-8');
+      ? 'keyword;suchvolumen;aktuelle_position;zielposition;suchintention;marke;ai_overview\nbriefing erstellen;1300;;3;info;nein;ja\nseo agentur;880;12;5;kommerziell;nein;nein\n'
+      : 'keyword,volume,current_position,target_position,intent,brand,aio\nhow to write a brief,1900,,3,informational,no,yes\nseo agency,1300,12,5,commercial,no,no\n';
+    download(lang === 'de' ? 'seo-prognose-vorlage.csv' : 'seo-forecast-template.csv', csv);
   });
-  exportBtn.addEventListener('click', () => {
-    if (last) download(lang === 'de' ? 'seo-prognose.csv' : 'seo-forecast.csv', resultToCsv(last), 'text/csv;charset=utf-8');
-  });
+  exportBtn.addEventListener('click', () => { if (last) download(lang === 'de' ? 'seo-prognose-klicks.csv' : 'seo-forecast-clicks.csv', resultToCsv(last)); });
+  exportFunnelBtn.addEventListener('click', () => { if (lastFunnel) download(lang === 'de' ? 'seo-prognose-funnel.csv' : 'seo-forecast-funnel.csv', funnelToCsv(lastFunnel)); });
 
   // ---------- start ----------
   fetch(src, { credentials: 'same-origin' })
     .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
     .then((json: CurveFile) => {
       file = json;
-      curves = curvesFromFile(file, lang);
-      renderCurveOptions();
+      presets = presetsFromFile(file, lang);
+      renderPresetOptions();
       renderRows();
       update();
     })

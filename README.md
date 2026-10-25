@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-How many organic clicks can a better ranking bring? SEO Forecast multiplies **your** search volume with **published, sourced** click-through rates per position and the **measured** effect of Google AI Overviews, then ramps the result up linearly to your target month. Every number it uses is shown next to the result, with its source.
+How many organic clicks, leads, customers and how much profit can a better ranking bring? SEO Forecast multiplies **your** search volume with **published, sourced** click-through rates per position and the **measured** effect of Google AI Overviews, ramps the result up linearly to your target month, and, if you enter your own conversion figures, follows it through the business funnel to revenue, profit, ROI and break-even. Every number it uses is shown next to the result, with its source.
 
 ## Measured, not estimated
 
@@ -14,25 +14,35 @@ A forecast is never a measurement. What this tool does instead is keep every inp
 - **CTR curves** are copied as published, with source, market, period and method: [Advanced Web Ranking](https://www.advancedwebranking.com/seo/organic-ctr), Google US, July 2026. Nothing is smoothed or extrapolated. Positions without published data count as 0 clicks and are reported, not guessed.
 - **AI Overview impact** lowers CTR, as measured by [Ahrefs](https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/) (300,000 keywords, Search Console data, December 2025: position 1 minus 58 %), or uses AWR's separate CTR column for SERPs with an AI Overview.
 - **Your own curve** beats every preset: load your Search Console query export, and the tool computes CTR per position from your clicks and impressions.
-- **No hidden factors.** Industry multipliers and uplift bonuses from older versions are gone because no source backs them.
+- **Funnel figures are yours.** Lead rate, close rate, customer value, margin and investment come from your GA4, CRM or accounts. There are no industry defaults; without your rates the tool forecasts clicks only and invents no revenue.
+- **No hidden factors.** Industry multipliers, industry default conversion rates and boosts for ads, snippets, “AI visibility”, mobile or long tail from older versions are gone because no source backs them. Brand and query length are back, but through published curves instead of flat multipliers.
 
 ## Formula
 
 ```
 clicks per month = search volume × CTR(position) × AI Overview factor(position)
 month m          = clicks today + (clicks at target − clicks today) × min(m / ramp months, 1)
+
+leads            = clicks × lead rate (per keyword: your rate for its intent, if given)
+customers        = leads × close rate
+revenue          = customers × customer value
+gross profit     = revenue × margin
+net profit       = gross profit − investment (monthly, plus an optional one-off in month 1)
+ROI              = (cumulative gross profit − cumulative investment) ÷ cumulative investment
 ```
+
+By default the funnel counts only the **additional** clicks on top of today's clicks, which is what the SEO work adds. You can switch to all forecast clicks.
 
 Positions are rounded to whole numbers (Search Console reports averages like 3.4).
 
 ## CTR presets
 
-| Preset | Positions | AI Overview model |
-| --- | --- | --- |
-| Non-brand keywords, all devices (AWR, US, 07/2026) | 1 to 10 | Ahrefs reduction per position |
-| Brand keywords, all devices (AWR, US, 07/2026) | 1 to 10 | Ahrefs reduction per position |
-| Desktop, all intents (AWR, US, 07/2026) | 1 to 20 | AWR column "with AI Overview" |
-| Your own curve from Search Console | your data | none (already in your data) |
+| Preset | How the curve is chosen | Positions | AI Overview model |
+| --- | --- | --- | --- |
+| All devices, brand / non-brand (AWR, US, 07/2026) | per keyword: brand curve if ticked as brand, else non-brand | 1 to 10 | Ahrefs reduction per position |
+| All devices, by query length (AWR, US, 07/2026) | per keyword: curve for 1, 2, 3 or 4 words (longer: 4, with a note) | 1 to 10 | Ahrefs reduction per position |
+| Desktop, all intents (AWR, US, 07/2026) | one curve | 1 to 20 | AWR column “with AI Overview” |
+| Your own curve from Search Console | one curve | your data | none (already in your data) |
 
 All values with sources: [`data/ctr-curves.json`](data/ctr-curves.json).
 
@@ -66,6 +76,8 @@ Columns (comma or semicolon, German or English headers):
 | `current_position` (`aktuelle_position`) | no, empty = not ranking | `8` |
 | `target_position` (`zielposition`) | yes | `3` |
 | `aio` (`ai_overview`) | no, `yes`/`no` or `ja`/`nein` | `yes` |
+| `intent` (`suchintention`) | no, `informational`/`commercial`/`transactional` (or `info`, `kommerziell`, `transaktional`) | `informational` |
+| `brand` (`marke`) | no, `yes`/`no` | `no` |
 
 ### Search Console curve
 
@@ -75,16 +87,21 @@ In Search Console, open *Performance → Search results*, choose a period, expor
 
 ```js
 import { forecast } from './dist/forecast.js';
-import { curvesFromFile } from './dist/data.js';
+import { funnel } from './dist/funnel.js';
+import { presetsFromFile } from './dist/data.js';
 
 const file = await (await fetch('data/ctr-curves.json')).json();
-const [curve] = curvesFromFile(file, 'en');
-const result = forecast(curve, [
-  { keyword: 'how to write a brief', volume: 1900, currentPosition: null, targetPosition: 3, aio: true },
+const [preset] = presetsFromFile(file, 'en');
+const clicks = forecast(preset.choice, [
+  { keyword: 'how to write a brief', volume: 1900, currentPosition: null, targetPosition: 3, aio: true, intent: 'informational' },
 ], { rampMonths: 6, horizonMonths: 12 });
+const money = funnel(clicks, {
+  leadRate: 1, closeRate: 15, customerValue: 1500, margin: 20,
+  monthlyInvestment: 500, basis: 'additional',
+});
 ```
 
-The core (`src/forecast.ts`, `src/csv.ts`) has no dependencies and no I/O. It runs in browsers, Node and edge workers. Embedding notes for websites: [`docs/integration.md`](docs/integration.md).
+The core (`src/forecast.ts`, `src/funnel.ts`, `src/csv.ts`) has no dependencies and no I/O. It runs in browsers, Node and edge workers. Embedding notes for websites: [`docs/integration.md`](docs/integration.md).
 
 ### Develop
 
@@ -115,7 +132,7 @@ Thorsten Litzki · [Litzki Systems](https://litzki-systems.com)
 
 [![Lizenz: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Wie viele organische Klicks bringt ein besseres Ranking? Die SEO-Prognose multipliziert **Ihr** Suchvolumen mit **veröffentlichten, belegten** Klickraten je Position und dem **gemessenen** Einfluss der Google AI Overviews und lässt das Ergebnis linear bis zum Zielmonat ansteigen. Jede verwendete Zahl steht mit Quelle neben dem Ergebnis.
+Wie viele organische Klicks, Leads, Kunden und wie viel Gewinn bringt ein besseres Ranking? Die SEO-Prognose multipliziert **Ihr** Suchvolumen mit **veröffentlichten, belegten** Klickraten je Position und dem **gemessenen** Einfluss der Google AI Overviews, lässt das Ergebnis linear bis zum Zielmonat ansteigen und rechnet es mit Ihren eigenen Conversion-Zahlen durch den Business-Funnel bis zu Umsatz, Gewinn, ROI und Break-even. Jede verwendete Zahl steht mit Quelle neben dem Ergebnis.
 
 ## Gemessen statt geschätzt
 
@@ -125,14 +142,24 @@ Eine Prognose ist nie eine Messung. Dieses Werkzeug hält deshalb jede Eingabe n
 - **CTR-Kurven** sind unverändert übernommen, mit Quelle, Markt, Zeitraum und Methode: [Advanced Web Ranking](https://www.advancedwebranking.com/seo/organic-ctr), Google USA, Juli 2026. Nichts ist geglättet oder hochgerechnet. Positionen ohne veröffentlichte Daten zählen als 0 Klicks und werden gemeldet, nicht geraten.
 - **AI Overviews** senken die CTR, gemessen von [Ahrefs](https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/) (300.000 Keywords, Search-Console-Daten, Dezember 2025: Position 1 minus 58 %), oder es gilt die eigene AWR-Spalte für Suchergebnisse mit AI Overview.
 - **Ihre eigene Kurve** schlägt jede Voreinstellung: Laden Sie Ihren Search-Console-Export der Suchanfragen, und das Werkzeug berechnet die CTR je Position aus Ihren Klicks und Impressionen.
-- **Keine versteckten Faktoren.** Branchenfaktoren und Aufschläge früherer Fassungen sind entfallen, weil keine Quelle sie belegt.
+- **Funnel-Zahlen sind Ihre.** Lead-Rate, Abschlussrate, Kundenwert, Marge und Investition kommen aus Ihrem GA4, CRM oder Ihrer Buchhaltung. Es gibt keine Branchen-Standardwerte; ohne Ihre Raten rechnet das Werkzeug nur Klicks und erfindet keinen Umsatz.
+- **Keine versteckten Faktoren.** Branchenfaktoren, Branchen-Standardwerte und Aufschläge für Ads, Snippets, „KI-Sichtbarkeit“, Mobil oder Long-Tail aus früheren Fassungen sind entfallen, weil keine Quelle sie belegt. Marke und Länge der Suchanfrage sind wieder dabei, aber über veröffentlichte Kurven statt pauschaler Faktoren.
 
 ## Formel
 
 ```
 Klicks pro Monat = Suchvolumen × CTR(Position) × AI-Overview-Faktor(Position)
 Monat m          = Klicks heute + (Klicks im Ziel − Klicks heute) × min(m / Monate bis Ziel, 1)
+
+Leads            = Klicks × Lead-Rate (je Keyword: Ihre Rate für seine Suchabsicht, falls angegeben)
+Kunden           = Leads × Abschlussrate
+Umsatz           = Kunden × Kundenwert
+Rohertrag        = Umsatz × Marge
+Reingewinn       = Rohertrag − Investition (monatlich, optional einmalig im 1. Monat)
+ROI              = (Rohertrag kumuliert − Investition kumuliert) ÷ Investition kumuliert
 ```
+
+Standardmäßig zählt der Funnel nur die **zusätzlichen** Klicks über den heutigen hinaus, also das, was die SEO-Arbeit bringt. Umschaltbar auf alle prognostizierten Klicks.
 
 ## Grenzen
 
@@ -148,7 +175,7 @@ python3 -m http.server 8000
 # Deutsch:  http://localhost:8000/index.de.html
 ```
 
-Keyword-CSV mit den Spalten `keyword`, `suchvolumen`, `aktuelle_position` (leer = rankt nicht), `zielposition`, `ai_overview` (ja/nein), getrennt durch Komma oder Semikolon. Eigene Kurve: In der Search Console unter *Leistung → Suchergebnisse* die Suchanfragen als CSV exportieren und `Queries.csv` laden.
+Keyword-CSV mit den Spalten `keyword`, `suchvolumen`, `aktuelle_position` (leer = rankt nicht), `zielposition`, `ai_overview` (ja/nein), `suchintention` (info/kommerziell/transaktional), `marke` (ja/nein), getrennt durch Komma oder Semikolon. Eigene Kurve: In der Search Console unter *Leistung → Suchergebnisse* die Suchanfragen als CSV exportieren und `Queries.csv` laden.
 
 Der Rechner läuft vollständig im Browser: kein Server, keine Cookies, kein Speicher, kein Tracking.
 

@@ -23,6 +23,8 @@ export type AioModel = {
 export interface Curve {
     id: string;
     label: string;
+    /** Short name for table headers. */
+    shortLabel?: string;
     ctr: CtrTable;
     aio: AioModel;
     source?: string;
@@ -37,7 +39,24 @@ export interface Keyword {
     targetPosition: number;
     /** An AI Overview appears on the results page for this keyword. */
     aio: boolean;
+    /** Brand keyword (your own brand name). Selects the brand curve where a curve set has one. */
+    brand?: boolean;
+    /** Search intent. Only used to pick your own lead rate per intent in the funnel. */
+    intent?: Intent | null;
 }
+export type Intent = 'informational' | 'commercial' | 'transactional';
+/**
+ * Either one curve for all keywords, or a picker that chooses a curve per keyword
+ * (e.g. brand vs. non-brand, or by query length). The picker may return a note,
+ * which is reported with the keyword.
+ */
+export type CurveChoice = Curve | {
+    id: string;
+    pick: (k: Keyword) => {
+        curve: Curve;
+        note?: string;
+    };
+};
 export interface Settings {
     /** Months until the target position is reached. */
     rampMonths: number;
@@ -46,8 +65,8 @@ export interface Settings {
 }
 export interface ForecastWarning {
     /** beyond-data: no CTR for this position in the curve (beyond its range or a gap); no-aio-reduction: no published reduction, base CTR used. */
-    type: 'beyond-data' | 'no-aio-reduction';
-    which: 'current' | 'target';
+    type: 'beyond-data' | 'no-aio-reduction' | 'curve-note';
+    which: 'current' | 'target' | 'both';
     position: number;
     /** Highest position with data in the curve. */
     maxPosition: number;
@@ -59,6 +78,10 @@ export interface KeywordResult {
     currentPosition: number | null;
     targetPosition: number;
     aio: boolean;
+    brand: boolean;
+    intent: Intent | null;
+    /** Curve used for this keyword. */
+    curveId: string;
     currentCtr: number;
     targetCtr: number;
     currentClicks: number;
@@ -88,7 +111,7 @@ export declare function maxPosition(table: CtrTable): number;
 export declare function baseCtr(curve: Curve, position: number | null): number | null;
 /** CTR (percent) for a position, with the AI Overview model applied when aio is true. */
 export declare function ctrFor(curve: Curve, position: number | null, aio: boolean): number | null;
-export declare function forecast(curve: Curve, keywords: Keyword[], settings: Settings): ForecastResult;
+export declare function forecast(choice: CurveChoice, keywords: Keyword[], settings: Settings): ForecastResult;
 export interface SearchConsoleRow {
     clicks: number;
     impressions: number;

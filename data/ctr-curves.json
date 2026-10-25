@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "updated": "2026-10-25",
   "note": "CTR values in percent (clicks / impressions × 100). Every curve names its source, market, period and device. Values are copied from the sources as published; nothing is smoothed, extrapolated or estimated. Positions without published data are left out and count as 0 % in the calculator.",
   "sources": {
@@ -10,7 +10,8 @@
       "published": "2026-09-14",
       "data_period": "2026-07",
       "market": "Google US",
-      "method": "AWR's own tracked SERPs, about 1.75 million US SERPs per month (1 million desktop, 750,000 mobile), top 20 positions. Position 1 based on 184.8 million impressions and 37.0 million clicks."
+      "method": "AWR's own tracked SERPs, about 1.75 million US SERPs per month (1 million desktop, 750,000 mobile), top 20 positions. Position 1 based on 184.8 million impressions and 37.0 million clicks.",
+      "method_de": "Eigene erfasste Suchergebnisse von AWR, rund 1,75 Mio. US-Suchergebnisseiten pro Monat (1 Mio. Desktop, 750.000 Mobil), Top-20-Positionen. Position 1 beruht auf 184,8 Mio. Impressionen und 37,0 Mio. Klicks."
     },
     "ahrefs-2025-12": {
       "title": "Update: AI Overviews Reduce Clicks by 58%",
@@ -19,47 +20,273 @@
       "published": "2026-02-04",
       "data_period": "2023-12 vs. 2025-12",
       "market": "not stated",
-      "method": "Aggregated Google Search Console data, desktop CTR. 150,000 keywords with an AI Overview compared with 150,000 informational keywords without one, December 2023 vs. December 2025."
+      "method": "Aggregated Google Search Console data, desktop CTR. 150,000 keywords with an AI Overview compared with 150,000 informational keywords without one, December 2023 vs. December 2025.",
+      "method_de": "Aggregierte Daten aus der Google Search Console, Desktop-CTR. 150.000 Keywords mit AI Overview im Vergleich zu 150.000 informativen Keywords ohne, Dezember 2023 gegenüber Dezember 2025."
     }
   },
   "curves": [
     {
       "id": "awr-us-unbranded-2026-07",
-      "label": { "en": "Non-brand keywords, all devices (AWR, US, July 2026)", "de": "Keywords ohne Marke, alle Geräte (AWR, USA, Juli 2026)" },
+      "label": {
+        "en": "Non-brand keywords, all devices (AWR, US, July 2026)",
+        "de": "Keywords ohne Marke, alle Geräte (AWR, USA, Juli 2026)"
+      },
       "source": "awr-2026-07",
       "device": "all",
       "query_type": "unbranded",
-      "ctr": { "1": 19.38, "2": 9.64, "3": 6.02, "4": 3.88, "5": 2.68, "6": 1.86, "7": 1.37, "8": 1.10, "9": 0.94, "10": 0.81 },
-      "aio": { "type": "reduction", "source": "ahrefs-2025-12" }
+      "ctr": {
+        "1": 19.38,
+        "2": 9.64,
+        "3": 6.02,
+        "4": 3.88,
+        "5": 2.68,
+        "6": 1.86,
+        "7": 1.37,
+        "8": 1.1,
+        "9": 0.94,
+        "10": 0.81
+      },
+      "aio": {
+        "type": "reduction",
+        "source": "ahrefs-2025-12"
+      },
+      "short": {
+        "en": "Non-brand",
+        "de": "Ohne Marke"
+      }
     },
     {
       "id": "awr-us-branded-2026-07",
-      "label": { "en": "Brand keywords, all devices (AWR, US, July 2026)", "de": "Marken-Keywords, alle Geräte (AWR, USA, Juli 2026)" },
+      "label": {
+        "en": "Brand keywords, all devices (AWR, US, July 2026)",
+        "de": "Marken-Keywords, alle Geräte (AWR, USA, Juli 2026)"
+      },
       "source": "awr-2026-07",
       "device": "all",
       "query_type": "branded",
-      "ctr": { "1": 27.32, "2": 16.93, "3": 12.75, "4": 10.23, "5": 7.91, "6": 6.12, "7": 5.12, "8": 4.40, "9": 4.02, "10": 4.04 },
-      "aio": { "type": "reduction", "source": "ahrefs-2025-12" }
+      "ctr": {
+        "1": 27.32,
+        "2": 16.93,
+        "3": 12.75,
+        "4": 10.23,
+        "5": 7.91,
+        "6": 6.12,
+        "7": 5.12,
+        "8": 4.4,
+        "9": 4.02,
+        "10": 4.04
+      },
+      "aio": {
+        "type": "reduction",
+        "source": "ahrefs-2025-12"
+      },
+      "short": {
+        "en": "Brand",
+        "de": "Marke"
+      }
     },
     {
       "id": "awr-us-desktop-2026-07",
-      "label": { "en": "Desktop, all intents, positions 1 to 20 (AWR, US, July 2026)", "de": "Desktop, alle Suchabsichten, Positionen 1 bis 20 (AWR, USA, Juli 2026)" },
+      "label": {
+        "en": "Desktop, all intents, positions 1 to 20 (AWR, US, July 2026)",
+        "de": "Desktop, alle Suchabsichten, Positionen 1 bis 20 (AWR, USA, Juli 2026)"
+      },
       "source": "awr-2026-07",
       "device": "desktop",
       "query_type": "all",
-      "ctr": { "1": 20.02, "2": 10.36, "3": 3.89, "4": 1.71, "5": 1.08, "6": 0.73, "7": 0.46, "8": 0.47, "9": 0.54, "10": 0.58, "11": 0.67, "12": 0.70, "13": 0.82, "14": 0.88, "15": 0.80, "16": 0.67, "17": 0.64, "18": 0.55, "19": 0.52, "20": 0.27 },
+      "ctr": {
+        "1": 20.02,
+        "2": 10.36,
+        "3": 3.89,
+        "4": 1.71,
+        "5": 1.08,
+        "6": 0.73,
+        "7": 0.46,
+        "8": 0.47,
+        "9": 0.54,
+        "10": 0.58,
+        "11": 0.67,
+        "12": 0.7,
+        "13": 0.82,
+        "14": 0.88,
+        "15": 0.8,
+        "16": 0.67,
+        "17": 0.64,
+        "18": 0.55,
+        "19": 0.52,
+        "20": 0.27
+      },
       "aio": {
         "type": "curve",
         "source": "awr-2026-07",
-        "ctr": { "1": 9.69, "2": 3.69, "3": 1.70, "4": 1.27, "5": 1.02, "6": 0.55, "7": 0.35, "8": 0.34, "9": 0.47, "10": 0.43, "11": 0.61, "12": 0.60, "13": 0.71, "14": 0.91, "15": 0.70, "16": 0.69, "17": 0.66, "18": 0.56, "19": 0.54, "20": 0.22 }
+        "ctr": {
+          "1": 9.69,
+          "2": 3.69,
+          "3": 1.7,
+          "4": 1.27,
+          "5": 1.02,
+          "6": 0.55,
+          "7": 0.35,
+          "8": 0.34,
+          "9": 0.47,
+          "10": 0.43,
+          "11": 0.61,
+          "12": 0.6,
+          "13": 0.71,
+          "14": 0.91,
+          "15": 0.7,
+          "16": 0.69,
+          "17": 0.66,
+          "18": 0.56,
+          "19": 0.54,
+          "20": 0.22
+        }
+      },
+      "short": {
+        "en": "Desktop",
+        "de": "Desktop"
+      }
+    },
+    {
+      "id": "awr-us-words-1-2026-07",
+      "label": {
+        "en": "Queries with 1 word, all devices (AWR, US, July 2026)",
+        "de": "Suchanfragen mit 1 Wort, alle Geräte (AWR, USA, Juli 2026)"
+      },
+      "source": "awr-2026-07",
+      "device": "all",
+      "query_type": "words-1",
+      "ctr": {
+        "1": 25.67,
+        "2": 9.49,
+        "3": 5.37,
+        "4": 3.83,
+        "5": 2.63,
+        "6": 1.81,
+        "7": 1.27,
+        "8": 0.98,
+        "9": 0.83,
+        "10": 0.76
+      },
+      "aio": {
+        "type": "reduction",
+        "source": "ahrefs-2025-12"
+      },
+      "short": {
+        "en": "1 word",
+        "de": "1 Wort"
+      }
+    },
+    {
+      "id": "awr-us-words-2-2026-07",
+      "label": {
+        "en": "Queries with 2 words, all devices (AWR, US, July 2026)",
+        "de": "Suchanfragen mit 2 Wörter, alle Geräte (AWR, USA, Juli 2026)"
+      },
+      "source": "awr-2026-07",
+      "device": "all",
+      "query_type": "words-2",
+      "ctr": {
+        "1": 21.2,
+        "2": 12.6,
+        "3": 7.85,
+        "4": 5.2,
+        "5": 3.45,
+        "6": 2.34,
+        "7": 1.71,
+        "8": 1.43,
+        "9": 1.24,
+        "10": 1.11
+      },
+      "aio": {
+        "type": "reduction",
+        "source": "ahrefs-2025-12"
+      },
+      "short": {
+        "en": "2 words",
+        "de": "2 Wörter"
+      }
+    },
+    {
+      "id": "awr-us-words-3-2026-07",
+      "label": {
+        "en": "Queries with 3 words, all devices (AWR, US, July 2026)",
+        "de": "Suchanfragen mit 3 Wörter, alle Geräte (AWR, USA, Juli 2026)"
+      },
+      "source": "awr-2026-07",
+      "device": "all",
+      "query_type": "words-3",
+      "ctr": {
+        "1": 23.8,
+        "2": 13.57,
+        "3": 8.79,
+        "4": 5.66,
+        "5": 3.88,
+        "6": 2.67,
+        "7": 2.05,
+        "8": 1.65,
+        "9": 1.48,
+        "10": 1.28
+      },
+      "aio": {
+        "type": "reduction",
+        "source": "ahrefs-2025-12"
+      },
+      "short": {
+        "en": "3 words",
+        "de": "3 Wörter"
+      }
+    },
+    {
+      "id": "awr-us-words-4-2026-07",
+      "label": {
+        "en": "Queries with 4 words, all devices (AWR, US, July 2026)",
+        "de": "Suchanfragen mit 4 Wörter, alle Geräte (AWR, USA, Juli 2026)"
+      },
+      "source": "awr-2026-07",
+      "device": "all",
+      "query_type": "words-4",
+      "ctr": {
+        "1": 21.97,
+        "2": 10.77,
+        "3": 6.75,
+        "4": 4.37,
+        "5": 2.93,
+        "6": 1.99,
+        "7": 1.4,
+        "8": 1.08,
+        "9": 0.86,
+        "10": 0.73
+      },
+      "aio": {
+        "type": "reduction",
+        "source": "ahrefs-2025-12"
+      },
+      "short": {
+        "en": "4 words",
+        "de": "4 Wörter"
       }
     }
   ],
   "aio_reductions": {
     "ahrefs-2025-12": {
-      "label": { "en": "CTR change when an AI Overview is shown (Ahrefs, desktop, Dec 2025)", "de": "CTR-Veränderung, wenn eine AI Overview erscheint (Ahrefs, Desktop, Dez. 2025)" },
+      "label": {
+        "en": "CTR change when an AI Overview is shown (Ahrefs, desktop, Dec 2025)",
+        "de": "CTR-Veränderung, wenn eine AI Overview erscheint (Ahrefs, Desktop, Dez. 2025)"
+      },
       "source": "ahrefs-2025-12",
-      "change_percent": { "1": -58.0, "2": -50.8, "3": -46.4, "4": -38.8, "5": -32.6, "6": -30.5, "7": -29.7, "8": -28.8, "9": -29.7, "10": -19.4 }
+      "change_percent": {
+        "1": -58.0,
+        "2": -50.8,
+        "3": -46.4,
+        "4": -38.8,
+        "5": -32.6,
+        "6": -30.5,
+        "7": -29.7,
+        "8": -28.8,
+        "9": -29.7,
+        "10": -19.4
+      }
     }
   },
   "caveats": {
@@ -67,13 +294,52 @@
       "Published CTR curves move a lot from month to month. AWR's desktop CTR for position 1 ranged from 14.61 % (May 2026) to 45.57 % (February 2026) within one year.",
       "All presets describe Google US. No comparable public per-position data for Germany was found.",
       "The non-brand and brand curves already contain SERPs with AI Overviews. Applying the Ahrefs reduction on top can count part of the effect twice, so results for AI Overview keywords are a conservative lower estimate.",
-      "The most reliable curve is your own: export the performance report by position from Google Search Console and use it as a custom curve."
+      "AWR publishes brand/non-brand and query-length curves only for all devices together and only for positions 1 to 10. A mobile curve per position is not published, so the calculator has no mobile preset.",
+      "The most reliable curve is your own: export the performance report by position from Google Search Console and use it as a custom curve.",
+      "AWR's query-length data ends at 4 words. Longer queries use the 4-word curve; the calculator says so for each keyword."
     ],
     "de": [
       "Veröffentlichte CTR-Kurven schwanken stark von Monat zu Monat. Die Desktop-CTR für Position 1 lag bei AWR innerhalb eines Jahres zwischen 14,61 % (Mai 2026) und 45,57 % (Februar 2026).",
       "Alle Voreinstellungen beschreiben Google USA. Vergleichbare öffentliche Daten je Position für Deutschland wurden nicht gefunden.",
       "Die Kurven für Keywords mit und ohne Marke enthalten bereits Suchergebnisse mit AI Overviews. Der zusätzliche Ahrefs-Abschlag kann einen Teil des Effekts doppelt zählen; Ergebnisse für Keywords mit AI Overview sind daher eine vorsichtige Untergrenze.",
-      "Die verlässlichste Kurve ist Ihre eigene: Exportieren Sie den Leistungsbericht nach Position aus der Google Search Console und nutzen Sie ihn als eigene Kurve."
+      "AWR veröffentlicht die Kurven für Marke/ohne Marke und nach Länge der Suchanfrage nur für alle Geräte zusammen und nur für die Positionen 1 bis 10. Eine mobile Kurve je Position ist nicht veröffentlicht; der Rechner hat deshalb keine Mobil-Voreinstellung.",
+      "Die verlässlichste Kurve ist Ihre eigene: Exportieren Sie den Leistungsbericht nach Position aus der Google Search Console und nutzen Sie ihn als eigene Kurve.",
+      "Die Längen-Daten von AWR enden bei 4 Wörtern. Längere Suchanfragen nutzen die 4-Wort-Kurve; der Rechner weist bei jedem betroffenen Keyword darauf hin."
     ]
-  }
+  },
+  "presets": [
+    {
+      "id": "awr-us-brand-split-2026-07",
+      "type": "brand",
+      "label": {
+        "en": "All devices, brand and non-brand per keyword (AWR, US, July 2026)",
+        "de": "Alle Geräte, Marke und ohne Marke je Keyword (AWR, USA, Juli 2026)"
+      },
+      "default": "awr-us-unbranded-2026-07",
+      "brand": "awr-us-branded-2026-07"
+    },
+    {
+      "id": "awr-us-query-length-2026-07",
+      "type": "query-length",
+      "label": {
+        "en": "All devices, by query length (AWR, US, July 2026)",
+        "de": "Alle Geräte, nach Länge der Suchanfrage (AWR, USA, Juli 2026)"
+      },
+      "by_words": {
+        "1": "awr-us-words-1-2026-07",
+        "2": "awr-us-words-2-2026-07",
+        "3": "awr-us-words-3-2026-07",
+        "4": "awr-us-words-4-2026-07"
+      }
+    },
+    {
+      "id": "awr-us-desktop-2026-07",
+      "type": "single",
+      "label": {
+        "en": "Desktop, positions 1 to 20 (AWR, US, July 2026)",
+        "de": "Desktop, Positionen 1 bis 20 (AWR, USA, Juli 2026)"
+      },
+      "curve": "awr-us-desktop-2026-07"
+    }
+  ]
 }
