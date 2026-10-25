@@ -29,6 +29,11 @@
 .fc-cockpit { display: grid; gap: 1.25rem; align-items: start; }
 @media (min-width: 1100px) {
   .fc-cockpit { grid-template-columns: minmax(20rem, 25rem) minmax(0, 1fr); }
+}
+.fc-below { display: grid; gap: 1.25rem; align-items: start; }
+@media (min-width: 1100px) { .fc-below { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* only key figures and chart stay in view, and only when the window is tall enough for them */
+@media (min-width: 1100px) and (min-height: 820px) {
   .fc-main { position: sticky; top: calc(var(--nav-h, 4rem) + 1rem); }
 }
 .fc-side, .fc-main { display: grid; gap: 1.25rem; min-width: 0; }
@@ -99,6 +104,8 @@
 .fc-kw__outline { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
 .fc-kw__outlabel { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-gray-400); }
 .fc-kw__ctr { font-family: var(--font-mono); font-size: var(--text-lg); color: var(--color-accent); }
+.fc-kw__note { font-size: var(--text-xs); line-height: 1.45; color: var(--color-gray-300); }
+.fc-kw__note:empty { display: none; }
 .fc-kw__clicks { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-gray-300); }
 .fc-meter { display: block; height: 0.3rem; background: var(--color-navy-mid); border-radius: var(--radius-pill); overflow: hidden; }
 .fc-meter__bar { display: block; height: 100%; background: var(--color-accent); transform-origin: left center; transform: scaleX(0); transition: transform .45s var(--ease-out, ease-out); }

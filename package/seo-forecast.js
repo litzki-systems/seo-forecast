@@ -1,4 +1,4 @@
-/*! seo-forecast 1.4.0 · MIT License · https://github.com/litzki-systems/seo-forecast */
+/*! seo-forecast 1.4.1 · MIT License · https://github.com/litzki-systems/seo-forecast */
 
 // src/forecast.ts
 var round2 = (n) => Math.round(n * 100) / 100;
@@ -625,6 +625,8 @@ function strings(lang, currency) {
     aioReduction: (s) => `Mit AI Overview (Zitierung unbekannt) sinkt die CTR um den ver\xF6ffentlichten Abschlag je Rang (${s}).`,
     aioCurve: "Mit AI Overview (Zitierung unbekannt) gilt die eigene CTR-Spalte derselben Quelle.",
     aioNone: "F\xFCr die eigene Kurve gibt es keinen AI-Overview-Abschlag; Ihre Search-Console-Daten enthalten den Effekt bereits.",
+    citedNote: (f) => `Zitiert: CTR \xD7 ${f} gegen\xFCber keiner AI Overview (Seer 2026).`,
+    notCitedNote: (f, lo) => `Nicht zitiert: CTR \xD7 ${f} (Seer 2026, ohne ein Konto mit 47 % der Impressionen; mit ihm \xD7 ${lo}).`,
     citation: (l) => `Ist bekannt, ob Ihre Seite in der AI Overview zitiert wird, gilt statt des Durchschnitts: ${l}`,
     presetBrand: "Keywords mit \u201EMarke\u201C nutzen die Marken-Kurve, alle anderen die Kurve ohne Marke.",
     presetLength: "Jedes Keyword nutzt die Kurve f\xFCr seine Wortzahl (1 bis 4 W\xF6rter).",
@@ -744,6 +746,8 @@ function strings(lang, currency) {
     aioReduction: (s) => `With an AI Overview (citation unknown), CTR drops by the published reduction per rank (${s}).`,
     aioCurve: "With an AI Overview (citation unknown), the separate CTR column of the same source applies.",
     aioNone: "Your own curve has no AI Overview reduction; your Search Console data already contains the effect.",
+    citedNote: (f) => `Cited: CTR \xD7 ${f} relative to no AI Overview (Seer 2026).`,
+    notCitedNote: (f, lo) => `Not cited: CTR \xD7 ${f} (Seer 2026, without one account holding 47% of impressions; with it \xD7 ${lo}).`,
     citation: (l) => `If you know whether your page is cited in the AI Overview, this applies instead of the average: ${l}`,
     presetBrand: "Keywords marked \u201CBrand\u201D use the brand curve, all others the non-brand curve.",
     presetLength: "Each keyword uses the curve for its word count (1 to 4 words).",
@@ -1195,14 +1199,16 @@ function mount(root, options = {}) {
   const exportFunnelBtn = button(t.exportFunnel, "fc-btn--ghost fc-btn--small");
   actions.append(exportBtn, exportFunnelBtn);
   kwResBox.append(el("h3", "fc-card__title", t.kwTable), kwResBody, warnBox, actions);
-  main.append(messages, kpis, chartBox, perfBox, kwResBox);
+  main.append(messages, kpis, chartBox);
+  const below = el("div", "fc-below");
+  below.append(perfBox, kwResBox);
   const cockpit = el("div", "fc-cockpit");
   cockpit.append(side, main);
   const assumptions = el("details", "fc-assumptions");
   assumptions.appendChild(el("summary", void 0, t.assumptions));
   const assBody = el("div", "fc-assumptions__body");
   assumptions.appendChild(assBody);
-  root.append(bar, cockpit, assumptions, el("p", "fc-local", t.local));
+  root.append(bar, cockpit, below, assumptions, el("p", "fc-local", t.local));
   const kwOut = [];
   function markOwnInput() {
     if (!examplesActive) return;
@@ -1309,8 +1315,9 @@ function mount(root, options = {}) {
       meter.appendChild(meterBar);
       const line = el("div", "fc-kw__outline");
       line.append(el("span", "fc-kw__outlabel", t.expected), ctrOut);
-      out.append(line, meter, clickOut);
-      kwOut.push({ ctr: ctrOut, clicks: clickOut, bar: meterBar });
+      const note = el("span", "fc-kw__note");
+      out.append(line, meter, clickOut, note);
+      kwOut.push({ ctr: ctrOut, clicks: clickOut, bar: meterBar, note });
       card.append(top, nums, rankField, chips, out);
       kwList.appendChild(card);
     });
@@ -1364,6 +1371,8 @@ function mount(root, options = {}) {
       o.ctr.textContent = t.pct(Math.round(k.targetCtr * 100) / 100);
       o.clicks.textContent = `${t.nf0.format(k.currentClicks)} \u2192 ${t.nf0.format(k.targetClicks)} ${t.perMonth}`;
       o.bar.style.transform = `scaleX(${(k.targetClicks / maxClicks).toFixed(3)})`;
+      const c = file.aio_citation;
+      o.note.textContent = !k.aio || !c ? "" : k.aioCitation === "cited" ? t.citedNote(t.nf2.format(c.cited)) : k.aioCitation === "not-cited" ? t.notCitedNote(t.nf2.format(c.not_cited), t.nf2.format((c.not_cited_range || [c.not_cited])[0])) : "";
     });
     const fs = funnelSettings();
     const valid = fs ? validateFunnel(fs).length === 0 : false;
