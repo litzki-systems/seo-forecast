@@ -37,6 +37,12 @@ for (const c of data.curves) {
   if (!c.device) fail(`${c.id}: device missing`);
 }
 
+for (const [name, block] of [['aio_citation', data.aio_citation], ['industry_lead_rates', data.industry_lead_rates]]) {
+  if (!block) continue;
+  const r = block.source_ref;
+  if (!r || !r.name || !/^https:\/\//.test(r.url || '') || !Number.isInteger(r.year)) fail(`${name}: source_ref incomplete`);
+}
+
 if (errors.length) {
   console.error('package check failed:\n- ' + [...new Set(errors)].join('\n- '));
   process.exit(1);

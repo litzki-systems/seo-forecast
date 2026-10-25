@@ -3,7 +3,7 @@
  * Accepts comma, semicolon or tab as separator, quoted fields, German and English headers,
  * and German or English number formats. MIT License.
  */
-import type { ForecastResult, Intent, Keyword, SearchConsoleRow } from './forecast.js';
+import type { AioCitation, ForecastResult, Intent, Keyword, SearchConsoleRow } from './forecast.js';
 import type { FunnelResult } from './funnel.js';
 export declare function parseCsv(text: string): string[][];
 /**
@@ -11,6 +11,14 @@ export declare function parseCsv(text: string): string[][];
  * A single separator followed by exactly three digits groups for thousands ("1.300", "1,300" = 1300).
  */
 export declare function parseNumber(raw: string): number;
+/**
+ * AI Overview column: yes/ja/true → shown (citation unknown), cited/zitiert → shown and cited,
+ * not cited/nicht zitiert → shown, page not cited, no/nein/empty → none.
+ */
+export declare function parseAio(v: string): {
+    aio: boolean;
+    citation: AioCitation | null;
+};
 /** Reads info/informational/informativ, comm/commercial/kommerziell, trans/transactional/transaktional. */
 export declare function parseIntent(v: string): Intent | null;
 /**

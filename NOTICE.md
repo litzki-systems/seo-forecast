@@ -7,6 +7,9 @@ The CTR values in `data/ctr-curves.json` are published figures, cited with sourc
 - Advanced Web Ranking, "Google Organic CTR by Position: 2026 Study + AI Overviews", data for July 2026, Google US. https://www.advancedwebranking.com/seo/organic-ctr
 - Ahrefs, "Update: AI Overviews Reduce Clicks by 58%", published 2026-02-04. https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/
 
+- Seer Interactive, "AIO Impact on Google CTR: 2026 Update", published 2026-04-24. https://www.seerinteractive.com/insights/aio-impact-on-google-ctr-2026-update
+- Ruler Analytics, "Conversion Rate Benchmarks 2026", published 2026-05-26. https://www.ruleranalytics.com/blog/insight/conversion-rate-by-industry/
+
 All rights in those studies remain with their publishers. Please cite them when you reuse the figures.
 
 ## Demo fonts

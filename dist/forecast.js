@@ -22,13 +22,18 @@ export function baseCtr(curve, position) {
     const v = curve.ctr[String(Math.round(position))];
     return typeof v === 'number' ? v : null;
 }
-/** CTR (percent) for a position, with the AI Overview model applied when aio is true. */
-export function ctrFor(curve, position, aio) {
+/**
+ * CTR (percent) for a position, with the AI Overview model applied when aio is true.
+ * With a known citation status and citation factors, the citation factor replaces the average model.
+ */
+export function ctrFor(curve, position, aio, citation, factors) {
     const base = baseCtr(curve, position);
     if (base === null)
         return null;
     if (!aio || curve.aio.type === 'none')
         return base;
+    if (citation && factors)
+        return base * (citation === 'cited' ? factors.cited : factors.notCited);
     const key = String(Math.round(position));
     if (curve.aio.type === 'curve') {
         const v = curve.aio.ctr[key];
@@ -42,6 +47,8 @@ export function ctrFor(curve, position, aio) {
 }
 function validate(k) {
     const errors = [];
+    if (k.aioCitation && !['cited', 'not-cited'].includes(k.aioCitation))
+        errors.push('aioCitation must be cited, not-cited or empty');
     if (!k.keyword)
         errors.push('keyword missing');
     if (!Number.isFinite(k.volume) || k.volume < 0)
@@ -57,6 +64,9 @@ function resolve(choice, k) {
     return 'pick' in choice ? choice.pick(k) : { curve: choice };
 }
 export function forecast(choice, keywords, settings) {
+    if (settings.userCtrFactor !== undefined && (!Number.isFinite(settings.userCtrFactor) || settings.userCtrFactor < 0 || settings.userCtrFactor > 500)) {
+        throw new Error('userCtrFactor must be between 0 and 500 percent');
+    }
     const ramp = Math.max(1, Math.round(settings.rampMonths));
     const horizon = Math.max(1, Math.round(settings.horizonMonths));
     const results = keywords.map((k) => {
@@ -68,8 +78,10 @@ export function forecast(choice, keywords, settings) {
         const warnings = [];
         if (note)
             warnings.push({ type: 'curve-note', which: 'both', position: k.targetPosition, maxPosition: limit, message: note });
-        const cur = ctrFor(curve, k.currentPosition, k.aio);
-        const tgt = ctrFor(curve, k.targetPosition, k.aio);
+        const factor = (settings.userCtrFactor ?? 100) / 100;
+        const adjust = (v) => (v === null ? null : Math.min(100, v * factor));
+        const cur = adjust(ctrFor(curve, k.currentPosition, k.aio, k.aioCitation, settings.citationFactors));
+        const tgt = adjust(ctrFor(curve, k.targetPosition, k.aio, k.aioCitation, settings.citationFactors));
         const beyond = (which, position) => ({
             type: 'beyond-data', which, position, maxPosition: limit,
             message: `no CTR data for ${which} position ${position} in this curve, counted as 0 clicks`,
@@ -78,7 +90,7 @@ export function forecast(choice, keywords, settings) {
             warnings.push(beyond('current', k.currentPosition));
         if (tgt === null)
             warnings.push(beyond('target', k.targetPosition));
-        if (k.aio && curve.aio.type === 'reduction') {
+        if (k.aio && curve.aio.type === 'reduction' && !(k.aioCitation && settings.citationFactors)) {
             for (const [which, p] of [['current', k.currentPosition], ['target', k.targetPosition]]) {
                 if (p !== null && baseCtr(curve, p) !== null && typeof curve.aio.changePercent[String(Math.round(p))] !== 'number') {
                     warnings.push({
@@ -103,6 +115,7 @@ export function forecast(choice, keywords, settings) {
             currentPosition: k.currentPosition,
             targetPosition: k.targetPosition,
             aio: k.aio,
+            aioCitation: k.aio ? (k.aioCitation ?? null) : null,
             brand: !!k.brand,
             intent: k.intent ?? null,
             curveId: curve.id,
@@ -120,7 +133,7 @@ export function forecast(choice, keywords, settings) {
     const additional = round2(monthly.reduce((s, v) => s + (v - currentClicks), 0));
     return {
         curveId: choice.id,
-        settings: { rampMonths: ramp, horizonMonths: horizon },
+        settings: { rampMonths: ramp, horizonMonths: horizon, citationFactors: settings.citationFactors, userCtrFactor: settings.userCtrFactor ?? 100 },
         keywords: results,
         totals: { currentClicks, targetClicks, monthly, additionalClicksOverHorizon: additional },
     };

@@ -80,8 +80,8 @@ test('keywordsFromCsv: German headers, semicolons, empty current position', () =
   const { keywords, errors } = keywordsFromCsv('Keyword;Suchvolumen;Aktuelle Position;Zielposition;AI Overview\n"briefing erstellen";1.300;;3;ja\nseo agentur;880;12,4;5;nein\n');
   assert.deepEqual(errors, []);
   assert.deepEqual(keywords, [
-    { keyword: 'briefing erstellen', volume: 1300, currentPosition: null, targetPosition: 3, aio: true, brand: false, intent: null },
-    { keyword: 'seo agentur', volume: 880, currentPosition: 12.4, targetPosition: 5, aio: false, brand: false, intent: null },
+    { keyword: 'briefing erstellen', volume: 1300, currentPosition: null, targetPosition: 3, aio: true, aioCitation: null, brand: false, intent: null },
+    { keyword: 'seo agentur', volume: 880, currentPosition: 12.4, targetPosition: 5, aio: false, aioCitation: null, brand: false, intent: null },
   ]);
 });
 
@@ -201,4 +201,52 @@ test('keywordsFromCsv: brand and intent columns', () => {
   assert.deepEqual(errors, []);
   assert.equal(keywords[0].intent, 'transactional');
   assert.equal(keywords[0].brand, true);
+});
+
+// ---------- AI Overview citation, user factor, industry lead rates ----------
+import { parseAio } from '../dist/csv.js';
+
+test('citation factors replace the average AI Overview model', () => {
+  const cf = { cited: file.aio_citation.cited, notCited: file.aio_citation.not_cited };
+  const r = forecast(unbranded, [
+    { keyword: 'a', volume: 1000, currentPosition: null, targetPosition: 1, aio: true, aioCitation: 'cited' },
+    { keyword: 'b', volume: 1000, currentPosition: null, targetPosition: 1, aio: true, aioCitation: 'not-cited' },
+    { keyword: 'c', volume: 1000, currentPosition: null, targetPosition: 1, aio: true },
+    { keyword: 'd', volume: 1000, currentPosition: null, targetPosition: 1, aio: false, aioCitation: 'cited' },
+  ], { rampMonths: 1, horizonMonths: 1, citationFactors: cf });
+  assert.equal(r.keywords[0].targetCtr, Math.round(19.38 * 0.62 * 100) / 100);
+  assert.equal(r.keywords[1].targetCtr, Math.round(19.38 * 0.28 * 100) / 100);
+  assert.equal(r.keywords[2].targetCtr, Math.round(19.38 * 0.42 * 100) / 100);
+  assert.equal(r.keywords[3].targetCtr, 19.38, 'no AI Overview, citation ignored');
+  assert.equal(r.keywords[3].aioCitation, null);
+});
+
+test('citation factors match the Seer figures', () => {
+  assert.equal(Math.round((2.07 / 3.35) * 100) / 100, file.aio_citation.cited);
+  assert.equal(Math.round((0.94 / 3.35) * 100) / 100, file.aio_citation.not_cited);
+});
+
+test('user CTR factor scales all CTRs and is reported', () => {
+  const r = forecast(unbranded, [{ keyword: 'a', volume: 1000, currentPosition: 2, targetPosition: 1, aio: false }],
+    { rampMonths: 1, horizonMonths: 1, userCtrFactor: 120 });
+  assert.equal(r.keywords[0].targetCtr, Math.round(19.38 * 1.2 * 100) / 100);
+  assert.equal(r.keywords[0].currentCtr, Math.round(9.64 * 1.2 * 100) / 100);
+  assert.equal(r.settings.userCtrFactor, 120);
+  assert.ok(resultToCsv(r).includes('user CTR factor 120 %'));
+  assert.throws(() => forecast(unbranded, [], { rampMonths: 1, horizonMonths: 1, userCtrFactor: -5 }));
+});
+
+test('parseAio: yes, cited, not cited, no', () => {
+  assert.deepEqual(parseAio('ja'), { aio: true, citation: null });
+  assert.deepEqual(parseAio('zitiert'), { aio: true, citation: 'cited' });
+  assert.deepEqual(parseAio('nicht zitiert'), { aio: true, citation: 'not-cited' });
+  assert.deepEqual(parseAio('not_cited'), { aio: true, citation: 'not-cited' });
+  assert.deepEqual(parseAio('nein'), { aio: false, citation: null });
+});
+
+test('industry lead rates: 13 Ruler industries with source', () => {
+  const lr = file.industry_lead_rates;
+  assert.equal(lr.industries.length, 13);
+  assert.ok(file.sources[lr.source].url.startsWith('https://'));
+  for (const i of lr.industries) assert.ok(i.lead_rate > 0 && i.lead_rate < 20, i.id);
 });

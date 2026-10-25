@@ -39,12 +39,23 @@ export interface Keyword {
     targetPosition: number;
     /** An AI Overview appears on the results page for this keyword. */
     aio: boolean;
+    /**
+     * Whether your page is cited in that AI Overview. Only used when aio is true and
+     * citation factors are given in the settings. null/undefined = unknown (average model).
+     */
+    aioCitation?: AioCitation | null;
     /** Brand keyword (your own brand name). Selects the brand curve where a curve set has one. */
     brand?: boolean;
     /** Search intent. Only used to pick your own lead rate per intent in the funnel. */
     intent?: Intent | null;
 }
 export type Intent = 'informational' | 'commercial' | 'transactional';
+export type AioCitation = 'cited' | 'not-cited';
+/** CTR multipliers relative to the same result without an AI Overview. */
+export interface CitationFactors {
+    cited: number;
+    notCited: number;
+}
 /**
  * Either one curve for all keywords, or a picker that chooses a curve per keyword
  * (e.g. brand vs. non-brand, or by query length). The picker may return a note,
@@ -62,6 +73,13 @@ export interface Settings {
     rampMonths: number;
     /** Months shown in the forecast. */
     horizonMonths: number;
+    /** Multipliers for keywords whose AI Overview citation status is known (see data file for the source). */
+    citationFactors?: CitationFactors;
+    /**
+     * Your own CTR adjustment in percent (100 = none), applied to every keyword.
+     * A user assumption without a source, shown as such in the result.
+     */
+    userCtrFactor?: number;
 }
 export interface ForecastWarning {
     /** beyond-data: no CTR for this position in the curve (beyond its range or a gap); no-aio-reduction: no published reduction, base CTR used. */
@@ -78,6 +96,7 @@ export interface KeywordResult {
     currentPosition: number | null;
     targetPosition: number;
     aio: boolean;
+    aioCitation: AioCitation | null;
     brand: boolean;
     intent: Intent | null;
     /** Curve used for this keyword. */
@@ -109,8 +128,11 @@ export declare function maxPosition(table: CtrTable): number;
  * as Search Console reports averages like 3.4. Positions without data return null.
  */
 export declare function baseCtr(curve: Curve, position: number | null): number | null;
-/** CTR (percent) for a position, with the AI Overview model applied when aio is true. */
-export declare function ctrFor(curve: Curve, position: number | null, aio: boolean): number | null;
+/**
+ * CTR (percent) for a position, with the AI Overview model applied when aio is true.
+ * With a known citation status and citation factors, the citation factor replaces the average model.
+ */
+export declare function ctrFor(curve: Curve, position: number | null, aio: boolean, citation?: AioCitation | null, factors?: CitationFactors): number | null;
 export declare function forecast(choice: CurveChoice, keywords: Keyword[], settings: Settings): ForecastResult;
 export interface SearchConsoleRow {
     clicks: number;

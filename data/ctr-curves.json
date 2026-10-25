@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "updated": "2026-10-25",
   "note": "CTR values in percent (clicks / impressions × 100). Every curve names its source, market, period and device. Values are copied from the sources as published; nothing is smoothed, extrapolated or estimated. Positions without published data are left out and count as 0 % in the calculator. Each curve carries source_ref (name, url, year) for its CTR values and, under aio, for its AI Overview model.",
   "sources": {
@@ -22,6 +22,26 @@
       "market": "not stated",
       "method": "Aggregated Google Search Console data, desktop CTR. 150,000 keywords with an AI Overview compared with 150,000 informational keywords without one, December 2023 vs. December 2025.",
       "method_de": "Aggregierte Daten aus der Google Search Console, Desktop-CTR. 150.000 Keywords mit AI Overview im Vergleich zu 150.000 informativen Keywords ohne, Dezember 2023 gegenüber Dezember 2025."
+    },
+    "seer-2026-04": {
+      "title": "AIO Impact on Google CTR: 2026 Update",
+      "publisher": "Seer Interactive",
+      "url": "https://www.seerinteractive.com/insights/aio-impact-on-google-ctr-2026-update",
+      "published": "2026-04-24",
+      "data_period": "2025-01 to 2026-02",
+      "market": "client panel, 53 brands",
+      "method": "Search Console and SERP data of 53 brands: 5,471,127 queries, 2.43 billion organic impressions. CTR = clicks ÷ impressions. Informational queries, full-year 2025 averages: brand cited in the AI Overview 2.07 %, AI Overview without citation 0.94 %, no AI Overview 3.35 %. The authors state they cannot claim causation.",
+      "method_de": "Search-Console- und SERP-Daten von 53 Marken: 5.471.127 Suchanfragen, 2,43 Mrd. organische Impressionen. CTR = Klicks ÷ Impressionen. Informative Suchanfragen, Jahresmittel 2025: Marke in der AI Overview zitiert 2,07 %, AI Overview ohne Zitierung 0,94 %, keine AI Overview 3,35 %. Die Autoren betonen, dass sie keine Kausalität belegen können."
+    },
+    "ruler-2026": {
+      "title": "Conversion Rate Benchmarks 2026: Based on 5+ Million Conversions Tracked Across 13 Industries",
+      "publisher": "Ruler Analytics",
+      "url": "https://www.ruleranalytics.com/blog/insight/conversion-rate-by-industry/",
+      "published": "2026-05-26",
+      "data_period": "not stated",
+      "market": "not stated (Ruler customers, mainly UK)",
+      "method": "Ruler Analytics platform data: 110 million+ sessions, 5 million+ conversions, 13 industries. A conversion is a qualified lead or sale; forms and phone calls are reported. The page does not say whether the rate is per session, visitor or user. Values here: organic search channel.",
+      "method_de": "Plattformdaten von Ruler Analytics: über 110 Mio. Sitzungen, über 5 Mio. Conversions, 13 Branchen. Conversion = qualifizierter Lead oder Verkauf; ausgewiesen sind Formulare und Anrufe. Ob je Sitzung, Besucher oder Nutzer gerechnet wird, nennt die Seite nicht. Werte hier: Kanal organische Suche."
     }
   },
   "curves": [
@@ -366,7 +386,8 @@
       "The non-brand and brand curves already contain SERPs with AI Overviews. Applying the Ahrefs reduction on top can count part of the effect twice, so results for AI Overview keywords are a conservative lower estimate.",
       "AWR publishes brand/non-brand and query-length curves only for all devices together and only for positions 1 to 10. A mobile curve per position is not published, so the calculator has no mobile preset.",
       "The most reliable curve is your own: export the performance report by position from Google Search Console and use it as a custom curve.",
-      "AWR's query-length data ends at 4 words. Longer queries use the 4-word curve; the calculator says so for each keyword."
+      "AWR's query-length data ends at 4 words. Longer queries use the 4-word curve; the calculator says so for each keyword.",
+      "Not backed by any published data and therefore not used as defaults: CTR factors per industry, close rates and margins per industry, a CTR boost for running Google Ads (Google's own study only measures how many ad clicks organic results would replace: 50 % at organic rank 1), boosts for featured snippets or mobile/desktop factors. Use “Your own CTR factor” for such assumptions; it is labelled as your assumption in the result."
     ],
     "de": [
       "Veröffentlichte CTR-Kurven schwanken stark von Monat zu Monat. Die Desktop-CTR für Position 1 lag bei AWR innerhalb eines Jahres zwischen 14,61 % (Mai 2026) und 45,57 % (Februar 2026).",
@@ -374,7 +395,8 @@
       "Die Kurven für Keywords mit und ohne Marke enthalten bereits Suchergebnisse mit AI Overviews. Der zusätzliche Ahrefs-Abschlag kann einen Teil des Effekts doppelt zählen; Ergebnisse für Keywords mit AI Overview sind daher eine vorsichtige Untergrenze.",
       "AWR veröffentlicht die Kurven für Marke/ohne Marke und nach Länge der Suchanfrage nur für alle Geräte zusammen und nur für die Positionen 1 bis 10. Eine mobile Kurve je Position ist nicht veröffentlicht; der Rechner hat deshalb keine Mobil-Voreinstellung.",
       "Die verlässlichste Kurve ist Ihre eigene: Exportieren Sie den Leistungsbericht nach Position aus der Google Search Console und nutzen Sie ihn als eigene Kurve.",
-      "Die Längen-Daten von AWR enden bei 4 Wörtern. Längere Suchanfragen nutzen die 4-Wort-Kurve; der Rechner weist bei jedem betroffenen Keyword darauf hin."
+      "Die Längen-Daten von AWR enden bei 4 Wörtern. Längere Suchanfragen nutzen die 4-Wort-Kurve; der Rechner weist bei jedem betroffenen Keyword darauf hin.",
+      "Nicht durch veröffentlichte Daten gedeckt und daher nicht vorbelegt: CTR-Faktoren je Branche, Abschlussraten und Margen je Branche, ein CTR-Aufschlag durch parallele Google-Anzeigen (Googles eigene Studie misst nur, wie viele Anzeigenklicks organische Ergebnisse ersetzen würden: 50 % bei organischer Position 1), Aufschläge für Featured Snippets oder Mobil-/Desktop-Faktoren. Für solche Annahmen gibt es den „Eigenen CTR-Faktor“; er wird im Ergebnis als Ihre Annahme ausgewiesen."
     ]
   },
   "presets": [
@@ -411,5 +433,139 @@
       },
       "curve": "awr-us-desktop-2026-07"
     }
-  ]
+  ],
+  "aio_citation": {
+    "source": "seer-2026-04",
+    "source_ref": {
+      "name": "Seer Interactive, AIO Impact on Google CTR: 2026 Update",
+      "url": "https://www.seerinteractive.com/insights/aio-impact-on-google-ctr-2026-update",
+      "year": 2026
+    },
+    "cited": 0.62,
+    "not_cited": 0.28,
+    "calculation": "cited 2.07 % ÷ no AIO 3.35 % = 0.618; not cited 0.94 % ÷ 3.35 % = 0.281 (informational queries, 2025 averages)",
+    "label": {
+      "en": "Seer Interactive, informational queries, 2025: CTR × 0.62 when your page is cited in the AI Overview, × 0.28 when it is not, relative to no AI Overview. Applies regardless of position.",
+      "de": "Seer Interactive, informative Suchanfragen, 2025: CTR × 0,62, wenn Ihre Seite in der AI Overview zitiert wird, × 0,28, wenn nicht, jeweils gegenüber keiner AI Overview. Gilt unabhängig von der Position."
+    }
+  },
+  "industry_lead_rates": {
+    "source": "ruler-2026",
+    "source_ref": {
+      "name": "Ruler Analytics, Conversion Rate Benchmarks 2026",
+      "url": "https://www.ruleranalytics.com/blog/insight/conversion-rate-by-industry/",
+      "year": 2026
+    },
+    "note": {
+      "en": "Organic search conversion rate (qualified leads and sales; forms and calls). Ruler does not state whether it divides by sessions or visitors. Use it as a starting point and replace it with your own GA4 figure.",
+      "de": "Conversion-Rate der organischen Suche (qualifizierte Leads und Verkäufe; Formulare und Anrufe). Ruler nennt nicht, ob durch Sitzungen oder Besucher geteilt wird. Als Startwert nutzen und durch Ihre eigene GA4-Zahl ersetzen."
+    },
+    "industries": [
+      {
+        "id": "automotive",
+        "label": {
+          "en": "Automotive",
+          "de": "Automobil"
+        },
+        "lead_rate": 5.7
+      },
+      {
+        "id": "beauty",
+        "label": {
+          "en": "Beauty & Cosmetics",
+          "de": "Beauty & Kosmetik"
+        },
+        "lead_rate": 3.2
+      },
+      {
+        "id": "construction",
+        "label": {
+          "en": "Construction & Engineering",
+          "de": "Bau & Ingenieurwesen"
+        },
+        "lead_rate": 4.8
+      },
+      {
+        "id": "education",
+        "label": {
+          "en": "Education",
+          "de": "Bildung"
+        },
+        "lead_rate": 7.4
+      },
+      {
+        "id": "finance",
+        "label": {
+          "en": "Finance",
+          "de": "Finanzen"
+        },
+        "lead_rate": 5.4
+      },
+      {
+        "id": "health",
+        "label": {
+          "en": "Health & Social Care",
+          "de": "Gesundheit & Pflege"
+        },
+        "lead_rate": 1.8
+      },
+      {
+        "id": "legal",
+        "label": {
+          "en": "Legal",
+          "de": "Recht"
+        },
+        "lead_rate": 7.3
+      },
+      {
+        "id": "marketing",
+        "label": {
+          "en": "Marketing & Advertising",
+          "de": "Marketing & Werbung"
+        },
+        "lead_rate": 5.8
+      },
+      {
+        "id": "professional",
+        "label": {
+          "en": "Professional Services",
+          "de": "Beratung & Dienstleistung"
+        },
+        "lead_rate": 8.1
+      },
+      {
+        "id": "real-estate",
+        "label": {
+          "en": "Real Estate",
+          "de": "Immobilien"
+        },
+        "lead_rate": 2.4
+      },
+      {
+        "id": "ecommerce",
+        "label": {
+          "en": "Retail & eCommerce",
+          "de": "Handel & E-Commerce"
+        },
+        "lead_rate": 2.0
+      },
+      {
+        "id": "software",
+        "label": {
+          "en": "Software",
+          "de": "Software"
+        },
+        "lead_rate": 7.9
+      },
+      {
+        "id": "travel",
+        "label": {
+          "en": "Travel",
+          "de": "Reisen"
+        },
+        "lead_rate": 1.8
+      }
+    ],
+    "average": 4.9
+  }
 }

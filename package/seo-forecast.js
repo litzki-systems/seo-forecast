@@ -1,4 +1,4 @@
-/*! seo-forecast 1.2.0 · MIT License · https://github.com/litzki-systems/seo-forecast */
+/*! seo-forecast 1.3.0 · MIT License · https://github.com/litzki-systems/seo-forecast */
 
 // src/forecast.ts
 var round2 = (n) => Math.round(n * 100) / 100;
@@ -10,10 +10,11 @@ function baseCtr(curve, position) {
   const v = curve.ctr[String(Math.round(position))];
   return typeof v === "number" ? v : null;
 }
-function ctrFor(curve, position, aio) {
+function ctrFor(curve, position, aio, citation, factors) {
   const base = baseCtr(curve, position);
   if (base === null) return null;
   if (!aio || curve.aio.type === "none") return base;
+  if (citation && factors) return base * (citation === "cited" ? factors.cited : factors.notCited);
   const key = String(Math.round(position));
   if (curve.aio.type === "curve") {
     const v = curve.aio.ctr[key];
@@ -25,6 +26,7 @@ function ctrFor(curve, position, aio) {
 }
 function validate(k) {
   const errors = [];
+  if (k.aioCitation && !["cited", "not-cited"].includes(k.aioCitation)) errors.push("aioCitation must be cited, not-cited or empty");
   if (!k.keyword) errors.push("keyword missing");
   if (!Number.isFinite(k.volume) || k.volume < 0) errors.push("volume must be a number \u2265 0");
   if (!Number.isFinite(k.targetPosition) || k.targetPosition < 1) errors.push("target position must be \u2265 1");
@@ -37,6 +39,9 @@ function resolve(choice, k) {
   return "pick" in choice ? choice.pick(k) : { curve: choice };
 }
 function forecast(choice, keywords, settings) {
+  if (settings.userCtrFactor !== void 0 && (!Number.isFinite(settings.userCtrFactor) || settings.userCtrFactor < 0 || settings.userCtrFactor > 500)) {
+    throw new Error("userCtrFactor must be between 0 and 500 percent");
+  }
   const ramp = Math.max(1, Math.round(settings.rampMonths));
   const horizon = Math.max(1, Math.round(settings.horizonMonths));
   const results = keywords.map((k) => {
@@ -46,8 +51,10 @@ function forecast(choice, keywords, settings) {
     const limit = maxPosition(curve.ctr);
     const warnings = [];
     if (note) warnings.push({ type: "curve-note", which: "both", position: k.targetPosition, maxPosition: limit, message: note });
-    const cur = ctrFor(curve, k.currentPosition, k.aio);
-    const tgt = ctrFor(curve, k.targetPosition, k.aio);
+    const factor = (settings.userCtrFactor ?? 100) / 100;
+    const adjust = (v) => v === null ? null : Math.min(100, v * factor);
+    const cur = adjust(ctrFor(curve, k.currentPosition, k.aio, k.aioCitation, settings.citationFactors));
+    const tgt = adjust(ctrFor(curve, k.targetPosition, k.aio, k.aioCitation, settings.citationFactors));
     const beyond = (which, position) => ({
       type: "beyond-data",
       which,
@@ -57,7 +64,7 @@ function forecast(choice, keywords, settings) {
     });
     if (k.currentPosition !== null && cur === null) warnings.push(beyond("current", k.currentPosition));
     if (tgt === null) warnings.push(beyond("target", k.targetPosition));
-    if (k.aio && curve.aio.type === "reduction") {
+    if (k.aio && curve.aio.type === "reduction" && !(k.aioCitation && settings.citationFactors)) {
       for (const [which, p] of [["current", k.currentPosition], ["target", k.targetPosition]]) {
         if (p !== null && baseCtr(curve, p) !== null && typeof curve.aio.changePercent[String(Math.round(p))] !== "number") {
           warnings.push({
@@ -85,6 +92,7 @@ function forecast(choice, keywords, settings) {
       currentPosition: k.currentPosition,
       targetPosition: k.targetPosition,
       aio: k.aio,
+      aioCitation: k.aio ? k.aioCitation ?? null : null,
       brand: !!k.brand,
       intent: k.intent ?? null,
       curveId: curve.id,
@@ -102,7 +110,7 @@ function forecast(choice, keywords, settings) {
   const additional = round2(monthly.reduce((s, v) => s + (v - currentClicks), 0));
   return {
     curveId: choice.id,
-    settings: { rampMonths: ramp, horizonMonths: horizon },
+    settings: { rampMonths: ramp, horizonMonths: horizon, citationFactors: settings.citationFactors, userCtrFactor: settings.userCtrFactor ?? 100 },
     keywords: results,
     totals: { currentClicks, targetClicks, monthly, additionalClicksOverHorizon: additional }
   };
@@ -298,6 +306,12 @@ var KEYWORD_HEADERS = {
   brand: ["brand", "marke", "branded"],
   intent: ["intent", "intention", "suchintention", "search_intent"]
 };
+function parseAio(v) {
+  const s = String(v || "").trim().toLowerCase().replace(/[_-]+/g, " ");
+  if (/^(not cited|nicht zitiert|uncited)$/.test(s)) return { aio: true, citation: "not-cited" };
+  if (/^(cited|zitiert)$/.test(s)) return { aio: true, citation: "cited" };
+  return { aio: truthy(s), citation: null };
+}
 function parseIntent(v) {
   const s = String(v || "").trim().toLowerCase();
   if (!s) return null;
@@ -368,7 +382,10 @@ function keywordsFromCsv(text) {
       volume,
       currentPosition: current,
       targetPosition: target,
-      aio: col.aio >= 0 ? truthy(r[col.aio]) : false,
+      ...(() => {
+        const a = col.aio >= 0 ? parseAio(r[col.aio]) : { aio: false, citation: null };
+        return { aio: a.aio, aioCitation: a.citation };
+      })(),
       brand: col.brand >= 0 ? truthy(r[col.brand]) : false,
       intent
     });
@@ -403,8 +420,9 @@ function resultToCsv(result) {
   const head = ["keyword", "volume", "current_position", "target_position", "aio", "brand", "intent", "curve", "current_ctr_percent", "target_ctr_percent", "current_clicks", "target_clicks", ...months];
   const lines = [head.join(",")];
   for (const k of result.keywords) {
-    lines.push([k.keyword, k.volume, k.currentPosition ?? "", k.targetPosition, k.aio ? "yes" : "no", k.brand ? "yes" : "no", k.intent ?? "", k.curveId, k.currentCtr, k.targetCtr, k.currentClicks, k.targetClicks, ...k.monthly].map(esc).join(","));
+    lines.push([k.keyword, k.volume, k.currentPosition ?? "", k.targetPosition, k.aio ? k.aioCitation === "cited" ? "cited" : k.aioCitation === "not-cited" ? "not cited" : "yes" : "no", k.brand ? "yes" : "no", k.intent ?? "", k.curveId, k.currentCtr, k.targetCtr, k.currentClicks, k.targetClicks, ...k.monthly].map(esc).join(","));
   }
+  if ((result.settings.userCtrFactor ?? 100) !== 100) lines.push(["NOTE", `user CTR factor ${result.settings.userCtrFactor} % applied (assumption without source)`].map(esc).join(","));
   lines.push(["TOTAL", "", "", "", "", "", "", "", "", "", result.totals.currentClicks, result.totals.targetClicks, ...result.totals.monthly].map(esc).join(","));
   return lines.join("\n") + "\n";
 }
@@ -593,7 +611,19 @@ function strings(lang, currency) {
     presetLength: "Jedes Keyword nutzt die Kurve f\xFCr seine Wortzahl (1 bis 4 W\xF6rter).",
     noData: "keine Daten",
     gscInfo: (n) => `Eigene Kurve aus ${n} Zeilen Ihres Search-Console-Exports. Positionen mit weniger als 100 Impressionen sind ausgelassen.`,
-    notTaken: "Bewusst nicht \xFCbernommen aus fr\xFCheren Fassungen (keine Quelle): Branchenfaktoren auf die CTR, Branchen-Standardwerte f\xFCr Conversion-Raten, pauschaler Lead-Aufschlag f\xFCr kommerzielle Keywords, Aufschl\xE4ge f\xFCr Ads (\xD71,1), Featured Snippet (\xD71,2) und \u201EKI-Sichtbarkeit\u201C (\xD71,15 bis \xD71,25), Mobil-Abschlag (\xD70,75), Long-Tail-Aufschlag (\xD71,2, ersetzt durch die Kurve nach L\xE4nge der Suchanfrage), exponentielles Wachstum.",
+    notTaken: "Gegen\xFCber fr\xFCheren Fassungen durch Daten ersetzt: \u201EKI-Ziel/KI-Dominanz\u201C (\xD71,15/\xD71,25) durch die Seer-Faktoren f\xFCr zitiert/nicht zitiert, Marke \xD71,8 durch die Marken-Kurve, Long-Tail \xD71,2 durch die Kurven nach Wortzahl, Branchen-Lead-Raten durch Ruler Analytics. Nicht \xFCbernommen: pauschaler Lead-Aufschlag f\xFCr kommerzielle Keywords (stattdessen eigene Raten je Suchabsicht) und exponentielles Wachstum.",
+    aioSel: { "": "Keine", yes: "Ja", cited: "Ja, Seite zitiert", "not-cited": "Ja, nicht zitiert" },
+    aioCitedTag: "AIO, zitiert",
+    aioNotCitedTag: "AIO, nicht zitiert",
+    citation: (l) => `Ist bekannt, ob Ihre Seite in der AI Overview zitiert wird, gilt statt des Durchschnitts: ${l}`,
+    userFactor: "Eigener CTR-Faktor (%)",
+    userFactorHelp: "Ihre Annahme ohne Quelle, z. B. aus eigenen Tests zu Snippets, Anzeigen oder Mobil. 100 = keine \xC4nderung. Wird im Ergebnis als Annahme ausgewiesen.",
+    userFactorNote: (f) => `Eigener CTR-Faktor ${f} % auf alle Keywords angewendet. Das ist Ihre Annahme, keine belegte Zahl.`,
+    industry: "Branche",
+    industryNone: "Keine Vorbelegung",
+    industryAvg: (v) => `Durchschnitt aller Branchen (${v})`,
+    industrySource: "Quelle",
+    industryShort: (y) => `Startwert aus Ruler Analytics (${y}), organische Suche. Bitte durch Ihre eigene Zahl ersetzen; Details unter \u201EAnnahmen\u201C.`,
     warnings: "Hinweise",
     errors: "Bitte pr\xFCfen",
     noKeywords: "Tragen Sie mindestens ein Keyword ein.",
@@ -699,7 +729,19 @@ function strings(lang, currency) {
     presetLength: "Each keyword uses the curve for its word count (1 to 4 words).",
     noData: "no data",
     gscInfo: (n) => `Your own curve from ${n} rows of your Search Console export. Positions with fewer than 100 impressions are left out.`,
-    notTaken: "Deliberately not carried over from earlier versions (no source): industry factors on CTR, industry default conversion rates, a flat lead bonus for commercial keywords, boosts for ads (\xD71.1), featured snippets (\xD71.2) and \u201CAI visibility\u201D (\xD71.15 to \xD71.25), a mobile discount (\xD70.75), a long-tail boost (\xD71.2, replaced by the query-length curves), exponential growth.",
+    notTaken: "Replaced by data compared with earlier versions: \u201CAI target/AI dominance\u201D (\xD71.15/\xD71.25) by the Seer factors for cited/not cited, brand \xD71.8 by the brand curve, long tail \xD71.2 by the word-count curves, industry lead rates by Ruler Analytics. Not carried over: a flat lead bonus for commercial keywords (use your own rates per intent instead) and exponential growth.",
+    aioSel: { "": "None", yes: "Yes", cited: "Yes, page cited", "not-cited": "Yes, not cited" },
+    aioCitedTag: "AIO, cited",
+    aioNotCitedTag: "AIO, not cited",
+    citation: (l) => `If you know whether your page is cited in the AI Overview, this applies instead of the average: ${l}`,
+    userFactor: "Your own CTR factor (%)",
+    userFactorHelp: "Your assumption without a source, e.g. from your own tests on snippets, ads or mobile. 100 = no change. Shown as an assumption in the result.",
+    userFactorNote: (f) => `Your own CTR factor of ${f} % is applied to all keywords. This is your assumption, not a sourced figure.`,
+    industry: "Industry",
+    industryNone: "No starting value",
+    industryAvg: (v) => `Average of all industries (${v})`,
+    industrySource: "Source",
+    industryShort: (y) => `Starting value from Ruler Analytics (${y}), organic search. Please replace it with your own figure; details under \u201CAssumptions\u201D.`,
     warnings: "Notes",
     errors: "Please check",
     noKeywords: "Enter at least one keyword.",
@@ -855,7 +897,8 @@ function mount(root, options = {}) {
   const curveSel = el("select", "fc-input");
   const ramp = numInput("6", "1", "1", "36");
   const horizon = numInput("12", "1", "1", "36");
-  grid.append(field(t.curve, curveSel), field(t.ramp, ramp), field(t.horizon, horizon));
+  const userFactor = numInput("100", "0", "any", "500");
+  grid.append(field(t.curve, curveSel), field(t.ramp, ramp), field(t.horizon, horizon), field(t.userFactor, userFactor, t.userFactorHelp));
   setup.appendChild(grid);
   const presetNote = el("p", "fc-note");
   setup.appendChild(presetNote);
@@ -901,8 +944,13 @@ function mount(root, options = {}) {
   const margin = numInput("100", "0", "any", "100");
   const invest = numInput("", "0", "any");
   const oneOff = numInput("", "0", "any");
+  const industrySel = el("select", "fc-input");
+  const industryNote = el("p", "fc-help");
+  const industryField = field(t.industry, industrySel);
+  industryField.appendChild(industryNote);
   const fGrid1 = el("div", "fc-grid");
   fGrid1.append(
+    industryField,
     field(t.basis, basisSel),
     field(t.leadRate, leadRate, t.leadRateHelp),
     field(t.closeRate, closeRate, t.closeRateHelp),
@@ -1000,11 +1048,16 @@ function mount(root, options = {}) {
         r.brand = brand.checked;
         update();
       });
-      const aio = el("input");
-      aio.type = "checkbox";
-      aio.checked = r.aio;
+      const aio = el("select", "fc-input");
+      for (const [v, l] of Object.entries(t.aioSel)) {
+        const o = el("option", void 0, l);
+        o.value = v;
+        aio.appendChild(o);
+      }
+      aio.value = !r.aio ? "" : r.aioCitation || "yes";
       aio.addEventListener("change", () => {
-        r.aio = aio.checked;
+        r.aio = aio.value !== "";
+        r.aioCitation = aio.value === "cited" || aio.value === "not-cited" ? aio.value : null;
         update();
       });
       const del = button("\xD7", "fc-btn--secondary fc-btn--small fc-btn--icon");
@@ -1073,7 +1126,7 @@ function mount(root, options = {}) {
     resTableHost.appendChild(table(
       [t.colKeyword, t.colVolume, t.colCurrent, t.colTarget, ...preset.curves.length > 1 ? [t.colCurve] : [], t.colCtrNow, t.colCtrTarget, t.colClicksNow, t.colClicksTarget],
       result.keywords.map((k) => [
-        k.keyword + (k.aio ? " \xB7 AIO" : ""),
+        k.keyword + (k.aio ? ` \xB7 ${k.aioCitation === "cited" ? t.aioCitedTag : k.aioCitation === "not-cited" ? t.aioNotCitedTag : "AIO"}` : ""),
         t.nf0.format(k.volume),
         k.currentPosition === null ? "\u2013" : t.nf.format(k.currentPosition),
         t.nf.format(k.targetPosition),
@@ -1086,6 +1139,7 @@ function mount(root, options = {}) {
     ));
     warnBox.textContent = "";
     const warns = result.keywords.flatMap((k) => k.warnings.map((w) => `${k.keyword}: ${w.type === "beyond-data" ? t.warnBeyond(w.which, Math.round(w.position)) : w.type === "no-aio-reduction" ? t.warnNoAio(w.position) : w.message}`));
+    if ((result.settings.userCtrFactor ?? 100) !== 100) warns.unshift(t.userFactorNote(result.settings.userCtrFactor));
     if (warns.length) {
       warnBox.appendChild(el("p", "fc-label", t.warnings));
       const ul = el("ul");
@@ -1215,6 +1269,34 @@ function mount(root, options = {}) {
     } else {
       assBody.appendChild(el("p", void 0, first.aio.type === "curve" ? t.aioCurve : t.aioNone));
     }
+    if (file.aio_citation && first.aio.type !== "none") {
+      const c = file.aio_citation;
+      const cp = el("p");
+      cp.appendChild(document.createTextNode(t.citation(c.label[lang]) + " "));
+      const a = el("a", void 0, c.source_ref.name);
+      a.href = c.source_ref.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      cp.append(a, document.createTextNode(`. ${(() => {
+        const s2 = file.sources[c.source];
+        return s2 ? lang === "de" && s2.method_de || s2.method : "";
+      })()}`));
+      assBody.appendChild(cp);
+    }
+    const uf = Number(userFactor.value);
+    if (Number.isFinite(uf) && uf !== 100 && userFactor.value.trim() !== "") assBody.appendChild(el("p", "fc-msg", t.userFactorNote(uf)));
+    const lr = file.industry_lead_rates;
+    if (lr && industrySel.value) {
+      const lp = el("p");
+      const s2 = file.sources[lr.source];
+      lp.appendChild(document.createTextNode(`${t.industry}: ${industrySel.selectedOptions[0]?.textContent || ""}. ${lr.note[lang]} ${t.industrySource}: `));
+      const a = el("a", void 0, lr.source_ref.name);
+      a.href = lr.source_ref.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      lp.append(a, document.createTextNode(s2 ? `. ${lang === "de" && s2.method_de || s2.method}` : "."));
+      assBody.appendChild(lp);
+    }
     const maxP = Math.max(10, ...preset.curves.map((c) => maxPosition(c.ctr)));
     const short = (c) => c.shortLabel || c.label;
     const headers = [t.position, ...preset.curves.flatMap((c) => preset.curves.length > 1 ? [short(c), `${short(c)} ${t.ctrAioShort}`] : ["CTR", `CTR ${t.ctrAioShort}`])];
@@ -1248,7 +1330,9 @@ function mount(root, options = {}) {
       return;
     }
     try {
-      last = forecast(preset.choice, rows, { rampMonths: Number(ramp.value) || 1, horizonMonths: Number(horizon.value) || 12 });
+      const ufv = userFactor.value.trim() === "" ? 100 : Number(userFactor.value);
+      const cf = file.aio_citation ? { cited: file.aio_citation.cited, notCited: file.aio_citation.not_cited } : void 0;
+      last = forecast(preset.choice, rows, { rampMonths: Number(ramp.value) || 1, horizonMonths: Number(horizon.value) || 12, citationFactors: cf, userCtrFactor: ufv });
       showMessages([]);
       renderResult(last);
     } catch (e) {
@@ -1257,6 +1341,19 @@ function mount(root, options = {}) {
     renderFunnel(last);
   }
   curveSel.addEventListener("change", update);
+  userFactor.addEventListener("input", update);
+  industrySel.addEventListener("change", () => {
+    const lr = file.industry_lead_rates;
+    const v = industrySel.value;
+    if (lr && v) {
+      const rate = v === "average" ? lr.average : lr.industries.find((i) => i.id === v)?.lead_rate;
+      if (typeof rate === "number") leadRate.value = String(rate);
+      industryNote.textContent = t.industryShort(lr.source_ref.year);
+    } else {
+      industryNote.textContent = "";
+    }
+    update();
+  });
   for (const i of [ramp, horizon, leadRate, leadInfo, leadComm, leadTrans, closeRate, custValue, margin, invest, oneOff]) i.addEventListener("input", update);
   basisSel.addEventListener("change", update);
   let resizeTimer;
@@ -1303,7 +1400,7 @@ function mount(root, options = {}) {
     update();
   });
   templateBtn.addEventListener("click", () => {
-    const csv = lang === "de" ? "keyword;suchvolumen;aktuelle_position;zielposition;suchintention;marke;ai_overview\nbriefing erstellen;1300;;3;info;nein;ja\nseo agentur;880;12;5;kommerziell;nein;nein\n" : "keyword,volume,current_position,target_position,intent,brand,aio\nhow to write a brief,1900,,3,informational,no,yes\nseo agency,1300,12,5,commercial,no,no\n";
+    const csv = lang === "de" ? "keyword;suchvolumen;aktuelle_position;zielposition;suchintention;marke;ai_overview\nbriefing erstellen;1300;;3;info;nein;zitiert\nseo agentur;880;12;5;kommerziell;nein;nein\n" : "keyword,volume,current_position,target_position,intent,brand,aio\nhow to write a brief,1900,,3,informational,no,cited\nseo agency,1300,12,5,commercial,no,no\n";
     download(lang === "de" ? "seo-prognose-vorlage.csv" : "seo-forecast-template.csv", csv);
   });
   exportBtn.addEventListener("click", () => {
@@ -1318,6 +1415,19 @@ function mount(root, options = {}) {
   }).then((json) => {
     file = json;
     presets = presetsFromFile(file, lang);
+    const lr = file.industry_lead_rates;
+    if (lr) {
+      const add = (v, l) => {
+        const o = el("option", void 0, l);
+        o.value = v;
+        industrySel.appendChild(o);
+      };
+      add("", t.industryNone);
+      lr.industries.slice().sort((a, b) => a.label[lang].localeCompare(b.label[lang], lang)).forEach((i) => add(i.id, `${i.label[lang]} \xB7 ${t.pct(i.lead_rate)}`));
+      add("average", t.industryAvg(t.pct(lr.average)));
+    } else {
+      industryField.hidden = true;
+    }
     renderPresetOptions();
     renderRows();
     update();

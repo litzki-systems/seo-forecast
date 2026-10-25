@@ -39,6 +39,21 @@ export interface CurveFile {
   >;
   aio_reductions: Record<string, { label: Record<Lang, string>; source: string; change_percent: CtrTable }>;
   caveats: Record<Lang, string[]>;
+  aio_citation?: {
+    source: string;
+    source_ref: { name: string; url: string; year: number };
+    cited: number;
+    not_cited: number;
+    calculation: string;
+    label: Record<Lang, string>;
+  };
+  industry_lead_rates?: {
+    source: string;
+    source_ref: { name: string; url: string; year: number };
+    note: Record<Lang, string>;
+    industries: Array<{ id: string; label: Record<Lang, string>; lead_rate: number }>;
+    average: number;
+  };
 }
 
 export function curvesFromFile(file: CurveFile, lang: Lang): Curve[] {

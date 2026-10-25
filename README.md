@@ -13,6 +13,9 @@ A forecast is never a measurement. What this tool does instead is keep every inp
 - **Search volume** comes from you (keyword tool, Search Console). The calculator never estimates it.
 - **CTR curves** are copied as published, with source, market, period and method: [Advanced Web Ranking](https://www.advancedwebranking.com/seo/organic-ctr), Google US, July 2026. Nothing is smoothed or extrapolated. Positions without published data count as 0 clicks and are reported, not guessed.
 - **AI Overview impact** lowers CTR, as measured by [Ahrefs](https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/) (300,000 keywords, Search Console data, December 2025: position 1 minus 58 %), or uses AWR's separate CTR column for SERPs with an AI Overview.
+- **Cited or not cited in the AI Overview** changes a lot, so you can set it per keyword: [Seer Interactive](https://www.seerinteractive.com/insights/aio-impact-on-google-ctr-2026-update) (53 brands, 5.47 million queries, informational, 2025) measured CTR × 0.62 when the brand is cited and × 0.28 when it is not, relative to no AI Overview.
+- **Industry starting values for the lead rate** come from [Ruler Analytics](https://www.ruleranalytics.com/blog/insight/conversion-rate-by-industry/) (organic search, 13 industries, 2026). They are a starting point; replace them with your own GA4 figure.
+- **Your own CTR factor** (default 100 %) lets you apply assumptions for which no published data exists, e.g. snippets, ads or mobile. The result labels it as your assumption.
 - **Your own curve** beats every preset: load your Search Console query export, and the tool computes CTR per position from your clicks and impressions.
 - **Funnel figures are yours.** Lead rate, close rate, customer value, margin and investment come from your GA4, CRM or accounts. There are no industry defaults; without your rates the tool forecasts clicks only and invents no revenue.
 - **No hidden factors.** Industry multipliers, industry default conversion rates and boosts for ads, snippets, “AI visibility”, mobile or long tail from older versions are gone because no source backs them. Brand and query length are back, but through published curves instead of flat multipliers.
@@ -90,7 +93,7 @@ Columns (comma or semicolon, German or English headers):
 | `volume` (`suchvolumen`) | yes | `1900` |
 | `current_position` (`aktuelle_position`) | no, empty = not ranking | `8` |
 | `target_position` (`zielposition`) | yes | `3` |
-| `aio` (`ai_overview`) | no, `yes`/`no` or `ja`/`nein` | `yes` |
+| `aio` (`ai_overview`) | no: `yes`/`ja` (citation unknown), `cited`/`zitiert`, `not cited`/`nicht zitiert`, `no`/`nein` | `cited` |
 | `intent` (`suchintention`) | no, `informational`/`commercial`/`transactional` (or `info`, `kommerziell`, `transaktional`) | `informational` |
 | `brand` (`marke`) | no, `yes`/`no` | `no` |
 
@@ -155,6 +158,9 @@ Eine Prognose ist nie eine Messung. Dieses Werkzeug hält deshalb jede Eingabe n
 - **CTR-Kurven** sind unverändert übernommen, mit Quelle, Markt, Zeitraum und Methode: [Advanced Web Ranking](https://www.advancedwebranking.com/seo/organic-ctr), Google USA, Juli 2026. Nichts ist geglättet oder hochgerechnet. Positionen ohne veröffentlichte Daten zählen als 0 Klicks und werden gemeldet, nicht geraten.
 - **AI Overviews** senken die CTR, gemessen von [Ahrefs](https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/) (300.000 Keywords, Search-Console-Daten, Dezember 2025: Position 1 minus 58 %), oder es gilt die eigene AWR-Spalte für Suchergebnisse mit AI Overview.
 - **Ihre eigene Kurve** schlägt jede Voreinstellung: Laden Sie Ihren Search-Console-Export der Suchanfragen, und das Werkzeug berechnet die CTR je Position aus Ihren Klicks und Impressionen.
+- **In der AI Overview zitiert oder nicht** lässt sich je Keyword angeben: [Seer Interactive](https://www.seerinteractive.com/insights/aio-impact-on-google-ctr-2026-update) (53 Marken, 5,47 Mio. Suchanfragen, informativ, 2025) misst CTR × 0,62 bei Zitierung und × 0,28 ohne, jeweils gegenüber keiner AI Overview.
+- **Branchen-Startwerte für die Lead-Rate** stammen von [Ruler Analytics](https://www.ruleranalytics.com/blog/insight/conversion-rate-by-industry/) (organische Suche, 13 Branchen, 2026). Sie sind ein Startpunkt; ersetzen Sie sie durch Ihre eigene GA4-Zahl.
+- **Eigener CTR-Faktor** (Standard 100 %) für Annahmen, zu denen es keine veröffentlichten Daten gibt, etwa Snippets, Anzeigen oder Mobil. Das Ergebnis weist ihn als Ihre Annahme aus.
 - **Funnel-Zahlen sind Ihre.** Lead-Rate, Abschlussrate, Kundenwert, Marge und Investition kommen aus Ihrem GA4, CRM oder Ihrer Buchhaltung. Es gibt keine Branchen-Standardwerte; ohne Ihre Raten rechnet das Werkzeug nur Klicks und erfindet keinen Umsatz.
 - **Keine versteckten Faktoren.** Branchenfaktoren, Branchen-Standardwerte und Aufschläge für Ads, Snippets, „KI-Sichtbarkeit“, Mobil oder Long-Tail aus früheren Fassungen sind entfallen, weil keine Quelle sie belegt. Marke und Länge der Suchanfrage sind wieder dabei, aber über veröffentlichte Kurven statt pauschaler Faktoren.
 

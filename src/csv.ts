@@ -3,7 +3,7 @@
  * Accepts comma, semicolon or tab as separator, quoted fields, German and English headers,
  * and German or English number formats. MIT License.
  */
-import type { ForecastResult, Intent, Keyword, SearchConsoleRow } from './forecast.js';
+import type { AioCitation, ForecastResult, Intent, Keyword, SearchConsoleRow } from './forecast.js';
 import type { FunnelResult } from './funnel.js';
 
 export function parseCsv(text: string): string[][] {
@@ -62,7 +62,7 @@ export function parseNumber(raw: string): number {
 
 const norm = (h: string): string => h.toLowerCase().trim().replace(/[\s\-]+/g, '_');
 
-const KEYWORD_HEADERS: Record<keyof Keyword, string[]> = {
+const KEYWORD_HEADERS: Record<Exclude<keyof Keyword, 'aioCitation'>, string[]> = {
   keyword: ['keyword', 'query', 'suchbegriff', 'top_queries', 'häufigste_suchanfragen', 'haeufigste_suchanfragen'],
   volume: ['volume', 'search_volume', 'msv', 'suchvolumen', 'volumen'],
   currentPosition: ['current_position', 'position', 'aktuelle_position'],
@@ -71,6 +71,17 @@ const KEYWORD_HEADERS: Record<keyof Keyword, string[]> = {
   brand: ['brand', 'marke', 'branded'],
   intent: ['intent', 'intention', 'suchintention', 'search_intent'],
 };
+
+/**
+ * AI Overview column: yes/ja/true → shown (citation unknown), cited/zitiert → shown and cited,
+ * not cited/nicht zitiert → shown, page not cited, no/nein/empty → none.
+ */
+export function parseAio(v: string): { aio: boolean; citation: AioCitation | null } {
+  const s = String(v || '').trim().toLowerCase().replace(/[_-]+/g, ' ');
+  if (/^(not cited|nicht zitiert|uncited)$/.test(s)) return { aio: true, citation: 'not-cited' };
+  if (/^(cited|zitiert)$/.test(s)) return { aio: true, citation: 'cited' };
+  return { aio: truthy(s), citation: null };
+}
 
 /** Reads info/informational/informativ, comm/commercial/kommerziell, trans/transactional/transaktional. */
 export function parseIntent(v: string): Intent | null {
@@ -133,7 +144,7 @@ export function keywordsFromCsv(text: string): { keywords: Keyword[]; errors: st
     if (intentRaw && intentRaw.trim() && !intent) { errors.push(`line ${line}: intent must be informational, commercial or transactional`); return; }
     keywords.push({
       keyword, volume, currentPosition: current, targetPosition: target,
-      aio: col.aio >= 0 ? truthy(r[col.aio]) : false,
+      ...(() => { const a = col.aio >= 0 ? parseAio(r[col.aio]) : { aio: false, citation: null }; return { aio: a.aio, aioCitation: a.citation }; })(),
       brand: col.brand >= 0 ? truthy(r[col.brand]) : false,
       intent,
     });
@@ -173,8 +184,9 @@ export function resultToCsv(result: ForecastResult): string {
   const head = ['keyword', 'volume', 'current_position', 'target_position', 'aio', 'brand', 'intent', 'curve', 'current_ctr_percent', 'target_ctr_percent', 'current_clicks', 'target_clicks', ...months];
   const lines = [head.join(',')];
   for (const k of result.keywords) {
-    lines.push([k.keyword, k.volume, k.currentPosition ?? '', k.targetPosition, k.aio ? 'yes' : 'no', k.brand ? 'yes' : 'no', k.intent ?? '', k.curveId, k.currentCtr, k.targetCtr, k.currentClicks, k.targetClicks, ...k.monthly].map(esc).join(','));
+    lines.push([k.keyword, k.volume, k.currentPosition ?? '', k.targetPosition, k.aio ? (k.aioCitation === 'cited' ? 'cited' : k.aioCitation === 'not-cited' ? 'not cited' : 'yes') : 'no', k.brand ? 'yes' : 'no', k.intent ?? '', k.curveId, k.currentCtr, k.targetCtr, k.currentClicks, k.targetClicks, ...k.monthly].map(esc).join(','));
   }
+  if ((result.settings.userCtrFactor ?? 100) !== 100) lines.push(['NOTE', `user CTR factor ${result.settings.userCtrFactor} % applied (assumption without source)`].map(esc).join(','));
   lines.push(['TOTAL', '', '', '', '', '', '', '', '', '', result.totals.currentClicks, result.totals.targetClicks, ...result.totals.monthly].map(esc).join(','));
   return lines.join('\n') + '\n';
 }
