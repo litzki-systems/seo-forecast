@@ -57,7 +57,7 @@
 /* ---------- tables ---------- */
 .fc-table-wrap { overflow-x: auto; margin-top: 1rem; }
 .fc-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
-.fc-table th { text-align: left; font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-gray-600); border-bottom: 1px solid var(--color-navy); padding: 0.5rem; white-space: nowrap; }
+.fc-table th { text-align: left; font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-gray-600); border-bottom: 1px solid var(--color-navy); padding: 0.5rem; vertical-align: bottom; }
 .fc-table td { border-bottom: 1px solid var(--line); padding: 0.5rem; vertical-align: middle; }
 .fc-table:not(.fc-table--input) td:not(:first-child) { font-family: var(--font-mono); font-size: var(--text-xs); }
 .fc-table--input td:first-child { min-width: 11rem; }

@@ -6,6 +6,22 @@
 
 How many organic clicks, leads, customers and how much profit can a better ranking bring? SEO Forecast multiplies **your** search volume with **published, sourced** click-through rates per position and the **measured** effect of Google AI Overviews, ramps the result up linearly to your target month, and, if you enter your own conversion figures, follows it through the business funnel to revenue, profit, ROI and break-even. Every number it uses is shown next to the result, with its source.
 
+## Screenshots
+
+Keywords with search volume, positions, intent, brand and AI Overview status:
+
+![Keyword input](docs/screenshots/en-keywords.png)
+
+Forecast clicks per month with the CTR used per keyword:
+
+![Clicks result](docs/screenshots/en-clicks.png)
+
+Business funnel with your own rates: leads, customers, revenue, profit, ROI and break-even:
+
+![Business funnel](docs/screenshots/en-funnel.png)
+
+Every assumption with its source: [assumptions panel](docs/screenshots/en-assumptions.png) · [funnel on a phone](docs/screenshots/en-mobile-funnel.png)
+
 ## Measured, not estimated
 
 A forecast is never a measurement. What this tool does instead is keep every input traceable:
@@ -149,6 +165,22 @@ Thorsten Litzki · [Litzki Systems](https://litzki-systems.com)
 [![Lizenz: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Wie viele organische Klicks, Leads, Kunden und wie viel Gewinn bringt ein besseres Ranking? Die SEO-Prognose multipliziert **Ihr** Suchvolumen mit **veröffentlichten, belegten** Klickraten je Position und dem **gemessenen** Einfluss der Google AI Overviews, lässt das Ergebnis linear bis zum Zielmonat ansteigen und rechnet es mit Ihren eigenen Conversion-Zahlen durch den Business-Funnel bis zu Umsatz, Gewinn, ROI und Break-even. Jede verwendete Zahl steht mit Quelle neben dem Ergebnis.
+
+## Screenshots
+
+Keywords mit Suchvolumen, Positionen, Suchabsicht, Marke und AI-Overview-Status:
+
+![Keyword-Eingabe](docs/screenshots/de-keywords.png)
+
+Prognostizierte Klicks pro Monat mit der CTR je Keyword:
+
+![Ergebnis Klicks](docs/screenshots/de-clicks.png)
+
+Business-Funnel mit Ihren eigenen Raten: Leads, Kunden, Umsatz, Gewinn, ROI und Break-even:
+
+![Business-Funnel](docs/screenshots/de-funnel.png)
+
+Jede Annahme mit Quelle: [Annahmen](docs/screenshots/de-assumptions.png) · [Funnel auf dem Handy](docs/screenshots/de-mobile-funnel.png)
 
 ## Gemessen statt geschätzt
 
