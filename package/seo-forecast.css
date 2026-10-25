@@ -102,8 +102,8 @@
 .fc-caveats { margin-top: 1rem; color: var(--color-gray-600); }
 .fc-caveats li + li { margin-top: 0.35rem; }
 
-/* ---------- phones: keyword rows as stacked cards ---------- */
-@media (max-width: 640px) {
+/* ---------- narrow screens: keyword rows as stacked cards ---------- */
+@media (max-width: 1100px) {
   .fc-table--input thead { display: none; }
   .fc-table--input, .fc-table--input tbody { display: block; }
   .fc-table--input tr { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.75rem; padding: 0.9rem 0; border-bottom: 1px solid var(--line); }
@@ -123,3 +123,6 @@
 @media (min-width: 900px) {
   .fc-grid .fc-field > .fc-label { min-height: 2.9em; display: flex; align-items: flex-end; }
 }
+
+/* the curve select carries long, sourced labels: give it the full row */
+.fc-field--wide { grid-column: 1 / -1; }

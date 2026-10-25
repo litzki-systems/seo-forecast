@@ -46,6 +46,7 @@ function strings(lang, currency) {
             result: '4. Ergebnis: Klicks',
             today: 'Klicks pro Monat heute', target: 'Klicks pro Monat bei Zielposition', extra: (n) => `Zusätzliche Klicks in ${n} Monaten`,
             chartClicks: 'Organische Klicks pro Monat (Summe aller Keywords, gestrichelt: heute)', month: 'Monat',
+            colVolumeShort: 'Suchvolumen', colPos: 'Position heute → Ziel', colCtr: 'CTR heute → Ziel', colClicks: 'Klicks/Monat heute → Ziel',
             colCurve: 'Kurve', colCtrNow: 'CTR heute', colCtrTarget: 'CTR Ziel', colClicksNow: 'Klicks heute', colClicksTarget: 'Klicks Ziel',
             exportCsv: 'Klicks als CSV',
             funnelResult: '5. Ergebnis: Business-Funnel',
@@ -107,6 +108,7 @@ function strings(lang, currency) {
         result: '4. Result: clicks',
         today: 'Clicks per month today', target: 'Clicks per month at target position', extra: (n) => `Additional clicks over ${n} months`,
         chartClicks: 'Organic clicks per month (all keywords, dashed: today)', month: 'Month',
+        colVolumeShort: 'Search volume', colPos: 'Position today → target', colCtr: 'CTR today → target', colClicks: 'Clicks/month today → target',
         colCurve: 'Curve', colCtrNow: 'CTR today', colCtrTarget: 'CTR target', colClicksNow: 'Clicks today', colClicksTarget: 'Clicks target',
         exportCsv: 'Clicks as CSV',
         funnelResult: '5. Result: business funnel',
@@ -305,7 +307,9 @@ export function mount(root, options = {}) {
     const ramp = numInput('6', '1', '1', '36');
     const horizon = numInput('12', '1', '1', '36');
     const userFactor = numInput('100', '0', 'any', '500');
-    grid.append(field(t.curve, curveSel), field(t.ramp, ramp), field(t.horizon, horizon), field(t.userFactor, userFactor, t.userFactorHelp));
+    const curveField = field(t.curve, curveSel);
+    curveField.classList.add('fc-field--wide');
+    grid.append(curveField, field(t.ramp, ramp), field(t.horizon, horizon), field(t.userFactor, userFactor, t.userFactorHelp));
     setup.appendChild(grid);
     const presetNote = el('p', 'fc-note');
     setup.appendChild(presetNote);
@@ -505,10 +509,10 @@ export function mount(root, options = {}) {
         const preset = currentPreset();
         const curveName = (id) => { const c = preset.curves.find((x) => x.id === id); return c ? (c.shortLabel || c.label) : id; };
         resTableHost.textContent = '';
-        resTableHost.appendChild(table([t.colKeyword, t.colVolume, t.colCurrent, t.colTarget, ...(preset.curves.length > 1 ? [t.colCurve] : []), t.colCtrNow, t.colCtrTarget, t.colClicksNow, t.colClicksTarget], result.keywords.map((k) => [
-            k.keyword + (k.aio ? ` · ${k.aioCitation === 'cited' ? t.aioCitedTag : k.aioCitation === 'not-cited' ? t.aioNotCitedTag : 'AIO'}` : ''), t.nf0.format(k.volume), k.currentPosition === null ? '–' : t.nf.format(k.currentPosition), t.nf.format(k.targetPosition),
+        resTableHost.appendChild(table([t.colKeyword, t.colVolumeShort, t.colPos, ...(preset.curves.length > 1 ? [t.colCurve] : []), t.colCtr, t.colClicks], result.keywords.map((k) => [
+            k.keyword + (k.aio ? ` · ${k.aioCitation === 'cited' ? t.aioCitedTag : k.aioCitation === 'not-cited' ? t.aioNotCitedTag : 'AIO'}` : ''), t.nf0.format(k.volume), `${k.currentPosition === null ? '–' : t.nf.format(k.currentPosition)} → ${t.nf.format(k.targetPosition)}`,
             ...(preset.curves.length > 1 ? [curveName(k.curveId)] : []),
-            t.pct(k.currentCtr), t.pct(k.targetCtr), t.nf.format(k.currentClicks), t.nf.format(k.targetClicks),
+            `${t.pct(k.currentCtr)} → ${t.pct(k.targetCtr)}`, `${t.nf.format(k.currentClicks)} → ${t.nf.format(k.targetClicks)}`,
         ])));
         warnBox.textContent = '';
         const warns = result.keywords.flatMap((k) => k.warnings.map((w) => `${k.keyword}: ${w.type === 'beyond-data' ? t.warnBeyond(w.which, Math.round(w.position)) : w.type === 'no-aio-reduction' ? t.warnNoAio(w.position) : w.message}`));

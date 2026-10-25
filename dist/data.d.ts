@@ -68,6 +68,8 @@ export interface CurveFile {
         };
         cited: number;
         not_cited: number;
+        /** Lower and upper value the source supports for not cited. */
+        not_cited_range?: [number, number];
         calculation: string;
         label: Record<Lang, string>;
     };

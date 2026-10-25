@@ -1,4 +1,4 @@
-/*! seo-forecast 1.3.0 · MIT License · https://github.com/litzki-systems/seo-forecast */
+/*! seo-forecast 1.3.1 · MIT License · https://github.com/litzki-systems/seo-forecast */
 
 // src/forecast.ts
 var round2 = (n) => Math.round(n * 100) / 100;
@@ -563,6 +563,10 @@ function strings(lang, currency) {
     extra: (n) => `Zus\xE4tzliche Klicks in ${n} Monaten`,
     chartClicks: "Organische Klicks pro Monat (Summe aller Keywords, gestrichelt: heute)",
     month: "Monat",
+    colVolumeShort: "Suchvolumen",
+    colPos: "Position heute \u2192 Ziel",
+    colCtr: "CTR heute \u2192 Ziel",
+    colClicks: "Klicks/Monat heute \u2192 Ziel",
     colCurve: "Kurve",
     colCtrNow: "CTR heute",
     colCtrTarget: "CTR Ziel",
@@ -681,6 +685,10 @@ function strings(lang, currency) {
     extra: (n) => `Additional clicks over ${n} months`,
     chartClicks: "Organic clicks per month (all keywords, dashed: today)",
     month: "Month",
+    colVolumeShort: "Search volume",
+    colPos: "Position today \u2192 target",
+    colCtr: "CTR today \u2192 target",
+    colClicks: "Clicks/month today \u2192 target",
     colCurve: "Curve",
     colCtrNow: "CTR today",
     colCtrTarget: "CTR target",
@@ -898,7 +906,9 @@ function mount(root, options = {}) {
   const ramp = numInput("6", "1", "1", "36");
   const horizon = numInput("12", "1", "1", "36");
   const userFactor = numInput("100", "0", "any", "500");
-  grid.append(field(t.curve, curveSel), field(t.ramp, ramp), field(t.horizon, horizon), field(t.userFactor, userFactor, t.userFactorHelp));
+  const curveField = field(t.curve, curveSel);
+  curveField.classList.add("fc-field--wide");
+  grid.append(curveField, field(t.ramp, ramp), field(t.horizon, horizon), field(t.userFactor, userFactor, t.userFactorHelp));
   setup.appendChild(grid);
   const presetNote = el("p", "fc-note");
   setup.appendChild(presetNote);
@@ -1124,17 +1134,14 @@ function mount(root, options = {}) {
     };
     resTableHost.textContent = "";
     resTableHost.appendChild(table(
-      [t.colKeyword, t.colVolume, t.colCurrent, t.colTarget, ...preset.curves.length > 1 ? [t.colCurve] : [], t.colCtrNow, t.colCtrTarget, t.colClicksNow, t.colClicksTarget],
+      [t.colKeyword, t.colVolumeShort, t.colPos, ...preset.curves.length > 1 ? [t.colCurve] : [], t.colCtr, t.colClicks],
       result.keywords.map((k) => [
         k.keyword + (k.aio ? ` \xB7 ${k.aioCitation === "cited" ? t.aioCitedTag : k.aioCitation === "not-cited" ? t.aioNotCitedTag : "AIO"}` : ""),
         t.nf0.format(k.volume),
-        k.currentPosition === null ? "\u2013" : t.nf.format(k.currentPosition),
-        t.nf.format(k.targetPosition),
+        `${k.currentPosition === null ? "\u2013" : t.nf.format(k.currentPosition)} \u2192 ${t.nf.format(k.targetPosition)}`,
         ...preset.curves.length > 1 ? [curveName(k.curveId)] : [],
-        t.pct(k.currentCtr),
-        t.pct(k.targetCtr),
-        t.nf.format(k.currentClicks),
-        t.nf.format(k.targetClicks)
+        `${t.pct(k.currentCtr)} \u2192 ${t.pct(k.targetCtr)}`,
+        `${t.nf.format(k.currentClicks)} \u2192 ${t.nf.format(k.targetClicks)}`
       ])
     ));
     warnBox.textContent = "";

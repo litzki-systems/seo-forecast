@@ -44,6 +44,8 @@ export interface CurveFile {
     source_ref: { name: string; url: string; year: number };
     cited: number;
     not_cited: number;
+    /** Lower and upper value the source supports for not cited. */
+    not_cited_range?: [number, number];
     calculation: string;
     label: Record<Lang, string>;
   };

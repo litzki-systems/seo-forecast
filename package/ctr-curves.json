@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.3.1",
   "updated": "2026-10-25",
   "note": "CTR values in percent (clicks / impressions × 100). Every curve names its source, market, period and device. Values are copied from the sources as published; nothing is smoothed, extrapolated or estimated. Positions without published data are left out and count as 0 % in the calculator. Each curve carries source_ref (name, url, year) for its CTR values and, under aio, for its AI Overview model.",
   "sources": {
@@ -442,12 +442,16 @@
       "year": 2026
     },
     "cited": 0.62,
-    "not_cited": 0.28,
-    "calculation": "cited 2.07 % ÷ no AIO 3.35 % = 0.618; not cited 0.94 % ÷ 3.35 % = 0.281 (informational queries, 2025 averages)",
+    "not_cited": 0.48,
+    "calculation": "cited 2.07 % ÷ no AIO 3.35 % = 0.618. Not cited: 0.94 % ÷ 3.35 % = 0.281, but Seer notes that one account makes up 47 % of this segment's impressions at 0.20 % CTR; without it the segment is about 1.61 %, i.e. 1.61 ÷ 3.35 = 0.481. Default 0.48, lower bound 0.28. Seer gives no corrected value for the no-AIO baseline (two accounts make up 35 % of it).",
     "label": {
-      "en": "Seer Interactive, informational queries, 2025: CTR × 0.62 when your page is cited in the AI Overview, × 0.28 when it is not, relative to no AI Overview. Applies regardless of position.",
-      "de": "Seer Interactive, informative Suchanfragen, 2025: CTR × 0,62, wenn Ihre Seite in der AI Overview zitiert wird, × 0,28, wenn nicht, jeweils gegenüber keiner AI Overview. Gilt unabhängig von der Position."
-    }
+      "en": "Seer Interactive, informational queries, 2025: CTR × 0.62 when your page is cited in the AI Overview, × 0.48 when it is not (range × 0.28 to × 0.48), relative to no AI Overview. Applies regardless of position. The not-cited value: Seer reports 0.94 %, but one account makes up 47 % of that segment; without it, about 1.61 %. The calculator uses 1.61 % (× 0.48) and names × 0.28 as the lower bound. The no-AI-Overview baseline (3.35 %) is also shaped by two accounts (35 % of impressions); Seer gives no corrected value for it.",
+      "de": "Seer Interactive, informative Suchanfragen, 2025: CTR × 0,62, wenn Ihre Seite in der AI Overview zitiert wird, × 0,48, wenn nicht (Spanne × 0,28 bis × 0,48), jeweils gegenüber keiner AI Overview. Gilt unabhängig von der Position. Zum Wert „nicht zitiert“: Seer nennt 0,94 %, doch ein einzelnes Konto stellt 47 % der Impressionen dieses Segments; ohne dieses Konto sind es rund 1,61 %. Der Rechner nutzt 1,61 % (× 0,48) und nennt × 0,28 als Untergrenze. Auch der Vergleichswert ohne AI Overview (3,35 %) ist von zwei Konten geprägt (35 % der Impressionen); einen bereinigten Wert nennt Seer dafür nicht."
+    },
+    "not_cited_range": [
+      0.28,
+      0.48
+    ]
   },
   "industry_lead_rates": {
     "source": "ruler-2026",

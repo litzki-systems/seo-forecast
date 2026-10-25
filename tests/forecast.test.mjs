@@ -215,7 +215,7 @@ test('citation factors replace the average AI Overview model', () => {
     { keyword: 'd', volume: 1000, currentPosition: null, targetPosition: 1, aio: false, aioCitation: 'cited' },
   ], { rampMonths: 1, horizonMonths: 1, citationFactors: cf });
   assert.equal(r.keywords[0].targetCtr, Math.round(19.38 * 0.62 * 100) / 100);
-  assert.equal(r.keywords[1].targetCtr, Math.round(19.38 * 0.28 * 100) / 100);
+  assert.equal(r.keywords[1].targetCtr, Math.round(19.38 * 0.48 * 100) / 100);
   assert.equal(r.keywords[2].targetCtr, Math.round(19.38 * 0.42 * 100) / 100);
   assert.equal(r.keywords[3].targetCtr, 19.38, 'no AI Overview, citation ignored');
   assert.equal(r.keywords[3].aioCitation, null);
@@ -223,7 +223,8 @@ test('citation factors replace the average AI Overview model', () => {
 
 test('citation factors match the Seer figures', () => {
   assert.equal(Math.round((2.07 / 3.35) * 100) / 100, file.aio_citation.cited);
-  assert.equal(Math.round((0.94 / 3.35) * 100) / 100, file.aio_citation.not_cited);
+  assert.equal(Math.round((1.61 / 3.35) * 100) / 100, file.aio_citation.not_cited);
+  assert.deepEqual(file.aio_citation.not_cited_range, [Math.round((0.94 / 3.35) * 100) / 100, file.aio_citation.not_cited]);
 });
 
 test('user CTR factor scales all CTRs and is reported', () => {
