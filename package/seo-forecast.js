@@ -1,4 +1,4 @@
-/*! seo-forecast 1.3.1 · MIT License · https://github.com/litzki-systems/seo-forecast */
+/*! seo-forecast 1.4.0 · MIT License · https://github.com/litzki-systems/seo-forecast */
 
 // src/forecast.ts
 var round2 = (n) => Math.round(n * 100) / 100;
@@ -514,82 +514,81 @@ function strings(lang, currency) {
   const cur = new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 });
   const cur2 = new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 2 });
   const pct = (n) => nf2.format(n) + (lang === "de" ? " %" : "%");
-  const base = { nf, nf0, nf2, cur, cur2, pct };
+  const base = { nf, nf0, nf2, cur, cur2, pct, locale };
   if (lang === "de") return {
     ...base,
-    loadFailed: "Die CTR-Daten konnten nicht geladen werden. Bitte laden Sie die Seite neu.",
-    setup: "1. Grundlage",
+    title: "SEO-Prognose",
+    live: "Live",
+    months: "Zeitraum",
+    ramp: "Hochlauf",
+    monthsUnit: "Mon.",
+    keywords: "Keywords",
+    addRow: "+ Keyword",
+    importKeywords: "CSV laden",
+    importGsc: "Search-Console-Kurve",
+    template: "CSV-Vorlage",
+    exampleKw: "Beispiel-Keywords. \xDCberschreiben Sie sie mit Ihren eigenen.",
+    kwName: "Keyword",
+    volume: "Suchvolumen",
+    target: "Ziel-Rang",
+    current: "Rang heute",
+    currentNone: "rankt nicht",
+    intent: "Suchabsicht",
+    intents: { "": "Absicht offen", informational: "Informational", commercial: "Kommerziell", transactional: "Transaktional" },
+    brand: "Marke",
+    aio: "AI Overview",
+    aioSel: { "": "Keine AI Overview", yes: "AI Overview", cited: "AI Overview, zitiert", "not-cited": "AI Overview, nicht zitiert" },
+    expected: "Erwartete CTR",
+    perMonth: "Klicks/Monat",
+    remove: "Keyword entfernen",
+    curveH: "CTR-Grundlage",
     curve: "CTR-Kurve",
     ownCurve: "Eigene Kurve aus der Search Console",
-    ramp: "Monate bis zur Zielposition",
-    horizon: "Prognosezeitraum (Monate)",
-    keywords: "2. Keywords",
-    keywordsHelp: "Suchvolumen aus Ihrem Keyword-Tool oder der Search Console. Der Rechner sch\xE4tzt kein Suchvolumen. Aktuelle Position leer lassen, wenn die Seite nicht rankt. \u201EMarke\u201C wirkt bei der Kurve mit Marken-Aufteilung, die Suchabsicht nur auf Ihre Lead-Raten im Funnel.",
-    colKeyword: "Keyword",
-    colVolume: "Suchvolumen / Monat",
-    colCurrent: "Aktuelle Position",
-    colTarget: "Zielposition",
-    colIntent: "Suchabsicht",
-    colBrand: "Marke",
-    colAio: "AI Overview",
-    intents: { "": "\u2013", informational: "Info", commercial: "Kommerziell", transactional: "Transaktional" },
-    remove: "Entfernen",
-    addRow: "Zeile hinzuf\xFCgen",
-    importKeywords: "Keywords aus CSV laden",
-    importGsc: "Search-Console-Export als eigene Kurve laden",
-    template: "CSV-Vorlage",
-    example: "Die zwei Zeilen sind Beispielwerte. Ersetzen Sie sie durch Ihre Keywords oder laden Sie eine CSV-Datei.",
-    funnelH: "3. Business-Funnel (optional)",
-    funnelHelp: "Tragen Sie Ihre eigenen Zahlen ein, zum Beispiel aus GA4, Ihrem CRM oder Ihrer Buchhaltung. Ohne Lead-Rate, Abschlussrate und Kundenwert rechnet der Rechner nur Klicks und erfindet keinen Umsatz.",
-    basis: "Grundlage der Rechnung",
-    basisAdditional: "Nur zus\xE4tzliche Klicks (was die SEO-Arbeit bringt)",
-    basisTotal: "Alle prognostizierten Klicks",
-    leadRate: "Lead-Rate (%)",
-    leadRateHelp: "Anteil der Besucher, die anfragen, sich eintragen oder bestellen.",
-    leadRateIntent: (i) => `Lead-Rate ${i} (%)`,
-    leadRateIntentHelp: "Optional, nur wenn Sie f\xFCr diese Suchabsicht eine eigene Rate kennen.",
-    closeRate: "Abschlussrate (%)",
-    closeRateHelp: "Anteil der Leads, die Kunde werden. Im Shop, wo der Lead die Bestellung ist: 100.",
-    customerValue: (c) => `Kundenwert (${c})`,
-    customerValueHelp: "Customer Lifetime Value oder durchschnittlicher Auftragswert.",
-    margin: "Marge (%)",
-    marginHelp: "Anteil des Umsatzes, der als Rohertrag bleibt. 100 = Umsatz z\xE4hlt voll.",
-    invest: (c) => `SEO-Investition pro Monat (${c})`,
-    oneOff: (c) => `Einmalige Investition im 1. Monat (${c})`,
-    investHelp: "Optional. Nur mit Investition rechnet der Rechner ROI und Break-even.",
-    result: "4. Ergebnis: Klicks",
-    today: "Klicks pro Monat heute",
-    target: "Klicks pro Monat bei Zielposition",
-    extra: (n) => `Zus\xE4tzliche Klicks in ${n} Monaten`,
-    chartClicks: "Organische Klicks pro Monat (Summe aller Keywords, gestrichelt: heute)",
+    userFactor: "Eigener CTR-Faktor",
+    assumption: "Eigene Annahme",
+    userFactorHelp: "Ohne Quelle, z. B. f\xFCr Snippets, Anzeigen oder Mobil. F\xFCr diese Effekte gibt es keine belegten Faktoren. 100 % = keine \xC4nderung.",
+    funnelH: "Business-Funnel",
+    industry: "Branche",
+    industryNone: "Branche w\xE4hlen \u2026",
+    industryAvg: (v) => `Durchschnitt aller Branchen \xB7 ${v}`,
+    industryShort: (y) => `Lead-Rate organische Suche, Ruler Analytics ${y}. Ersetzen Sie sie durch Ihre GA4-Zahl.`,
+    leadRate: "Lead-Rate",
+    closeRate: "Abschlussrate",
+    customerValue: "Kundenwert",
+    margin: "Marge",
+    invest: "SEO-Budget / Monat",
+    oneOff: "Einmalig (Monat 1)",
+    investPh: "optional",
+    example: "Beispiel",
+    exampleHelp: "Beispielwert ohne Quelle. Tragen Sie Ihre eigene Zahl ein.",
+    basis: "Rechnen mit",
+    basisAdditional: "Zusatz-Klicks",
+    basisTotal: "Allen Klicks",
+    intentRates: "Lead-Rate je Suchabsicht",
+    intentRatesHelp: "Optional, wenn Sie je Suchabsicht eigene Raten kennen.",
+    kpiTraffic: (b) => b === "additional" ? "Zusatz-Traffic" : "Traffic",
+    kpiTrafficSub: "Klicks pro Monat im Ziel",
+    kpiRevenue: "Umsatz-Potenzial",
+    kpiRevenueSub: "pro Monat im Ziel",
+    kpiNet: "Reingewinn",
+    kpiGross: "Rohertrag",
+    kpiNetSub: "pro Monat im Ziel",
+    kpiRoi: "ROI",
+    kpiRoiNone: "SEO-Budget eintragen",
+    kpiRoiSub: (n) => `nach ${n} Monaten`,
+    perEuro: (v) => `1 \u20AC bringt ${v}`,
+    breakEven: (m, n) => m === null ? `Kein Break-even in ${n} Monaten` : `Break-even in Monat ${m}`,
+    tabMoney: "Rohertrag",
+    tabClicks: "Klicks",
+    legendGross: "Rohertrag kumuliert",
+    legendInvest: "Investition kumuliert",
+    legendClicks: "Klicks",
+    legendToday: "heute",
     month: "Monat",
-    colVolumeShort: "Suchvolumen",
-    colPos: "Position heute \u2192 Ziel",
-    colCtr: "CTR heute \u2192 Ziel",
-    colClicks: "Klicks/Monat heute \u2192 Ziel",
-    colCurve: "Kurve",
-    colCtrNow: "CTR heute",
-    colCtrTarget: "CTR Ziel",
-    colClicksNow: "Klicks heute",
-    colClicksTarget: "Klicks Ziel",
-    exportCsv: "Klicks als CSV",
-    funnelResult: "5. Ergebnis: Business-Funnel",
-    funnelMissing: "F\xFCr den Funnel fehlen noch Lead-Rate, Abschlussrate oder Kundenwert.",
-    kpiTraffic: (b) => b === "additional" ? "Zusatz-Klicks pro Monat im Ziel" : "Klicks pro Monat im Ziel",
-    kpiLeads: "Leads pro Monat im Ziel",
-    kpiCustomers: "Kunden pro Monat im Ziel",
-    kpiRevenue: "Umsatz pro Monat im Ziel",
-    kpiGross: "Rohertrag pro Monat im Ziel",
-    kpiNet: "Reingewinn pro Monat im Ziel",
-    kpiRoi: (n) => `ROI nach ${n} Monaten`,
-    kpiReturn: (n) => `Rohertrag je investiertem Euro (${n} Monate)`,
-    kpiBreakEven: "Break-even",
-    breakEvenMonth: (m) => `Monat ${m}`,
-    breakEvenNone: (n) => `nicht in ${n} Monaten`,
-    chartFunnel: "Kumuliert: Rohertrag (durchgezogen) und Investition (gestrichelt)",
-    kpiTable: "Kennzahlen",
-    colPerMonth: "Monatlich (Ziel)",
-    colCumulative: (n) => `Kumuliert (${n} Monate)`,
+    monthShort: "M",
+    kpiTable: "Performance",
+    colPerMonth: "Monatlich im Ziel",
+    colCumulative: (n) => `Kumuliert ${n} Monate`,
     rowClicks: "Klicks",
     rowLeads: "Leads",
     rowCustomers: "Kunden",
@@ -597,121 +596,118 @@ function strings(lang, currency) {
     rowGross: "Rohertrag",
     rowInvest: "Investition",
     rowNet: "Reingewinn",
-    monthlyTable: "Monat f\xFCr Monat",
-    colMonth: "Monat",
-    colCumNet: "Reingewinn kumuliert",
-    colRoi: "ROI kumuliert",
+    kwTable: "Je Keyword",
+    colKw: "Keyword",
+    colPos: "Rang",
+    colCtr: "CTR",
+    colClicks: "Klicks / Monat",
+    monthly: "Monat f\xFCr Monat",
+    colCumNet: "Reingewinn kum.",
+    colRoi: "ROI kum.",
+    exportClicks: "Klicks als CSV",
     exportFunnel: "Funnel als CSV",
-    assumptions: "6. Annahmen",
-    formula: "Klicks pro Monat = Suchvolumen \xD7 CTR der Position \xD7 AI-Overview-Faktor. Zwischen heute und dem Erreichen der Zielposition steigen die Klicks linear.",
+    funnelMissing: "Lead-Rate, Abschlussrate und Kundenwert eintragen, dann erscheinen Umsatz und Gewinn.",
+    funnelInvalid: "Raten und Marge zwischen 0 und 100, Betr\xE4ge nicht negativ.",
+    notes: "Hinweise",
+    errors: "Bitte pr\xFCfen",
+    warnBeyond: (which, p) => `F\xFCr ${which === "current" ? "den heutigen Rang" : "den Ziel-Rang"} ${p} hat diese Kurve keine Daten; z\xE4hlt als 0 Klicks.`,
+    warnNoAio: (p) => `F\xFCr Rang ${p} ist kein AI-Overview-Abschlag ver\xF6ffentlicht; es gilt die CTR ohne AI Overview.`,
+    userFactorNote: (f) => `Eigener CTR-Faktor ${f} angewendet. Das ist Ihre Annahme, keine belegte Zahl.`,
+    invalid: (kw) => `${kw || "(ohne Name)"}: Suchvolumen \u2265 0 und Ziel-Rang \u2265 1 eintragen.`,
+    noKeywords: "F\xFCgen Sie mindestens ein Keyword hinzu.",
+    assumptions: "Annahmen und Quellen",
+    formula: "Klicks pro Monat = Suchvolumen \xD7 CTR des Rangs \xD7 AI-Overview-Faktor \xD7 eigener CTR-Faktor. Bis zum Ziel-Rang steigen die Klicks linear \xFCber die Hochlauf-Monate.",
     formulaFunnel: "Leads = Klicks \xD7 Lead-Rate (je Keyword nach Suchabsicht, falls angegeben) \xB7 Kunden = Leads \xD7 Abschlussrate \xB7 Umsatz = Kunden \xD7 Kundenwert \xB7 Rohertrag = Umsatz \xD7 Marge \xB7 Reingewinn = Rohertrag \u2212 Investition \xB7 ROI = (Rohertrag \u2212 Investition) \xF7 Investition, kumuliert.",
     source: "Quelle",
-    position: "Position",
+    position: "Rang",
     ctrAioShort: "mit AIO",
-    aioReduction: (s) => `Mit AI Overview wird die CTR um den ver\xF6ffentlichten Abschlag je Position gesenkt (${s}).`,
-    aioCurve: "Mit AI Overview gilt die eigene CTR-Spalte derselben Quelle.",
-    aioNone: "F\xFCr die eigene Kurve ist kein AI-Overview-Abschlag hinterlegt. Ihre Search-Console-Daten enthalten den Effekt bereits.",
-    presetBrand: "Keywords mit H\xE4kchen bei \u201EMarke\u201C nutzen die Marken-Kurve, alle anderen die Kurve ohne Marke.",
-    presetLength: "Jedes Keyword nutzt die Kurve f\xFCr seine Wortzahl (1 bis 4 W\xF6rter).",
     noData: "keine Daten",
-    gscInfo: (n) => `Eigene Kurve aus ${n} Zeilen Ihres Search-Console-Exports. Positionen mit weniger als 100 Impressionen sind ausgelassen.`,
-    notTaken: "Gegen\xFCber fr\xFCheren Fassungen durch Daten ersetzt: \u201EKI-Ziel/KI-Dominanz\u201C (\xD71,15/\xD71,25) durch die Seer-Faktoren f\xFCr zitiert/nicht zitiert, Marke \xD71,8 durch die Marken-Kurve, Long-Tail \xD71,2 durch die Kurven nach Wortzahl, Branchen-Lead-Raten durch Ruler Analytics. Nicht \xFCbernommen: pauschaler Lead-Aufschlag f\xFCr kommerzielle Keywords (stattdessen eigene Raten je Suchabsicht) und exponentielles Wachstum.",
-    aioSel: { "": "Keine", yes: "Ja", cited: "Ja, Seite zitiert", "not-cited": "Ja, nicht zitiert" },
-    aioCitedTag: "AIO, zitiert",
-    aioNotCitedTag: "AIO, nicht zitiert",
+    aioReduction: (s) => `Mit AI Overview (Zitierung unbekannt) sinkt die CTR um den ver\xF6ffentlichten Abschlag je Rang (${s}).`,
+    aioCurve: "Mit AI Overview (Zitierung unbekannt) gilt die eigene CTR-Spalte derselben Quelle.",
+    aioNone: "F\xFCr die eigene Kurve gibt es keinen AI-Overview-Abschlag; Ihre Search-Console-Daten enthalten den Effekt bereits.",
     citation: (l) => `Ist bekannt, ob Ihre Seite in der AI Overview zitiert wird, gilt statt des Durchschnitts: ${l}`,
-    userFactor: "Eigener CTR-Faktor (%)",
-    userFactorHelp: "Ihre Annahme ohne Quelle, z. B. aus eigenen Tests zu Snippets, Anzeigen oder Mobil. 100 = keine \xC4nderung. Wird im Ergebnis als Annahme ausgewiesen.",
-    userFactorNote: (f) => `Eigener CTR-Faktor ${f} % auf alle Keywords angewendet. Das ist Ihre Annahme, keine belegte Zahl.`,
-    industry: "Branche",
-    industryNone: "Keine Vorbelegung",
-    industryAvg: (v) => `Durchschnitt aller Branchen (${v})`,
-    industrySource: "Quelle",
-    industryShort: (y) => `Startwert aus Ruler Analytics (${y}), organische Suche. Bitte durch Ihre eigene Zahl ersetzen; Details unter \u201EAnnahmen\u201C.`,
-    warnings: "Hinweise",
-    errors: "Bitte pr\xFCfen",
-    noKeywords: "Tragen Sie mindestens ein Keyword ein.",
-    warnBeyond: (which, p) => `F\xFCr die ${which === "current" ? "aktuelle Position" : "Zielposition"} ${p} enth\xE4lt diese Kurve keine Daten; sie z\xE4hlt als 0 Klicks.`,
-    warnNoAio: (p) => `F\xFCr Position ${p} ist kein AI-Overview-Abschlag ver\xF6ffentlicht; es gilt die CTR ohne AI Overview.`,
-    invalid: (kw) => `${kw || "(ohne Keyword)"}: Bitte Suchvolumen (\u2265 0), Zielposition (\u2265 1) und, falls die Seite rankt, die aktuelle Position (\u2265 1) eintragen.`,
-    funnelInvalid: "Raten und Marge m\xFCssen zwischen 0 und 100 liegen, Betr\xE4ge d\xFCrfen nicht negativ sein.",
-    local: "Alle Eingaben bleiben in Ihrem Browser. Nichts wird gespeichert oder \xFCbertragen."
+    presetBrand: "Keywords mit \u201EMarke\u201C nutzen die Marken-Kurve, alle anderen die Kurve ohne Marke.",
+    presetLength: "Jedes Keyword nutzt die Kurve f\xFCr seine Wortzahl (1 bis 4 W\xF6rter).",
+    gscInfo: (n) => `Eigene Kurve aus ${n} Zeilen Ihres Search-Console-Exports; R\xE4nge mit weniger als 100 Impressionen ausgelassen.`,
+    examplesNote: "Abschlussrate, Kundenwert und Marge sind als Beispiel vorbelegt, damit der Funnel sofort rechnet. F\xFCr sie gibt es keine belegten Branchenwerte; ersetzen Sie sie durch Ihre Zahlen.",
+    notTaken: "Gegen\xFCber fr\xFCheren Fassungen durch Daten ersetzt: \u201EKI-Ziel/KI-Dominanz\u201C durch die Seer-Faktoren f\xFCr zitiert/nicht zitiert, Marke \xD71,8 durch die Marken-Kurve, Long-Tail \xD71,2 durch die Kurven nach Wortzahl, Branchen-Lead-Raten durch Ruler Analytics. F\xFCr Snippets, Anzeigen oder Mobil gibt es keine belegten Faktoren; daf\xFCr ist der eigene CTR-Faktor da, gekennzeichnet als Annahme. Nicht \xFCbernommen: pauschaler Lead-Aufschlag f\xFCr kommerzielle Keywords und exponentielles Wachstum.",
+    local: "Alle Eingaben bleiben in Ihrem Browser. Nichts wird gespeichert oder \xFCbertragen.",
+    loadFailed: "Die CTR-Daten konnten nicht geladen werden. Bitte laden Sie die Seite neu."
   };
   return {
     ...base,
-    loadFailed: "The CTR data could not be loaded. Please reload the page.",
-    setup: "1. Basis",
+    title: "SEO forecast",
+    live: "Live",
+    months: "Period",
+    ramp: "Ramp-up",
+    monthsUnit: "mo",
+    keywords: "Keywords",
+    addRow: "+ Keyword",
+    importKeywords: "Load CSV",
+    importGsc: "Search Console curve",
+    template: "CSV template",
+    exampleKw: "Example keywords. Overwrite them with your own.",
+    kwName: "Keyword",
+    volume: "Search volume",
+    target: "Target rank",
+    current: "Rank today",
+    currentNone: "not ranking",
+    intent: "Intent",
+    intents: { "": "Intent open", informational: "Informational", commercial: "Commercial", transactional: "Transactional" },
+    brand: "Brand",
+    aio: "AI Overview",
+    aioSel: { "": "No AI Overview", yes: "AI Overview", cited: "AI Overview, cited", "not-cited": "AI Overview, not cited" },
+    expected: "Expected CTR",
+    perMonth: "clicks/month",
+    remove: "Remove keyword",
+    curveH: "CTR basis",
     curve: "CTR curve",
     ownCurve: "Your own curve from Search Console",
-    ramp: "Months until the target position",
-    horizon: "Forecast period (months)",
-    keywords: "2. Keywords",
-    keywordsHelp: "Search volume from your keyword tool or Search Console. The calculator does not estimate search volume. Leave the current position empty if the page does not rank. \u201CBrand\u201D applies with the brand-split curve; intent only affects your lead rates in the funnel.",
-    colKeyword: "Keyword",
-    colVolume: "Search volume / month",
-    colCurrent: "Current position",
-    colTarget: "Target position",
-    colIntent: "Intent",
-    colBrand: "Brand",
-    colAio: "AI Overview",
-    intents: { "": "\u2013", informational: "Informational", commercial: "Commercial", transactional: "Transactional" },
-    remove: "Remove",
-    addRow: "Add row",
-    importKeywords: "Load keywords from CSV",
-    importGsc: "Load Search Console export as your own curve",
-    template: "CSV template",
-    example: "The two rows are example values. Replace them with your keywords or load a CSV file.",
-    funnelH: "3. Business funnel (optional)",
-    funnelHelp: "Enter your own figures, for example from GA4, your CRM or your accounts. Without lead rate, close rate and customer value the calculator only forecasts clicks and invents no revenue.",
-    basis: "What to count",
-    basisAdditional: "Additional clicks only (what the SEO work adds)",
-    basisTotal: "All forecast clicks",
-    leadRate: "Lead rate (%)",
-    leadRateHelp: "Share of visitors who enquire, sign up or order.",
-    leadRateIntent: (i) => `Lead rate ${i} (%)`,
-    leadRateIntentHelp: "Optional, only if you know a separate rate for this intent.",
-    closeRate: "Close rate (%)",
-    closeRateHelp: "Share of leads who become customers. For shops where the lead is the order: 100.",
-    customerValue: (c) => `Customer value (${c})`,
-    customerValueHelp: "Customer lifetime value or average order value.",
-    margin: "Margin (%)",
-    marginHelp: "Share of revenue that remains as gross profit. 100 = count revenue in full.",
-    invest: (c) => `SEO investment per month (${c})`,
-    oneOff: (c) => `One-off investment in month 1 (${c})`,
-    investHelp: "Optional. ROI and break-even are only calculated with an investment.",
-    result: "4. Result: clicks",
-    today: "Clicks per month today",
-    target: "Clicks per month at target position",
-    extra: (n) => `Additional clicks over ${n} months`,
-    chartClicks: "Organic clicks per month (all keywords, dashed: today)",
+    userFactor: "Your own CTR factor",
+    assumption: "Your assumption",
+    userFactorHelp: "Without a source, e.g. for snippets, ads or mobile. There are no sourced factors for these effects. 100% = no change.",
+    funnelH: "Business funnel",
+    industry: "Industry",
+    industryNone: "Choose industry \u2026",
+    industryAvg: (v) => `Average of all industries \xB7 ${v}`,
+    industryShort: (y) => `Organic search lead rate, Ruler Analytics ${y}. Replace it with your GA4 figure.`,
+    leadRate: "Lead rate",
+    closeRate: "Close rate",
+    customerValue: "Customer value",
+    margin: "Margin",
+    invest: "SEO budget / month",
+    oneOff: "One-off (month 1)",
+    investPh: "optional",
+    example: "Example",
+    exampleHelp: "Example value without a source. Enter your own figure.",
+    basis: "Count",
+    basisAdditional: "Additional clicks",
+    basisTotal: "All clicks",
+    intentRates: "Lead rate per intent",
+    intentRatesHelp: "Optional, if you know separate rates per intent.",
+    kpiTraffic: (b) => b === "additional" ? "Additional traffic" : "Traffic",
+    kpiTrafficSub: "clicks per month at target",
+    kpiRevenue: "Revenue potential",
+    kpiRevenueSub: "per month at target",
+    kpiNet: "Net profit",
+    kpiGross: "Gross profit",
+    kpiNetSub: "per month at target",
+    kpiRoi: "ROI",
+    kpiRoiNone: "Enter SEO budget",
+    kpiRoiSub: (n) => `after ${n} months`,
+    perEuro: (v) => `\u20AC1 returns ${v}`,
+    breakEven: (m, n) => m === null ? `No break-even within ${n} months` : `Break-even in month ${m}`,
+    tabMoney: "Gross profit",
+    tabClicks: "Clicks",
+    legendGross: "Gross profit, cumulative",
+    legendInvest: "Investment, cumulative",
+    legendClicks: "Clicks",
+    legendToday: "today",
     month: "Month",
-    colVolumeShort: "Search volume",
-    colPos: "Position today \u2192 target",
-    colCtr: "CTR today \u2192 target",
-    colClicks: "Clicks/month today \u2192 target",
-    colCurve: "Curve",
-    colCtrNow: "CTR today",
-    colCtrTarget: "CTR target",
-    colClicksNow: "Clicks today",
-    colClicksTarget: "Clicks target",
-    exportCsv: "Clicks as CSV",
-    funnelResult: "5. Result: business funnel",
-    funnelMissing: "The funnel still needs lead rate, close rate or customer value.",
-    kpiTraffic: (b) => b === "additional" ? "Additional clicks per month at target" : "Clicks per month at target",
-    kpiLeads: "Leads per month at target",
-    kpiCustomers: "Customers per month at target",
-    kpiRevenue: "Revenue per month at target",
-    kpiGross: "Gross profit per month at target",
-    kpiNet: "Net profit per month at target",
-    kpiRoi: (n) => `ROI after ${n} months`,
-    kpiReturn: (n) => `Gross profit per euro invested (${n} months)`,
-    kpiBreakEven: "Break-even",
-    breakEvenMonth: (m) => `Month ${m}`,
-    breakEvenNone: (n) => `not within ${n} months`,
-    chartFunnel: "Cumulative: gross profit (solid) and investment (dashed)",
-    kpiTable: "Key figures",
-    colPerMonth: "Per month (target)",
-    colCumulative: (n) => `Cumulative (${n} months)`,
+    monthShort: "M",
+    kpiTable: "Performance",
+    colPerMonth: "Per month at target",
+    colCumulative: (n) => `Cumulative ${n} months`,
     rowClicks: "Clicks",
     rowLeads: "Leads",
     rowCustomers: "Customers",
@@ -719,50 +715,55 @@ function strings(lang, currency) {
     rowGross: "Gross profit",
     rowInvest: "Investment",
     rowNet: "Net profit",
-    monthlyTable: "Month by month",
-    colMonth: "Month",
-    colCumNet: "Net profit, cumulative",
-    colRoi: "ROI, cumulative",
+    kwTable: "Per keyword",
+    colKw: "Keyword",
+    colPos: "Rank",
+    colCtr: "CTR",
+    colClicks: "Clicks / month",
+    monthly: "Month by month",
+    colCumNet: "Net profit cum.",
+    colRoi: "ROI cum.",
+    exportClicks: "Clicks as CSV",
     exportFunnel: "Funnel as CSV",
-    assumptions: "6. Assumptions",
-    formula: "Clicks per month = search volume \xD7 CTR of the position \xD7 AI Overview factor. Between today and reaching the target position, clicks rise linearly.",
+    funnelMissing: "Enter lead rate, close rate and customer value to see revenue and profit.",
+    funnelInvalid: "Rates and margin between 0 and 100, amounts not negative.",
+    notes: "Notes",
+    errors: "Please check",
+    warnBeyond: (which, p) => `This curve has no data for the ${which === "current" ? "current" : "target"} rank ${p}; counts as 0 clicks.`,
+    warnNoAio: (p) => `No published AI Overview reduction for rank ${p}; the CTR without AI Overview is used.`,
+    userFactorNote: (f) => `Your own CTR factor of ${f} is applied. This is your assumption, not a sourced figure.`,
+    invalid: (kw) => `${kw || "(no name)"}: enter search volume \u2265 0 and target rank \u2265 1.`,
+    noKeywords: "Add at least one keyword.",
+    assumptions: "Assumptions and sources",
+    formula: "Clicks per month = search volume \xD7 CTR of the rank \xD7 AI Overview factor \xD7 your own CTR factor. Clicks rise linearly over the ramp-up months until the target rank.",
     formulaFunnel: "Leads = clicks \xD7 lead rate (per keyword by intent, if given) \xB7 Customers = leads \xD7 close rate \xB7 Revenue = customers \xD7 customer value \xB7 Gross profit = revenue \xD7 margin \xB7 Net profit = gross profit \u2212 investment \xB7 ROI = (gross profit \u2212 investment) \xF7 investment, cumulative.",
     source: "Source",
-    position: "Position",
+    position: "Rank",
     ctrAioShort: "with AIO",
-    aioReduction: (s) => `With an AI Overview, CTR is lowered by the published reduction per position (${s}).`,
-    aioCurve: "With an AI Overview, the separate CTR column of the same source applies.",
-    aioNone: "No AI Overview reduction is applied to your own curve. Your Search Console data already contains the effect.",
-    presetBrand: "Keywords ticked as \u201CBrand\u201D use the brand curve, all others the non-brand curve.",
-    presetLength: "Each keyword uses the curve for its word count (1 to 4 words).",
     noData: "no data",
-    gscInfo: (n) => `Your own curve from ${n} rows of your Search Console export. Positions with fewer than 100 impressions are left out.`,
-    notTaken: "Replaced by data compared with earlier versions: \u201CAI target/AI dominance\u201D (\xD71.15/\xD71.25) by the Seer factors for cited/not cited, brand \xD71.8 by the brand curve, long tail \xD71.2 by the word-count curves, industry lead rates by Ruler Analytics. Not carried over: a flat lead bonus for commercial keywords (use your own rates per intent instead) and exponential growth.",
-    aioSel: { "": "None", yes: "Yes", cited: "Yes, page cited", "not-cited": "Yes, not cited" },
-    aioCitedTag: "AIO, cited",
-    aioNotCitedTag: "AIO, not cited",
+    aioReduction: (s) => `With an AI Overview (citation unknown), CTR drops by the published reduction per rank (${s}).`,
+    aioCurve: "With an AI Overview (citation unknown), the separate CTR column of the same source applies.",
+    aioNone: "Your own curve has no AI Overview reduction; your Search Console data already contains the effect.",
     citation: (l) => `If you know whether your page is cited in the AI Overview, this applies instead of the average: ${l}`,
-    userFactor: "Your own CTR factor (%)",
-    userFactorHelp: "Your assumption without a source, e.g. from your own tests on snippets, ads or mobile. 100 = no change. Shown as an assumption in the result.",
-    userFactorNote: (f) => `Your own CTR factor of ${f} % is applied to all keywords. This is your assumption, not a sourced figure.`,
-    industry: "Industry",
-    industryNone: "No starting value",
-    industryAvg: (v) => `Average of all industries (${v})`,
-    industrySource: "Source",
-    industryShort: (y) => `Starting value from Ruler Analytics (${y}), organic search. Please replace it with your own figure; details under \u201CAssumptions\u201D.`,
-    warnings: "Notes",
-    errors: "Please check",
-    noKeywords: "Enter at least one keyword.",
-    warnBeyond: (which, p) => `This curve has no data for the ${which === "current" ? "current" : "target"} position ${p}, so it counts as 0 clicks.`,
-    warnNoAio: (p) => `No published AI Overview reduction for position ${p}; the CTR without AI Overview is used.`,
-    invalid: (kw) => `${kw || "(no keyword)"}: please enter search volume (\u2265 0), target position (\u2265 1) and, if it ranks, a current position (\u2265 1).`,
-    funnelInvalid: "Rates and margin must be between 0 and 100, amounts must not be negative.",
-    local: "All input stays in your browser. Nothing is stored or transmitted."
+    presetBrand: "Keywords marked \u201CBrand\u201D use the brand curve, all others the non-brand curve.",
+    presetLength: "Each keyword uses the curve for its word count (1 to 4 words).",
+    gscInfo: (n) => `Your own curve from ${n} rows of your Search Console export; ranks with fewer than 100 impressions left out.`,
+    examplesNote: "Close rate, customer value and margin are prefilled as examples so the funnel calculates right away. There are no sourced industry values for them; replace them with your figures.",
+    notTaken: "Replaced by data compared with earlier versions: \u201CAI target/AI dominance\u201D by the Seer factors for cited/not cited, brand \xD71.8 by the brand curve, long tail \xD71.2 by the word-count curves, industry lead rates by Ruler Analytics. There are no sourced factors for snippets, ads or mobile; that is what your own CTR factor is for, labelled as an assumption. Not carried over: a flat lead bonus for commercial keywords and exponential growth.",
+    local: "All input stays in your browser. Nothing is stored or transmitted.",
+    loadFailed: "The CTR data could not be loaded. Please reload the page."
   };
 }
 function el(tag, cls, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
+  if (text !== void 0) n.textContent = text;
+  return n;
+}
+var SVG = "http://www.w3.org/2000/svg";
+function svgEl(tag, attrs = {}, text) {
+  const n = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
   if (text !== void 0) n.textContent = text;
   return n;
 }
@@ -797,49 +798,170 @@ function table(headers, rows, cls = "fc-table") {
   wrap.appendChild(t);
   return wrap;
 }
-function lineChart(host, title, series, fmt) {
-  const width = host.clientWidth || (host.parentElement ? host.parentElement.clientWidth : 0) || 720;
-  host.textContent = "";
-  const months = series[0]?.values.length || 0;
-  if (!months) return;
-  const W = Math.max(280, Math.min(1600, Math.round(width)));
-  const H = W < 500 ? 220 : 280, R = 16, TOP = 20, B = 36;
-  const max = Math.max(1, ...series.flatMap((s) => s.values));
-  const L = Math.max(48, Math.min(96, fmt(max).length * 8 + 12));
-  const x = (i) => L + (months === 1 ? 0 : i * (W - L - R) / (months - 1));
-  const y = (v) => TOP + (1 - Math.max(0, v) / max) * (H - TOP - B);
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.setAttribute("class", "fc-svg");
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", title);
-  const add = (tag, attrs, text) => {
-    const n = document.createElementNS(ns, tag);
-    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
-    if (text !== void 0) n.textContent = text;
-    svg.appendChild(n);
-  };
-  for (let g = 0; g <= 4; g++) {
-    const v = max * g / 4;
-    add("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), class: "fc-grid-line" });
-    add("text", { x: L - 8, y: y(v) + 5, "text-anchor": "end", class: "fc-axis" }, fmt(v));
+var reducedMotion = () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var Ticker = class {
+  constructor(node, fmt) {
+    this.node = node;
+    this.fmt = fmt;
+    this.value = 0;
+    this.frame = 0;
   }
-  const step = W < 500 ? Math.ceil(months / 6) : months <= 12 ? 1 : 3;
-  for (let i = 0; i < months; i++) {
-    if (i === 0 || (i + 1) % step === 0) add("text", { x: x(i), y: H - 10, "text-anchor": "middle", class: "fc-axis" }, String(i + 1));
-  }
-  for (const s of series) {
-    if (s.values.every((v) => v === s.values[0]) && s.cls.includes("baseline")) {
-      add("line", { x1: L, x2: W - R, y1: y(s.values[0]), y2: y(s.values[0]), class: s.cls });
-      continue;
+  set(to, text = "\u2013") {
+    cancelAnimationFrame(this.frame);
+    this.node.classList.remove("fc-is-bump");
+    if (to === null || !Number.isFinite(to)) {
+      this.node.textContent = text;
+      return;
     }
-    add("polyline", { points: s.values.map((v, i) => `${x(i)},${y(v)}`).join(" "), class: s.cls });
-    if (s.cls === "fc-line") s.values.forEach((v, i) => add("circle", { cx: x(i), cy: y(v), r: 4, class: "fc-dot" }));
+    const from = this.value;
+    this.value = to;
+    if (reducedMotion() || Math.abs(from - to) < 1e-9) {
+      this.node.textContent = this.fmt(to);
+      return;
+    }
+    void this.node.offsetWidth;
+    this.node.classList.add("fc-is-bump");
+    const start = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - start) / 420);
+      const e = 1 - Math.pow(1 - p, 3);
+      this.node.textContent = this.fmt(from + (to - from) * e);
+      if (p < 1) this.frame = requestAnimationFrame(step);
+    };
+    this.frame = requestAnimationFrame(step);
   }
-  host.appendChild(el("p", "fc-label", title));
-  host.appendChild(svg);
-}
+  stop() {
+    cancelAnimationFrame(this.frame);
+  }
+};
+var Chart = class {
+  constructor(label) {
+    this.paths = [];
+    this.W = 720;
+    this.H = 320;
+    this.L = 64;
+    this.R = 16;
+    this.T = 16;
+    this.B = 36;
+    this.last = null;
+    this.root = el("div", "fc-chart");
+    this.svg = document.createElementNS(SVG, "svg");
+    this.svg.setAttribute("class", "fc-svg");
+    this.svg.setAttribute("role", "img");
+    this.svg.setAttribute("aria-label", label);
+    const defs = svgEl("defs");
+    this.gradId = `fc-grad-${Math.random().toString(36).slice(2, 9)}`;
+    const grad = svgEl("linearGradient", { id: this.gradId, x1: 0, x2: 0, y1: 0, y2: 1 });
+    grad.append(svgEl("stop", { offset: "0%", class: "fc-grad-top" }), svgEl("stop", { offset: "100%", class: "fc-grad-bottom" }));
+    defs.appendChild(grad);
+    this.gGrid = svgEl("g");
+    this.gAxis = svgEl("g");
+    this.gDots = svgEl("g");
+    this.cursor = svgEl("line", { class: "fc-cursor", x1: 0, x2: 0, y1: 0, y2: 0 });
+    this.svg.append(defs, this.gGrid, this.gAxis, this.cursor, this.gDots);
+    this.tip = el("div", "fc-tip");
+    this.tip.hidden = true;
+    this.root.append(this.svg, this.tip);
+    this.svg.addEventListener("pointermove", (e) => this.hover(e));
+    this.svg.addEventListener("pointerleave", () => this.leave());
+  }
+  setLabel(label) {
+    this.svg.setAttribute("aria-label", label);
+  }
+  draw(series, fmt, label) {
+    this.last = { series, fmt, label };
+    const n = series[0]?.values.length || 0;
+    if (!n) return;
+    const width = this.root.clientWidth || this.root.parentElement?.clientWidth || 720;
+    this.W = Math.max(260, Math.round(width));
+    this.H = this.W < 560 ? 240 : 320;
+    const raw = Math.max(1, ...series.flatMap((s) => s.values)) / 4;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const tick = ([1, 2, 2.5, 5, 10].find((m) => m * mag >= raw) || 10) * mag;
+    const max = tick * 4;
+    this.L = Math.max(48, Math.min(120, fmt(max).length * 8.6 + 16));
+    const { W, H, L, R, T, B } = this;
+    const x = (i) => L + (n === 1 ? (W - L - R) / 2 : i * (W - L - R) / (n - 1));
+    const y = (v) => T + (1 - Math.max(0, v) / max) * (H - T - B);
+    this.svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    this.svg.setAttribute("width", String(W));
+    this.svg.setAttribute("height", String(H));
+    this.gGrid.textContent = "";
+    this.gAxis.textContent = "";
+    for (let g = 0; g <= 4; g++) {
+      const v = max * g / 4;
+      this.gGrid.appendChild(svgEl("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), class: "fc-grid-line" }));
+      this.gAxis.appendChild(svgEl("text", { x: L - 10, y: y(v) + 5, "text-anchor": "end", class: "fc-axis" }, fmt(v)));
+    }
+    const maxLabels = Math.max(2, Math.floor((W - L - R) / 52));
+    const step = Math.max(1, Math.ceil(n / maxLabels));
+    for (let i = 0; i < n; i++) {
+      if (i % step === 0) {
+        this.gAxis.appendChild(svgEl("text", { x: x(i), y: H - 10, "text-anchor": "middle", class: "fc-axis" }, label(i)));
+      }
+    }
+    while (this.paths.length < series.length * 2) {
+      const p = svgEl("path");
+      this.svg.insertBefore(p, this.cursor);
+      this.paths.push(p);
+    }
+    this.paths.forEach((p, idx) => {
+      const s = series[Math.floor(idx / 2)];
+      const isFill = idx % 2 === 0;
+      if (!s || isFill && s.kind !== "area") {
+        p.setAttribute("d", "M0,0");
+        p.setAttribute("class", "fc-off");
+        return;
+      }
+      const pts = s.values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+      if (isFill) {
+        p.setAttribute("d", `M${x(0).toFixed(1)},${y(0).toFixed(1)} L${pts.join(" L")} L${x(n - 1).toFixed(1)},${y(0).toFixed(1)} Z`);
+        p.setAttribute("class", "fc-area");
+        p.setAttribute("fill", `url(#${this.gradId})`);
+      } else {
+        p.setAttribute("d", `M${pts.join(" L")}`);
+        p.setAttribute("class", s.kind === "dashed" ? "fc-line fc-line--dashed" : "fc-line");
+      }
+    });
+    const main = series[0];
+    this.gDots.textContent = "";
+    main.values.forEach((v, i) => this.gDots.appendChild(svgEl("circle", { cx: x(i), cy: y(v), r: n > 24 ? 2.5 : 3.5, class: "fc-dot" })));
+    this.cursor.setAttribute("y1", String(T));
+    this.cursor.setAttribute("y2", String(H - B));
+  }
+  redraw() {
+    if (this.last) this.draw(this.last.series, this.last.fmt, this.last.label);
+  }
+  leave() {
+    this.tip.hidden = true;
+    this.cursor.setAttribute("class", "fc-cursor");
+  }
+  hover(e) {
+    if (!this.last) return;
+    const { series, fmt, label } = this.last;
+    const n = series[0].values.length;
+    const box = this.svg.getBoundingClientRect();
+    const scale = this.W / Math.max(1, box.width);
+    const px = (e.clientX - box.left) * scale;
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - this.L) / (this.W - this.L - this.R) * (n - 1))));
+    const cx = this.L + (n === 1 ? (this.W - this.L - this.R) / 2 : i * (this.W - this.L - this.R) / (n - 1));
+    this.cursor.setAttribute("x1", String(cx));
+    this.cursor.setAttribute("x2", String(cx));
+    this.cursor.setAttribute("class", "fc-cursor fc-is-on");
+    this.tip.textContent = "";
+    this.tip.appendChild(el("strong", "fc-tip__head", label(i)));
+    series.forEach((s) => {
+      const row = el("span", "fc-tip__row" + (s.kind === "dashed" ? " fc-is-dashed" : ""));
+      row.append(el("span", "fc-tip__name", s.name), el("span", "fc-tip__val", fmt(s.values[i])));
+      this.tip.appendChild(row);
+    });
+    this.tip.hidden = false;
+    const left = cx / scale;
+    const tipW = this.tip.offsetWidth || 180;
+    this.tip.style.left = `${left + 14 + tipW > box.width ? Math.max(0, left - tipW - 14) : left + 14}px`;
+    this.tip.style.top = `${Math.max(0, this.T / scale)}px`;
+  }
+};
 function defaultSrc() {
   try {
     return new URL("./ctr-curves.json", import.meta.url).href;
@@ -852,7 +974,7 @@ function mount(root, options = {}) {
   const lang = wanted.slice(0, 2).toLowerCase() === "en" ? "en" : "de";
   const currency = (options.currency || root.dataset.currency || "EUR").toUpperCase();
   const t = strings(lang, currency);
-  const curSym = 0 .toLocaleString(lang === "de" ? "de-DE" : "en-US", { style: "currency", currency, maximumFractionDigits: 0 }).replace(/[\d\s.,]/g, "") || currency;
+  const curSym = 0 .toLocaleString(t.locale, { style: "currency", currency, maximumFractionDigits: 0 }).replace(/[\d\s.,]/g, "") || currency;
   const src = options.src || root.dataset.src || defaultSrc();
   let file;
   let presets = [];
@@ -860,29 +982,26 @@ function mount(root, options = {}) {
   let ownInfo = "";
   let last = null;
   let lastFunnel = null;
+  let chartMode = "money";
+  let basis = "additional";
+  let examplesActive = true;
+  let uid = 0;
+  const nextId = () => `fc-${++uid}-${Math.random().toString(36).slice(2, 7)}`;
   const rows = lang === "de" ? [
-    { keyword: "briefing erstellen", volume: 1300, currentPosition: null, targetPosition: 3, aio: true, brand: false, intent: "informational" },
-    { keyword: "seo agentur", volume: 880, currentPosition: 12, targetPosition: 5, aio: false, brand: false, intent: "commercial" }
+    { keyword: "briefing erstellen", volume: 1300, currentPosition: null, targetPosition: 3, aio: true, aioCitation: "cited", brand: false, intent: "informational" },
+    { keyword: "seo agentur m\xFCnchen", volume: 880, currentPosition: 8, targetPosition: 3, aio: false, brand: false, intent: "commercial" },
+    { keyword: "seo beratung", volume: 1900, currentPosition: 9, targetPosition: 2, aio: false, brand: false, intent: "commercial" }
   ] : [
-    { keyword: "how to write a brief", volume: 1900, currentPosition: null, targetPosition: 3, aio: true, brand: false, intent: "informational" },
-    { keyword: "seo agency", volume: 1300, currentPosition: 12, targetPosition: 5, aio: false, brand: false, intent: "commercial" }
+    { keyword: "how to write a brief", volume: 1900, currentPosition: null, targetPosition: 3, aio: true, aioCitation: "cited", brand: false, intent: "informational" },
+    { keyword: "seo agency london", volume: 1300, currentPosition: 8, targetPosition: 3, aio: false, brand: false, intent: "commercial" },
+    { keyword: "seo consulting", volume: 2400, currentPosition: 9, targetPosition: 2, aio: false, brand: false, intent: "commercial" }
   ];
   root.textContent = "";
   root.classList.add("fc");
-  const field = (label, input, help) => {
-    const f = el("div", "fc-field");
-    const id = "fc-" + Math.random().toString(36).slice(2, 9);
-    input.id = id;
-    const l = el("label", "fc-label", label);
-    l.htmlFor = id;
-    f.append(l, input);
-    if (help) {
-      const h = el("p", "fc-help", help);
-      h.id = id + "-help";
-      input.setAttribute("aria-describedby", h.id);
-      f.appendChild(h);
-    }
-    return f;
+  const button = (text, cls) => {
+    const b = el("button", "fc-btn " + cls, text);
+    b.type = "button";
+    return b;
   };
   const numInput = (value, min = "0", step = "any", max) => {
     const i = el("input", "fc-input");
@@ -894,203 +1013,307 @@ function mount(root, options = {}) {
     if (max) i.max = max;
     return i;
   };
-  const button = (text, cls) => {
-    const b = el("button", "fc-btn " + cls, text);
-    b.type = "button";
-    return b;
+  const rangeInput = (min, max, value, step = 1) => {
+    const i = el("input", "fc-range");
+    i.type = "range";
+    i.min = String(min);
+    i.max = String(max);
+    i.step = String(step);
+    i.value = String(value);
+    return i;
   };
-  const setup = el("section", "fc-card");
-  setup.appendChild(el("h2", "fc-h", t.setup));
-  const grid = el("div", "fc-grid");
-  const curveSel = el("select", "fc-input");
-  const ramp = numInput("6", "1", "1", "36");
-  const horizon = numInput("12", "1", "1", "36");
-  const userFactor = numInput("100", "0", "any", "500");
-  const curveField = field(t.curve, curveSel);
-  curveField.classList.add("fc-field--wide");
-  grid.append(curveField, field(t.ramp, ramp), field(t.horizon, horizon), field(t.userFactor, userFactor, t.userFactorHelp));
-  setup.appendChild(grid);
-  const presetNote = el("p", "fc-note");
-  setup.appendChild(presetNote);
-  const kwCard = el("section", "fc-card");
-  kwCard.append(el("h2", "fc-h", t.keywords), el("p", "fc-note", t.keywordsHelp), el("p", "fc-note fc-example", t.example));
-  const kwWrap = el("div", "fc-table-wrap");
-  const kwTable = el("table", "fc-table fc-table--input");
-  kwWrap.appendChild(kwTable);
-  kwCard.appendChild(kwWrap);
-  const kwActions = el("div", "fc-actions");
-  const addBtn = button(t.addRow, "fc-btn--outline");
+  const labelled = (label, content, target = content) => {
+    const f = el("div", "fc-field");
+    target.id = nextId();
+    const l = el("label", "fc-label");
+    l.appendChild(el("span", void 0, label));
+    l.htmlFor = target.id;
+    f.append(l, content);
+    return f;
+  };
+  const chip = (field, text, cls, title) => {
+    const c = el("span", "fc-chip " + cls, text);
+    if (title) c.title = title;
+    field.querySelector(".fc-label")?.appendChild(c);
+    return c;
+  };
+  const unitField = (label, input, unit, example = false) => {
+    const wrap = el("div", "fc-unit");
+    wrap.append(input, el("span", "fc-unit__u", unit));
+    const field = labelled(label, wrap, input);
+    if (example) {
+      const c = chip(field, t.example, "fc-chip--example", t.exampleHelp);
+      input.addEventListener("input", () => c.remove(), { once: true });
+    }
+    return field;
+  };
+  const panel = (title, extra) => {
+    const box = el("section", "fc-panel");
+    const head = el("div", "fc-panel__head");
+    head.appendChild(el("h3", "fc-panel__title", title));
+    if (extra) head.appendChild(extra);
+    const body = el("div", "fc-panel__body");
+    box.append(head, body);
+    return { box, body };
+  };
+  const bar = el("div", "fc-bar");
+  const brandBox = el("div", "fc-bar__brand");
+  brandBox.append(el("span", "fc-bar__title", t.title), el("span", "fc-live", t.live));
+  const barCtl = (label, input) => {
+    const box = el("div", "fc-bar__ctl");
+    input.id = nextId();
+    const l = el("label", "fc-bar__label", label);
+    l.htmlFor = input.id;
+    const out = el("output", "fc-bar__val");
+    out.htmlFor.add(input.id);
+    box.append(l, input, out);
+    return { box, out };
+  };
+  const months = rangeInput(3, 36, 12);
+  const ramp = rangeInput(1, 24, 6);
+  const monthsCtl = barCtl(t.months, months);
+  const rampCtl = barCtl(t.ramp, ramp);
+  bar.append(brandBox, rampCtl.box, monthsCtl.box);
+  const side = el("div", "fc-side");
+  const kwCount = el("span", "fc-count");
+  const kwPanel = panel(t.keywords, kwCount);
+  const kwList = el("div", "fc-kws");
+  const exampleNote = el("p", "fc-note fc-note--example", t.exampleKw);
+  const kwTools = el("div", "fc-tools");
+  const addBtn = button(t.addRow, "fc-btn--primary fc-btn--small");
+  const kwImport = button(t.importKeywords, "fc-btn--ghost fc-btn--small");
+  const gscImport = button(t.importGsc, "fc-btn--ghost fc-btn--small");
+  const templateBtn = button(t.template, "fc-btn--ghost fc-btn--small");
   const kwFile = el("input");
   kwFile.type = "file";
   kwFile.accept = ".csv,text/csv,text/plain";
   kwFile.hidden = true;
-  const kwImport = button(t.importKeywords, "fc-btn--outline");
   const gscFile = el("input");
   gscFile.type = "file";
   gscFile.accept = ".csv,text/csv,text/plain";
   gscFile.hidden = true;
-  const gscImport = button(t.importGsc, "fc-btn--outline");
-  const templateBtn = button(t.template, "fc-btn--secondary");
-  kwActions.append(addBtn, kwImport, kwFile, gscImport, gscFile, templateBtn);
-  kwCard.appendChild(kwActions);
-  const messages = el("div", "fc-messages");
-  messages.setAttribute("role", "status");
-  messages.setAttribute("aria-live", "polite");
-  kwCard.appendChild(messages);
-  const fCard = el("section", "fc-card");
-  fCard.append(el("h2", "fc-h", t.funnelH), el("p", "fc-note", t.funnelHelp));
-  const basisSel = el("select", "fc-input");
-  for (const [v, l] of [["additional", t.basisAdditional], ["total", t.basisTotal]]) {
-    const o = el("option", void 0, l);
-    o.value = v;
-    basisSel.appendChild(o);
-  }
+  kwTools.append(addBtn, kwImport, gscImport, templateBtn, kwFile, gscFile);
+  kwPanel.body.append(exampleNote, kwList, kwTools);
+  const ctrPanel = panel(t.curveH);
+  const curveSel = el("select", "fc-input");
+  const presetNote = el("p", "fc-note");
+  const userFactor = rangeInput(50, 200, 100, 5);
+  const ufBox = el("div", "fc-slider");
+  const ufOut = el("output", "fc-slider__val");
+  ufBox.append(userFactor, ufOut);
+  const ufField = labelled(t.userFactor, ufBox, userFactor);
+  chip(ufField, t.assumption, "fc-chip--assumption");
+  ufField.appendChild(el("p", "fc-help", t.userFactorHelp));
+  ctrPanel.body.append(labelled(t.curve, curveSel), presetNote, ufField);
+  const fPanel = panel(t.funnelH);
+  const industrySel = el("select", "fc-input");
+  const industryNote = el("p", "fc-help");
   const leadRate = numInput("", "0", "any", "100");
+  const closeRate = numInput("20", "0", "any", "100");
+  const custValue = numInput("1500", "0", "any");
+  const margin = numInput("40", "0", "any", "100");
+  const invest = numInput("1000", "0", "any");
+  const oneOff = numInput("", "0", "any");
+  oneOff.placeholder = t.investPh;
   const leadInfo = numInput("", "0", "any", "100");
   const leadComm = numInput("", "0", "any", "100");
   const leadTrans = numInput("", "0", "any", "100");
-  const closeRate = numInput("", "0", "any", "100");
-  const custValue = numInput("", "0", "any");
-  const margin = numInput("100", "0", "any", "100");
-  const invest = numInput("", "0", "any");
-  const oneOff = numInput("", "0", "any");
-  const industrySel = el("select", "fc-input");
-  const industryNote = el("p", "fc-help");
-  const industryField = field(t.industry, industrySel);
+  for (const i of [leadInfo, leadComm, leadTrans]) i.placeholder = t.investPh;
+  const seg = (a, b) => {
+    const box = el("div", "fc-seg");
+    const ba = button(a, "fc-seg__btn fc-is-on");
+    const bb = button(b, "fc-seg__btn");
+    ba.setAttribute("aria-pressed", "true");
+    bb.setAttribute("aria-pressed", "false");
+    box.append(ba, bb);
+    return { box, a: ba, b: bb };
+  };
+  const basisSeg = seg(t.basisAdditional, t.basisTotal);
+  basisSeg.box.setAttribute("role", "group");
+  basisSeg.box.setAttribute("aria-label", t.basis);
+  const industryField = labelled(t.industry, industrySel);
   industryField.appendChild(industryNote);
-  const fGrid1 = el("div", "fc-grid");
-  fGrid1.append(
-    industryField,
-    field(t.basis, basisSel),
-    field(t.leadRate, leadRate, t.leadRateHelp),
-    field(t.closeRate, closeRate, t.closeRateHelp),
-    field(t.customerValue(curSym), custValue, t.customerValueHelp),
-    field(t.margin, margin, t.marginHelp)
+  const fGrid = el("div", "fc-pair");
+  fGrid.append(
+    unitField(t.leadRate, leadRate, "%"),
+    unitField(t.closeRate, closeRate, "%", true),
+    unitField(t.customerValue, custValue, curSym, true),
+    unitField(t.margin, margin, "%", true)
   );
-  const fGrid2 = el("div", "fc-grid");
-  fGrid2.append(
-    field(t.leadRateIntent(t.intents.informational), leadInfo, t.leadRateIntentHelp),
-    field(t.leadRateIntent(t.intents.commercial), leadComm),
-    field(t.leadRateIntent(t.intents.transactional), leadTrans)
-  );
-  const fGrid3 = el("div", "fc-grid");
-  fGrid3.append(field(t.invest(curSym), invest, t.investHelp), field(t.oneOff(curSym), oneOff));
-  fCard.append(fGrid1, fGrid2, fGrid3);
-  const resCard = el("section", "fc-card");
-  resCard.appendChild(el("h2", "fc-h", t.result));
+  const iGrid = el("div", "fc-pair");
+  iGrid.append(unitField(t.intents.informational, leadInfo, "%"), unitField(t.intents.commercial, leadComm, "%"), unitField(t.intents.transactional, leadTrans, "%"));
+  const intentDet = el("details", "fc-more");
+  intentDet.append(el("summary", void 0, t.intentRates), el("p", "fc-help", t.intentRatesHelp), iGrid);
+  const invGrid = el("div", "fc-pair");
+  const investField = unitField(t.invest, invest, curSym, true);
+  invGrid.append(investField, unitField(t.oneOff, oneOff, curSym));
+  const basisField = el("div", "fc-field");
+  basisField.append(el("span", "fc-label", t.basis), basisSeg.box);
+  fPanel.body.append(industryField, fGrid, invGrid, basisField, intentDet);
+  side.append(kwPanel.box, ctrPanel.box, fPanel.box);
+  const main = el("div", "fc-main");
   const kpis = el("div", "fc-kpis");
-  const chart = el("div", "fc-chart");
-  const resTableHost = el("div");
+  const kpi = (mod) => {
+    const box = el("div", "fc-kpi " + mod);
+    const label = el("p", "fc-kpi__label");
+    const value = el("p", "fc-kpi__value", "\u2013");
+    const sub = el("p", "fc-kpi__sub");
+    box.append(label, value, sub);
+    return { box, label, value, sub };
+  };
+  const kTraffic = kpi("fc-kpi--traffic");
+  const kRevenue = kpi("fc-kpi--revenue");
+  const kProfit = kpi("fc-kpi--profit");
+  const kRoi = kpi("fc-kpi--roi");
+  kpis.append(kTraffic.box, kRevenue.box, kProfit.box, kRoi.box);
+  const tickTraffic = new Ticker(kTraffic.value, (n) => t.nf0.format(n));
+  const tickRevenue = new Ticker(kRevenue.value, (n) => t.cur.format(n));
+  const tickProfit = new Ticker(kProfit.value, (n) => t.cur.format(n));
+  const tickRoi = new Ticker(kRoi.value, (n) => t.pct(Math.round(n)));
+  const chartBox = el("section", "fc-console");
+  const chartHead = el("div", "fc-chart__head");
+  const tabs = seg(t.tabMoney, t.tabClicks);
+  tabs.box.classList.add("fc-seg--dark");
+  tabs.box.setAttribute("role", "group");
+  const legend = el("div", "fc-legend");
+  chartHead.append(tabs.box, legend);
+  const chart = new Chart(t.tabMoney);
+  const chartFoot = el("p", "fc-chart__foot");
+  chartBox.append(chartHead, chart.root, chartFoot);
+  const perfBox = el("section", "fc-card");
+  const perfBody = el("div");
+  const funnelMsg = el("p", "fc-note");
+  perfBox.append(el("h3", "fc-card__title", t.kpiTable), funnelMsg, perfBody);
+  const kwResBox = el("section", "fc-card");
+  const kwResBody = el("div");
   const warnBox = el("div", "fc-warnings");
-  const resActions = el("div", "fc-actions");
-  const exportBtn = button(t.exportCsv, "fc-btn--primary");
-  resActions.appendChild(exportBtn);
-  resCard.append(kpis, chart, resTableHost, warnBox, resActions);
-  const fRes = el("section", "fc-card");
-  fRes.appendChild(el("h2", "fc-h", t.funnelResult));
-  const fBody = el("div");
-  const fActions = el("div", "fc-actions");
-  const exportFunnelBtn = button(t.exportFunnel, "fc-btn--primary");
-  fActions.appendChild(exportFunnelBtn);
-  fRes.append(fBody, fActions);
-  const assCard = el("section", "fc-card");
-  assCard.appendChild(el("h2", "fc-h", t.assumptions));
-  const assBody = el("div", "fc-assumptions");
-  assCard.appendChild(assBody);
-  root.append(setup, kwCard, fCard, resCard, fRes, assCard, el("p", "fc-note fc-local", t.local));
-  const numOrNull = (v) => v.trim() === "" ? null : Number(v.replace(",", "."));
+  const messages = el("div", "fc-messages");
+  messages.setAttribute("role", "status");
+  messages.setAttribute("aria-live", "polite");
+  const actions = el("div", "fc-tools");
+  const exportBtn = button(t.exportClicks, "fc-btn--ghost fc-btn--small");
+  const exportFunnelBtn = button(t.exportFunnel, "fc-btn--ghost fc-btn--small");
+  actions.append(exportBtn, exportFunnelBtn);
+  kwResBox.append(el("h3", "fc-card__title", t.kwTable), kwResBody, warnBox, actions);
+  main.append(messages, kpis, chartBox, perfBox, kwResBox);
+  const cockpit = el("div", "fc-cockpit");
+  cockpit.append(side, main);
+  const assumptions = el("details", "fc-assumptions");
+  assumptions.appendChild(el("summary", void 0, t.assumptions));
+  const assBody = el("div", "fc-assumptions__body");
+  assumptions.appendChild(assBody);
+  root.append(bar, cockpit, assumptions, el("p", "fc-local", t.local));
+  const kwOut = [];
+  function markOwnInput() {
+    if (!examplesActive) return;
+    examplesActive = false;
+    exampleNote.remove();
+  }
   function renderRows() {
-    kwTable.textContent = "";
-    const head = el("thead");
-    const hr = el("tr");
-    for (const h of [t.colKeyword, t.colVolume, t.colCurrent, t.colTarget, t.colIntent, t.colBrand, t.colAio, ""]) hr.appendChild(el("th", void 0, h));
-    head.appendChild(hr);
-    const body = el("tbody");
+    kwList.textContent = "";
+    kwOut.length = 0;
+    kwCount.textContent = String(rows.length);
     rows.forEach((r, i) => {
-      const tr = el("tr");
-      const cell = (input, label) => {
-        const td2 = el("td");
-        td2.dataset.label = label;
-        input.setAttribute("aria-label", `${label} ${i + 1}`);
-        td2.appendChild(input);
-        tr.appendChild(td2);
-      };
-      const kw = el("input", "fc-input");
-      kw.type = "text";
-      kw.value = r.keyword;
-      kw.addEventListener("input", () => {
-        r.keyword = kw.value.trim();
+      const card = el("div", "fc-kw");
+      const top = el("div", "fc-kw__top");
+      const name = el("input", "fc-input fc-kw__name");
+      name.type = "text";
+      name.value = r.keyword;
+      name.placeholder = t.kwName;
+      name.setAttribute("aria-label", `${t.kwName} ${i + 1}`);
+      name.addEventListener("input", () => {
+        r.keyword = name.value.trim();
+        markOwnInput();
         update();
       });
-      const vol = numInput(String(r.volume));
-      vol.classList.add("fc-input--num");
+      const del = button("\xD7", "fc-btn--icon");
+      del.setAttribute("aria-label", `${t.remove}: ${r.keyword || i + 1}`);
+      del.title = t.remove;
+      del.addEventListener("click", () => {
+        rows.splice(i, 1);
+        markOwnInput();
+        renderRows();
+        update();
+      });
+      top.append(name, del);
+      const vol = numInput(Number.isFinite(r.volume) ? String(r.volume) : "");
       vol.addEventListener("input", () => {
         r.volume = vol.value === "" ? NaN : Number(vol.value);
+        markOwnInput();
         update();
       });
       const cur = numInput(r.currentPosition === null ? "" : String(r.currentPosition), "1", "0.1");
-      cur.classList.add("fc-input--num");
+      cur.placeholder = t.currentNone;
       cur.addEventListener("input", () => {
-        r.currentPosition = numOrNull(cur.value);
+        r.currentPosition = cur.value.trim() === "" ? null : Number(cur.value);
+        markOwnInput();
         update();
       });
-      const tgt = numInput(String(r.targetPosition), "1", "1");
-      tgt.classList.add("fc-input--num");
-      tgt.addEventListener("input", () => {
-        r.targetPosition = tgt.value === "" ? NaN : Number(tgt.value);
+      const nums = el("div", "fc-pair");
+      nums.append(labelled(t.volume, vol), labelled(t.current, cur));
+      const rank = rangeInput(1, 20, Math.min(20, Math.max(1, Math.round(r.targetPosition))));
+      const badge = el("output", "fc-badge", `#${rank.value}`);
+      const rankBox = el("div", "fc-slider");
+      rankBox.append(rank, badge);
+      rank.addEventListener("input", () => {
+        r.targetPosition = Number(rank.value);
+        badge.textContent = `#${rank.value}`;
+        markOwnInput();
         update();
       });
-      const intent = el("select", "fc-input");
+      const rankField = labelled(t.target, rankBox, rank);
+      const chips = el("div", "fc-kw__chips");
+      const intent = el("select", "fc-input fc-input--chip");
       for (const [v, l] of Object.entries(t.intents)) {
         const o = el("option", void 0, l);
         o.value = v;
         intent.appendChild(o);
       }
       intent.value = r.intent || "";
+      intent.setAttribute("aria-label", `${t.intent} ${i + 1}`);
       intent.addEventListener("change", () => {
         r.intent = intent.value || null;
+        markOwnInput();
         update();
       });
-      const brand = el("input");
-      brand.type = "checkbox";
-      brand.checked = !!r.brand;
-      brand.addEventListener("change", () => {
-        r.brand = brand.checked;
-        update();
-      });
-      const aio = el("select", "fc-input");
+      const aio = el("select", "fc-input fc-input--chip");
       for (const [v, l] of Object.entries(t.aioSel)) {
         const o = el("option", void 0, l);
         o.value = v;
         aio.appendChild(o);
       }
       aio.value = !r.aio ? "" : r.aioCitation || "yes";
+      aio.setAttribute("aria-label", `${t.aio} ${i + 1}`);
       aio.addEventListener("change", () => {
         r.aio = aio.value !== "";
         r.aioCitation = aio.value === "cited" || aio.value === "not-cited" ? aio.value : null;
+        markOwnInput();
         update();
       });
-      const del = button("\xD7", "fc-btn--secondary fc-btn--small fc-btn--icon");
-      del.setAttribute("aria-label", `${t.remove}: ${r.keyword || i + 1}`);
-      del.title = t.remove;
-      del.addEventListener("click", () => {
-        rows.splice(i, 1);
-        renderRows();
+      const brandLbl = el("label", "fc-toggle");
+      const brand = el("input");
+      brand.type = "checkbox";
+      brand.checked = !!r.brand;
+      brand.addEventListener("change", () => {
+        r.brand = brand.checked;
+        markOwnInput();
         update();
       });
-      cell(kw, t.colKeyword);
-      cell(vol, t.colVolume);
-      cell(cur, t.colCurrent);
-      cell(tgt, t.colTarget);
-      cell(intent, t.colIntent);
-      cell(brand, t.colBrand);
-      cell(aio, t.colAio);
-      const td = el("td");
-      td.appendChild(del);
-      tr.appendChild(td);
-      body.appendChild(tr);
+      brandLbl.append(brand, el("span", void 0, t.brand));
+      chips.append(intent, aio, brandLbl);
+      const out = el("div", "fc-kw__out");
+      const ctrOut = el("span", "fc-kw__ctr", "\u2013");
+      const clickOut = el("span", "fc-kw__clicks");
+      const meter = el("span", "fc-meter");
+      const meterBar = el("span", "fc-meter__bar");
+      meter.appendChild(meterBar);
+      const line = el("div", "fc-kw__outline");
+      line.append(el("span", "fc-kw__outlabel", t.expected), ctrOut);
+      out.append(line, meter, clickOut);
+      kwOut.push({ ctr: ctrOut, clicks: clickOut, bar: meterBar });
+      card.append(top, nums, rankField, chips, out);
+      kwList.appendChild(card);
     });
-    kwTable.append(head, body);
   }
   function renderPresetOptions() {
     const selected = curveSel.value;
@@ -1106,53 +1329,12 @@ function mount(root, options = {}) {
   function showMessages(list) {
     messages.textContent = "";
     if (!list.length) return;
-    const box = el("div", "fc-msg fc-msg--error");
+    const box = el("div", "fc-msg");
     box.appendChild(el("p", "fc-label", t.errors));
     const ul = el("ul");
     list.forEach((m) => ul.appendChild(el("li", void 0, m)));
     box.appendChild(ul);
     messages.appendChild(box);
-  }
-  const kpi = (host, value, label, accent = false) => {
-    const k = el("div", "fc-kpi" + (accent ? " fc-kpi--accent" : ""));
-    k.append(el("p", "fc-kpi__value", value), el("p", "fc-kpi__label", label));
-    host.appendChild(k);
-  };
-  function renderResult(result) {
-    kpis.textContent = "";
-    kpi(kpis, t.nf0.format(result.totals.currentClicks), t.today);
-    kpi(kpis, t.nf0.format(result.totals.targetClicks), t.target);
-    kpi(kpis, t.nf0.format(result.totals.additionalClicksOverHorizon), t.extra(result.settings.horizonMonths), true);
-    lineChart(chart, t.chartClicks, [
-      { values: result.totals.monthly.map(() => result.totals.currentClicks), cls: "fc-baseline" },
-      { values: result.totals.monthly, cls: "fc-line" }
-    ], (n) => t.nf0.format(n));
-    const preset = currentPreset();
-    const curveName = (id) => {
-      const c = preset.curves.find((x) => x.id === id);
-      return c ? c.shortLabel || c.label : id;
-    };
-    resTableHost.textContent = "";
-    resTableHost.appendChild(table(
-      [t.colKeyword, t.colVolumeShort, t.colPos, ...preset.curves.length > 1 ? [t.colCurve] : [], t.colCtr, t.colClicks],
-      result.keywords.map((k) => [
-        k.keyword + (k.aio ? ` \xB7 ${k.aioCitation === "cited" ? t.aioCitedTag : k.aioCitation === "not-cited" ? t.aioNotCitedTag : "AIO"}` : ""),
-        t.nf0.format(k.volume),
-        `${k.currentPosition === null ? "\u2013" : t.nf.format(k.currentPosition)} \u2192 ${t.nf.format(k.targetPosition)}`,
-        ...preset.curves.length > 1 ? [curveName(k.curveId)] : [],
-        `${t.pct(k.currentCtr)} \u2192 ${t.pct(k.targetCtr)}`,
-        `${t.nf.format(k.currentClicks)} \u2192 ${t.nf.format(k.targetClicks)}`
-      ])
-    ));
-    warnBox.textContent = "";
-    const warns = result.keywords.flatMap((k) => k.warnings.map((w) => `${k.keyword}: ${w.type === "beyond-data" ? t.warnBeyond(w.which, Math.round(w.position)) : w.type === "no-aio-reduction" ? t.warnNoAio(w.position) : w.message}`));
-    if ((result.settings.userCtrFactor ?? 100) !== 100) warns.unshift(t.userFactorNote(result.settings.userCtrFactor));
-    if (warns.length) {
-      warnBox.appendChild(el("p", "fc-label", t.warnings));
-      const ul = el("ul");
-      warns.forEach((w) => ul.appendChild(el("li", void 0, w)));
-      warnBox.appendChild(ul);
-    }
   }
   const num = (i) => i.value.trim() === "" ? void 0 : Number(i.value);
   function funnelSettings() {
@@ -1171,90 +1353,152 @@ function mount(root, options = {}) {
       leadRateByIntent: byIntent,
       monthlyInvestment: num(invest),
       oneOffInvestment: num(oneOff),
-      basis: basisSel.value === "total" ? "total" : "additional"
+      basis
     };
   }
-  function renderFunnel(result) {
-    fBody.textContent = "";
-    lastFunnel = null;
-    exportFunnelBtn.disabled = true;
+  function renderAll(result) {
+    const maxClicks = Math.max(1, ...result.keywords.map((k) => k.targetClicks));
+    result.keywords.forEach((k, i) => {
+      const o = kwOut[i];
+      if (!o) return;
+      o.ctr.textContent = t.pct(Math.round(k.targetCtr * 100) / 100);
+      o.clicks.textContent = `${t.nf0.format(k.currentClicks)} \u2192 ${t.nf0.format(k.targetClicks)} ${t.perMonth}`;
+      o.bar.style.transform = `scaleX(${(k.targetClicks / maxClicks).toFixed(3)})`;
+    });
     const fs = funnelSettings();
-    if (!result || !fs) {
-      fBody.appendChild(el("p", "fc-note", t.funnelMissing));
-      return;
-    }
-    if (validateFunnel(fs).length) {
-      fBody.appendChild(el("p", "fc-msg fc-msg--error", t.funnelInvalid));
-      return;
-    }
-    const f = funnel(result, fs);
+    const valid = fs ? validateFunnel(fs).length === 0 : false;
+    const f = fs && valid ? funnel(result, fs) : null;
     lastFunnel = f;
-    exportFunnelBtn.disabled = false;
-    const n = f.months.length;
-    const hasInv = f.totals.investment > 0;
-    const k1 = el("div", "fc-kpis");
-    kpi(k1, t.nf0.format(f.atTarget.clicks), t.kpiTraffic(fs.basis));
-    kpi(k1, t.nf.format(f.atTarget.leads), t.kpiLeads);
-    kpi(k1, t.nf.format(f.atTarget.customers), t.kpiCustomers);
-    kpi(k1, t.cur.format(f.atTarget.revenue), t.kpiRevenue);
-    kpi(k1, t.cur.format(f.atTarget.grossProfit), t.kpiGross, !hasInv);
-    if (hasInv) kpi(k1, t.cur.format(f.atTarget.netProfit), t.kpiNet, true);
-    fBody.appendChild(k1);
-    if (hasInv) {
-      const k2 = el("div", "fc-kpis fc-kpis--second");
-      kpi(k2, f.totals.roi === null ? "\u2013" : t.pct(Math.round(f.totals.roi)), t.kpiRoi(n), true);
-      kpi(k2, f.totals.returnPerEuro === null ? "\u2013" : t.cur2.format(f.totals.returnPerEuro), t.kpiReturn(n));
-      kpi(k2, f.totals.breakEvenMonth === null ? t.breakEvenNone(n) : t.breakEvenMonth(f.totals.breakEvenMonth), t.kpiBreakEven);
-      fBody.appendChild(k2);
+    exportFunnelBtn.disabled = !f;
+    const n = result.totals.monthly.length;
+    const hasInv = !!f && f.totals.investment > 0;
+    const atTargetClicks = result.keywords.reduce((s, k) => s + (basis === "additional" ? Math.max(0, k.targetClicks - k.currentClicks) : k.targetClicks), 0);
+    kTraffic.label.textContent = t.kpiTraffic(basis);
+    kTraffic.sub.textContent = t.kpiTrafficSub;
+    tickTraffic.set(atTargetClicks);
+    kRevenue.label.textContent = t.kpiRevenue;
+    kRevenue.sub.textContent = t.kpiRevenueSub;
+    tickRevenue.set(f ? f.atTarget.revenue : null);
+    kProfit.label.textContent = hasInv ? t.kpiNet : t.kpiGross;
+    kProfit.sub.textContent = t.kpiNetSub;
+    tickProfit.set(f ? hasInv ? f.atTarget.netProfit : f.atTarget.grossProfit : null);
+    kProfit.box.classList.toggle("fc-is-negative", !!f && hasInv && f.atTarget.netProfit < 0);
+    kRoi.label.textContent = t.kpiRoi;
+    if (f && hasInv && f.totals.roi !== null) {
+      tickRoi.set(f.totals.roi);
+      kRoi.sub.textContent = `${t.kpiRoiSub(n)} \xB7 ${t.perEuro(t.cur2.format(f.totals.returnPerEuro ?? 0))}`;
+      kRoi.box.classList.toggle("fc-is-negative", f.totals.roi < 0);
+    } else {
+      tickRoi.set(null);
+      kRoi.sub.textContent = t.kpiRoiNone;
+      kRoi.box.classList.remove("fc-is-negative");
     }
-    const fc = el("div", "fc-chart");
-    fBody.appendChild(fc);
-    lineChart(fc, hasInv ? t.chartFunnel : t.rowGross, [
-      ...hasInv ? [{ values: f.months.map((m) => m.cumulativeInvestment), cls: "fc-line fc-line--invest" }] : [],
-      { values: f.months.map((m) => m.cumulativeGrossProfit), cls: "fc-line" }
-    ], (v) => t.cur.format(v));
-    fBody.appendChild(el("p", "fc-label fc-gap", t.kpiTable));
-    const rowsKpi = [
-      [t.rowClicks, t.nf0.format(f.atTarget.clicks), t.nf0.format(f.totals.clicks)],
-      [t.rowLeads, t.nf.format(f.atTarget.leads), t.nf0.format(f.totals.leads)],
-      [t.rowCustomers, t.nf.format(f.atTarget.customers), t.nf.format(f.totals.customers)],
-      [t.rowRevenue, t.cur.format(f.atTarget.revenue), t.cur.format(f.totals.revenue)],
-      [t.rowGross, t.cur.format(f.atTarget.grossProfit), t.cur.format(f.totals.grossProfit)]
-    ];
-    if (hasInv) {
-      rowsKpi.push([t.rowInvest, t.cur.format(fs.monthlyInvestment || 0), t.cur.format(f.totals.investment)]);
-      rowsKpi.push([t.rowNet, t.cur.format(f.atTarget.netProfit), t.cur.format(f.totals.netProfit)]);
+    const monthLabel = (i) => `${t.monthShort}${i + 1}`;
+    legend.textContent = "";
+    const leg = (cls, text) => legend.appendChild(el("span", "fc-legend__item " + cls, text));
+    if (chartMode === "money" && f) {
+      const series = [{ name: t.legendGross, values: f.months.map((m) => m.cumulativeGrossProfit), kind: "area" }];
+      if (hasInv) series.push({ name: t.legendInvest, values: f.months.map((m) => m.cumulativeInvestment), kind: "dashed" });
+      leg("fc-is-main", t.legendGross);
+      if (hasInv) leg("fc-is-dashed", t.legendInvest);
+      chart.setLabel(t.tabMoney);
+      chart.draw(series, (v) => t.cur.format(v), monthLabel);
+      chartFoot.textContent = hasInv ? t.breakEven(f.totals.breakEvenMonth, n) : "";
+      chartFoot.classList.toggle("fc-is-good", hasInv && f.totals.breakEvenMonth !== null);
+    } else {
+      const series = [
+        { name: t.legendClicks, values: result.totals.monthly, kind: "area" },
+        { name: t.legendToday, values: result.totals.monthly.map(() => result.totals.currentClicks), kind: "dashed" }
+      ];
+      leg("fc-is-main", t.legendClicks);
+      leg("fc-is-dashed", t.legendToday);
+      chart.setLabel(t.tabClicks);
+      chart.draw(series, (v) => t.nf0.format(v), monthLabel);
+      chartFoot.textContent = chartMode === "money" ? t.funnelMissing : "";
+      chartFoot.classList.remove("fc-is-good");
     }
-    fBody.appendChild(table(["", t.colPerMonth, t.colCumulative(n)], rowsKpi, "fc-table fc-table--kpi"));
-    const det = el("details", "fc-details");
-    det.appendChild(el("summary", void 0, t.monthlyTable));
-    det.appendChild(table(
-      [t.colMonth, t.rowClicks, t.rowLeads, t.rowCustomers, t.rowRevenue, t.rowGross, ...hasInv ? [t.rowInvest, t.colCumNet, t.colRoi] : []],
-      f.months.map((m) => [
-        String(m.month),
-        t.nf0.format(m.clicks),
-        t.nf.format(m.leads),
-        t.nf2.format(m.customers),
-        t.cur.format(m.revenue),
-        t.cur.format(m.grossProfit),
-        ...hasInv ? [t.cur.format(m.investment), t.cur.format(m.cumulativeNetProfit), m.cumulativeRoi === null ? "\u2013" : t.pct(Math.round(m.cumulativeRoi))] : []
-      ])
+    perfBody.textContent = "";
+    funnelMsg.textContent = !fs ? t.funnelMissing : !valid ? t.funnelInvalid : "";
+    const cumClicks = f ? f.totals.clicks : result.totals.monthly.reduce((s, v) => s + (basis === "additional" ? Math.max(0, v - result.totals.currentClicks) : v), 0);
+    const rowsKpi = [[t.rowClicks, t.nf0.format(atTargetClicks), t.nf0.format(cumClicks)]];
+    if (f) {
+      rowsKpi.push(
+        [t.rowLeads, t.nf.format(f.atTarget.leads), t.nf.format(f.totals.leads)],
+        [t.rowCustomers, t.nf.format(f.atTarget.customers), t.nf.format(f.totals.customers)],
+        [t.rowRevenue, t.cur.format(f.atTarget.revenue), t.cur.format(f.totals.revenue)],
+        [t.rowGross, t.cur.format(f.atTarget.grossProfit), t.cur.format(f.totals.grossProfit)]
+      );
+      if (hasInv) {
+        rowsKpi.push([t.rowInvest, t.cur.format(fs?.monthlyInvestment || 0), t.cur.format(f.totals.investment)]);
+        rowsKpi.push([t.rowNet, t.cur.format(f.atTarget.netProfit), t.cur.format(f.totals.netProfit)]);
+      }
+    }
+    const perfTable = table(["", t.colPerMonth, t.colCumulative(n)], rowsKpi, "fc-table fc-table--kpi");
+    if (f) perfTable.querySelector("tbody tr:last-child")?.classList.add("fc-is-total");
+    perfBody.appendChild(perfTable);
+    if (f) {
+      const det = el("details", "fc-more");
+      det.appendChild(el("summary", void 0, t.monthly));
+      det.appendChild(table(
+        [t.month, t.rowClicks, t.rowLeads, t.rowCustomers, t.rowRevenue, t.rowGross, ...hasInv ? [t.colCumNet, t.colRoi] : []],
+        f.months.map((m) => [
+          String(m.month),
+          t.nf0.format(m.clicks),
+          t.nf.format(m.leads),
+          t.nf2.format(m.customers),
+          t.cur.format(m.revenue),
+          t.cur.format(m.grossProfit),
+          ...hasInv ? [t.cur.format(m.cumulativeNetProfit), m.cumulativeRoi === null ? "\u2013" : t.pct(Math.round(m.cumulativeRoi))] : []
+        ]),
+        "fc-table fc-table--num"
+      ));
+      perfBody.appendChild(det);
+    }
+    kwResBody.textContent = "";
+    kwResBody.appendChild(table(
+      [t.colKw, t.colPos, t.colCtr, t.colClicks],
+      result.keywords.map((k) => [
+        k.keyword + (k.aio ? ` \xB7 ${t.aioSel[k.aioCitation || "yes"]}` : ""),
+        `${k.currentPosition === null ? "\u2013" : t.nf.format(k.currentPosition)} \u2192 ${t.nf.format(k.targetPosition)}`,
+        `${t.pct(Math.round(k.currentCtr * 100) / 100)} \u2192 ${t.pct(Math.round(k.targetCtr * 100) / 100)}`,
+        `${t.nf.format(k.currentClicks)} \u2192 ${t.nf.format(k.targetClicks)}`
+      ]),
+      "fc-table fc-table--num"
     ));
-    fBody.appendChild(det);
+    warnBox.textContent = "";
+    const warns = result.keywords.flatMap((k) => k.warnings.map((w) => `${k.keyword}: ${w.type === "beyond-data" ? t.warnBeyond(w.which, Math.round(w.position)) : w.type === "no-aio-reduction" ? t.warnNoAio(w.position) : w.message}`));
+    const uf = result.settings.userCtrFactor ?? 100;
+    if (uf !== 100) warns.unshift(t.userFactorNote(t.pct(uf)));
+    if (warns.length) {
+      warnBox.appendChild(el("p", "fc-label", t.notes));
+      const ul = el("ul");
+      warns.forEach((w) => ul.appendChild(el("li", void 0, w)));
+      warnBox.appendChild(ul);
+    }
   }
+  const link = (text, href) => {
+    const a = el("a", void 0, text);
+    a.href = href;
+    a.target = "_blank";
+    a.rel = "noopener";
+    return a;
+  };
+  const method = (key) => {
+    const s = file.sources[key];
+    return s ? lang === "de" && s.method_de || s.method : "";
+  };
   function renderAssumptions(preset) {
     assBody.textContent = "";
     assBody.append(el("p", void 0, t.formula), el("p", void 0, t.formulaFunnel));
     const first = preset.curves[0];
     const s = first.source ? file.sources[first.source] : null;
     const p = el("p");
-    if (s) {
-      p.appendChild(document.createTextNode(`${t.curve}: ${preset.label}. ${t.source}: `));
-      const a = el("a", void 0, `${s.publisher}, ${s.title}`);
-      a.href = s.url;
-      a.target = "_blank";
-      a.rel = "noopener";
-      p.append(a, document.createTextNode(` (${s.market}, ${s.data_period}). ${lang === "de" && s.method_de || s.method}`));
+    if (s && first.source) {
+      p.append(
+        document.createTextNode(`${t.curve}: ${preset.label}. ${t.source}: `),
+        link(`${s.publisher}, ${s.title}`, s.url),
+        document.createTextNode(` (${s.market}, ${s.data_period}). ${method(first.source)}`)
+      );
     } else {
       p.textContent = ownInfo;
     }
@@ -1265,13 +1509,7 @@ function mount(root, options = {}) {
       const r = first.aio.source ? file.sources[first.aio.source] : null;
       const ap = el("p");
       ap.appendChild(document.createTextNode(t.aioReduction(r ? `${r.publisher}, ${r.data_period}` : "")));
-      if (r) {
-        const a = el("a", void 0, r.title);
-        a.href = r.url;
-        a.target = "_blank";
-        a.rel = "noopener";
-        ap.append(document.createTextNode(" "), a, document.createTextNode(`. ${lang === "de" && r.method_de || r.method}`));
-      }
+      if (r && first.aio.source) ap.append(document.createTextNode(" "), link(r.title, r.url), document.createTextNode(`. ${method(first.aio.source)}`));
       assBody.appendChild(ap);
     } else {
       assBody.appendChild(el("p", void 0, first.aio.type === "curve" ? t.aioCurve : t.aioNone));
@@ -1279,31 +1517,18 @@ function mount(root, options = {}) {
     if (file.aio_citation && first.aio.type !== "none") {
       const c = file.aio_citation;
       const cp = el("p");
-      cp.appendChild(document.createTextNode(t.citation(c.label[lang]) + " "));
-      const a = el("a", void 0, c.source_ref.name);
-      a.href = c.source_ref.url;
-      a.target = "_blank";
-      a.rel = "noopener";
-      cp.append(a, document.createTextNode(`. ${(() => {
-        const s2 = file.sources[c.source];
-        return s2 ? lang === "de" && s2.method_de || s2.method : "";
-      })()}`));
+      cp.append(document.createTextNode(t.citation(c.label[lang]) + " "), link(c.source_ref.name, c.source_ref.url), document.createTextNode(`. ${method(c.source)}`));
       assBody.appendChild(cp);
     }
-    const uf = Number(userFactor.value);
-    if (Number.isFinite(uf) && uf !== 100 && userFactor.value.trim() !== "") assBody.appendChild(el("p", "fc-msg", t.userFactorNote(uf)));
     const lr = file.industry_lead_rates;
-    if (lr && industrySel.value) {
+    if (lr) {
       const lp = el("p");
-      const s2 = file.sources[lr.source];
-      lp.appendChild(document.createTextNode(`${t.industry}: ${industrySel.selectedOptions[0]?.textContent || ""}. ${lr.note[lang]} ${t.industrySource}: `));
-      const a = el("a", void 0, lr.source_ref.name);
-      a.href = lr.source_ref.url;
-      a.target = "_blank";
-      a.rel = "noopener";
-      lp.append(a, document.createTextNode(s2 ? `. ${lang === "de" && s2.method_de || s2.method}` : "."));
+      lp.append(document.createTextNode(`${t.industry}: ${industrySel.selectedOptions[0]?.textContent || ""}. ${lr.note[lang]} ${t.source}: `), link(lr.source_ref.name, lr.source_ref.url), document.createTextNode(`. ${method(lr.source)}`));
       assBody.appendChild(lp);
     }
+    assBody.appendChild(el("p", void 0, t.examplesNote));
+    const uf = Number(userFactor.value);
+    if (uf !== 100) assBody.appendChild(el("p", "fc-msg", t.userFactorNote(t.pct(uf))));
     const maxP = Math.max(10, ...preset.curves.map((c) => maxPosition(c.ctr)));
     const short = (c) => c.shortLabel || c.label;
     const headers = [t.position, ...preset.curves.flatMap((c) => preset.curves.length > 1 ? [short(c), `${short(c)} ${t.ctrAioShort}`] : ["CTR", `CTR ${t.ctrAioShort}`])];
@@ -1314,66 +1539,97 @@ function mount(root, options = {}) {
         return [b === null ? t.noData : t.pct(b), a === null ? t.noData : t.pct(Math.round(a * 100) / 100)];
       })]);
     }
-    assBody.appendChild(table(headers, rowsA, "fc-table fc-table--compact"));
+    assBody.appendChild(table(headers, rowsA, "fc-table fc-table--num fc-table--compact"));
     const ul = el("ul", "fc-caveats");
     file.caveats[lang].forEach((c) => ul.appendChild(el("li", void 0, c)));
     ul.appendChild(el("li", void 0, t.notTaken));
     assBody.appendChild(ul);
   }
   function update() {
+    monthsCtl.out.textContent = `${months.value} ${t.monthsUnit}`;
+    rampCtl.out.textContent = `${ramp.value} ${t.monthsUnit}`;
+    ufOut.textContent = t.pct(Number(userFactor.value));
+    ufOut.classList.toggle("fc-is-changed", userFactor.value !== "100");
     const preset = currentPreset();
     presetNote.textContent = own && preset === own ? ownInfo : preset.type === "brand" ? t.presetBrand : preset.type === "query-length" ? t.presetLength : "";
     renderAssumptions(preset);
     last = null;
+    exportBtn.disabled = true;
     if (!rows.length) {
       showMessages([t.noKeywords]);
-      renderFunnel(null);
       return;
     }
-    const invalid = rows.filter((r) => !r.keyword || !Number.isFinite(r.volume) || r.volume < 0 || !Number.isFinite(r.targetPosition) || r.targetPosition < 1 || r.currentPosition !== null && (!Number.isFinite(r.currentPosition) || r.currentPosition < 1));
+    const invalid = rows.filter((r) => !Number.isFinite(r.volume) || r.volume < 0 || !Number.isFinite(r.targetPosition) || r.targetPosition < 1 || r.currentPosition !== null && (!Number.isFinite(r.currentPosition) || r.currentPosition < 1));
     if (invalid.length) {
       showMessages(invalid.map((r) => t.invalid(r.keyword)));
-      renderFunnel(null);
       return;
     }
     try {
-      const ufv = userFactor.value.trim() === "" ? 100 : Number(userFactor.value);
       const cf = file.aio_citation ? { cited: file.aio_citation.cited, notCited: file.aio_citation.not_cited } : void 0;
-      last = forecast(preset.choice, rows, { rampMonths: Number(ramp.value) || 1, horizonMonths: Number(horizon.value) || 12, citationFactors: cf, userCtrFactor: ufv });
+      const named = rows.map((r, i) => ({ ...r, keyword: r.keyword || `${t.kwName} ${i + 1}` }));
+      last = forecast(preset.choice, named, {
+        rampMonths: Number(ramp.value),
+        horizonMonths: Number(months.value),
+        citationFactors: cf,
+        userCtrFactor: Number(userFactor.value)
+      });
+      exportBtn.disabled = false;
       showMessages([]);
-      renderResult(last);
+      renderAll(last);
     } catch (e) {
       showMessages([e.message]);
     }
-    renderFunnel(last);
   }
+  for (const i of [months, ramp, userFactor]) i.addEventListener("input", update);
+  for (const i of [leadRate, closeRate, custValue, margin, invest, oneOff, leadInfo, leadComm, leadTrans]) i.addEventListener("input", update);
   curveSel.addEventListener("change", update);
-  userFactor.addEventListener("input", update);
+  const setSeg = (s, first) => {
+    s.a.classList.toggle("fc-is-on", first);
+    s.b.classList.toggle("fc-is-on", !first);
+    s.a.setAttribute("aria-pressed", String(first));
+    s.b.setAttribute("aria-pressed", String(!first));
+  };
+  basisSeg.a.addEventListener("click", () => {
+    basis = "additional";
+    setSeg(basisSeg, true);
+    update();
+  });
+  basisSeg.b.addEventListener("click", () => {
+    basis = "total";
+    setSeg(basisSeg, false);
+    update();
+  });
+  tabs.a.addEventListener("click", () => {
+    chartMode = "money";
+    setSeg(tabs, true);
+    if (last) renderAll(last);
+  });
+  tabs.b.addEventListener("click", () => {
+    chartMode = "clicks";
+    setSeg(tabs, false);
+    if (last) renderAll(last);
+  });
   industrySel.addEventListener("change", () => {
     const lr = file.industry_lead_rates;
     const v = industrySel.value;
     if (lr && v) {
-      const rate = v === "average" ? lr.average : lr.industries.find((i) => i.id === v)?.lead_rate;
+      const rate = v === "average" ? lr.average : lr.industries.find((x) => x.id === v)?.lead_rate;
       if (typeof rate === "number") leadRate.value = String(rate);
-      industryNote.textContent = t.industryShort(lr.source_ref.year);
-    } else {
-      industryNote.textContent = "";
     }
     update();
   });
-  for (const i of [ramp, horizon, leadRate, leadInfo, leadComm, leadTrans, closeRate, custValue, margin, invest, oneOff]) i.addEventListener("input", update);
-  basisSel.addEventListener("change", update);
   let resizeTimer;
   const onResize = () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(update, 150);
+    resizeTimer = setTimeout(() => chart.redraw(), 120);
   };
   window.addEventListener("resize", onResize);
   addBtn.addEventListener("click", () => {
-    rows.push({ keyword: "", volume: 0, currentPosition: null, targetPosition: 1, aio: false, brand: false, intent: null });
+    rows.push({ keyword: "", volume: 0, currentPosition: null, targetPosition: 3, aio: false, brand: false, intent: null });
+    markOwnInput();
     renderRows();
-    const first = kwTable.querySelector("tbody tr:last-child input");
-    if (first) first.focus();
+    update();
+    kwList.querySelector(".fc-kw:last-child .fc-kw__name")?.focus();
   });
   kwImport.addEventListener("click", () => kwFile.click());
   kwFile.addEventListener("change", async () => {
@@ -1381,6 +1637,7 @@ function mount(root, options = {}) {
     kwFile.value = "";
     if (keywords.length) {
       rows.splice(0, rows.length, ...keywords);
+      markOwnInput();
       renderRows();
       update();
     }
@@ -1396,7 +1653,7 @@ function mount(root, options = {}) {
     }
     const { ctr } = curveFromSearchConsole(gsc);
     if (!Object.keys(ctr).length) {
-      showMessages(["no position with at least 100 impressions"]);
+      showMessages([t.gscInfo(0)]);
       return;
     }
     const curve = { id: "own-search-console", label: t.ownCurve, ctr, aio: { type: "none" } };
@@ -1422,20 +1679,23 @@ function mount(root, options = {}) {
   }).then((json) => {
     file = json;
     presets = presetsFromFile(file, lang);
-    const lr = file.industry_lead_rates;
-    if (lr) {
-      const add = (v, l) => {
-        const o = el("option", void 0, l);
-        o.value = v;
-        industrySel.appendChild(o);
-      };
-      add("", t.industryNone);
-      lr.industries.slice().sort((a, b) => a.label[lang].localeCompare(b.label[lang], lang)).forEach((i) => add(i.id, `${i.label[lang]} \xB7 ${t.pct(i.lead_rate)}`));
-      add("average", t.industryAvg(t.pct(lr.average)));
-    } else {
-      industryField.hidden = true;
-    }
     renderPresetOptions();
+    const lr = file.industry_lead_rates;
+    const addOpt = (v, l) => {
+      const o = el("option", void 0, l);
+      o.value = v;
+      industrySel.appendChild(o);
+    };
+    if (lr) {
+      addOpt("", t.industryNone);
+      lr.industries.slice().sort((a, b) => a.label[lang].localeCompare(b.label[lang], lang)).forEach((x) => addOpt(x.id, `${x.label[lang]} \xB7 ${t.pct(x.lead_rate)}`));
+      addOpt("average", t.industryAvg(t.pct(lr.average)));
+      industrySel.value = "average";
+      leadRate.value = String(lr.average);
+      industryNote.textContent = t.industryShort(lr.source_ref.year);
+    } else {
+      industryField.remove();
+    }
     renderRows();
     update();
   }).catch(() => {
@@ -1445,6 +1705,7 @@ function mount(root, options = {}) {
     destroy() {
       window.removeEventListener("resize", onResize);
       clearTimeout(resizeTimer);
+      for (const tk of [tickTraffic, tickRevenue, tickProfit, tickRoi]) tk.stop();
       root.textContent = "";
       root.classList.remove("fc");
     }
