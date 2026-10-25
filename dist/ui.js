@@ -1,10 +1,13 @@
 /**
  * seo-forecast · browser UI
- * Mounts into <div id="seo-forecast">. No inline scripts, no storage, no network
- * besides loading the curve data file. Language from data-lang or <html lang>.
- * Optional data-src: URL of ctr-curves.json (default: data/ctr-curves.json).
- * Optional data-currency: ISO currency code for the funnel (default: EUR).
- * MIT License.
+ *
+ *   import { mount } from './seo-forecast.js';
+ *   mount(document.getElementById('forecast'), { lang: 'de' });
+ *
+ * Renders the whole calculator into the given element. No globals, no inline
+ * scripts or styles (CSP style-src 'self' works), no storage, no cookies and no
+ * requests besides loading ctr-curves.json from next to the module.
+ * All classes use the fc- prefix. MIT License.
  */
 import { forecast, ctrFor, maxPosition, curveFromSearchConsole } from './forecast.js';
 import { funnel, validateFunnel } from './funnel.js';
@@ -149,8 +152,8 @@ function readFile(input) {
     const f = input.files && input.files[0];
     return f ? f.text() : Promise.resolve('');
 }
-function table(headers, rows, cls = 'sf-table') {
-    const wrap = el('div', 'sf-table-wrap');
+function table(headers, rows, cls = 'fc-table') {
+    const wrap = el('div', 'fc-table-wrap');
     const t = el('table', cls);
     const thead = el('thead');
     const hr = el('tr');
@@ -167,11 +170,13 @@ function table(headers, rows, cls = 'sf-table') {
     return wrap;
 }
 function lineChart(host, title, series, fmt) {
+    // Measure before clearing: an empty host may be hidden by CSS and report width 0.
+    const width = host.clientWidth || (host.parentElement ? host.parentElement.clientWidth : 0) || 720;
     host.textContent = '';
     const months = series[0]?.values.length || 0;
     if (!months)
         return;
-    const W = Math.max(300, Math.min(960, Math.round(host.clientWidth || 720)));
+    const W = Math.max(280, Math.min(1600, Math.round(width)));
     const H = W < 500 ? 220 : 280, R = 16, TOP = 20, B = 36;
     const max = Math.max(1, ...series.flatMap((s) => s.values));
     const L = Math.max(48, Math.min(96, fmt(max).length * 8 + 12));
@@ -180,7 +185,7 @@ function lineChart(host, title, series, fmt) {
     const ns = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    svg.setAttribute('class', 'sf-svg');
+    svg.setAttribute('class', 'fc-svg');
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', title);
     const add = (tag, attrs, text) => {
@@ -193,13 +198,13 @@ function lineChart(host, title, series, fmt) {
     };
     for (let g = 0; g <= 4; g++) {
         const v = (max * g) / 4;
-        add('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), class: 'sf-grid-line' });
-        add('text', { x: L - 8, y: y(v) + 5, 'text-anchor': 'end', class: 'sf-axis' }, fmt(v));
+        add('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), class: 'fc-grid-line' });
+        add('text', { x: L - 8, y: y(v) + 5, 'text-anchor': 'end', class: 'fc-axis' }, fmt(v));
     }
     const step = W < 500 ? Math.ceil(months / 6) : (months <= 12 ? 1 : 3);
     for (let i = 0; i < months; i++) {
         if (i === 0 || (i + 1) % step === 0)
-            add('text', { x: x(i), y: H - 10, 'text-anchor': 'middle', class: 'sf-axis' }, String(i + 1));
+            add('text', { x: x(i), y: H - 10, 'text-anchor': 'middle', class: 'fc-axis' }, String(i + 1));
     }
     for (const s of series) {
         if (s.values.every((v) => v === s.values[0]) && s.cls.includes('baseline')) {
@@ -207,18 +212,27 @@ function lineChart(host, title, series, fmt) {
             continue;
         }
         add('polyline', { points: s.values.map((v, i) => `${x(i)},${y(v)}`).join(' '), class: s.cls });
-        if (s.cls === 'sf-line')
-            s.values.forEach((v, i) => add('circle', { cx: x(i), cy: y(v), r: 4, class: 'sf-dot' }));
+        if (s.cls === 'fc-line')
+            s.values.forEach((v, i) => add('circle', { cx: x(i), cy: y(v), r: 4, class: 'fc-dot' }));
     }
-    host.appendChild(el('p', 'sf-label', title));
+    host.appendChild(el('p', 'fc-label', title));
     host.appendChild(svg);
 }
-export function mount(root) {
-    const lang = ((root.dataset.lang || document.documentElement.lang || 'de').slice(0, 2).toLowerCase() === 'en') ? 'en' : 'de';
-    const currency = (root.dataset.currency || 'EUR').toUpperCase();
+function defaultSrc() {
+    try {
+        return new URL('./ctr-curves.json', import.meta.url).href;
+    }
+    catch {
+        return 'ctr-curves.json';
+    }
+}
+export function mount(root, options = {}) {
+    const wanted = options.lang || root.dataset.lang || document.documentElement.lang || 'de';
+    const lang = wanted.slice(0, 2).toLowerCase() === 'en' ? 'en' : 'de';
+    const currency = (options.currency || root.dataset.currency || 'EUR').toUpperCase();
     const t = strings(lang, currency);
     const curSym = (0).toLocaleString(lang === 'de' ? 'de-DE' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).replace(/[\d\s.,]/g, '') || currency;
-    const src = root.dataset.src || 'data/ctr-curves.json';
+    const src = options.src || root.dataset.src || defaultSrc();
     let file;
     let presets = [];
     let own = null;
@@ -235,16 +249,16 @@ export function mount(root) {
             { keyword: 'seo agency', volume: 1300, currentPosition: 12, targetPosition: 5, aio: false, brand: false, intent: 'commercial' },
         ];
     root.textContent = '';
-    root.classList.add('sf');
+    root.classList.add('fc');
     const field = (label, input, help) => {
-        const f = el('div', 'sf-field');
-        const id = 'sf-' + Math.random().toString(36).slice(2, 9);
+        const f = el('div', 'fc-field');
+        const id = 'fc-' + Math.random().toString(36).slice(2, 9);
         input.id = id;
-        const l = el('label', 'sf-label', label);
+        const l = el('label', 'fc-label', label);
         l.htmlFor = id;
         f.append(l, input);
         if (help) {
-            const h = el('p', 'sf-help', help);
+            const h = el('p', 'fc-help', help);
             h.id = id + '-help';
             input.setAttribute('aria-describedby', h.id);
             f.appendChild(h);
@@ -252,7 +266,7 @@ export function mount(root) {
         return f;
     };
     const numInput = (value, min = '0', step = 'any', max) => {
-        const i = el('input', 'sf-input');
+        const i = el('input', 'fc-input');
         i.type = 'number';
         i.min = min;
         i.step = step;
@@ -263,51 +277,51 @@ export function mount(root) {
         return i;
     };
     const button = (text, cls) => {
-        const b = el('button', 'sf-btn ' + cls, text);
+        const b = el('button', 'fc-btn ' + cls, text);
         b.type = 'button';
         return b;
     };
     // ---------- 1. basis ----------
-    const setup = el('section', 'sf-card');
-    setup.appendChild(el('h2', 'sf-h', t.setup));
-    const grid = el('div', 'sf-grid');
-    const curveSel = el('select', 'sf-input');
+    const setup = el('section', 'fc-card');
+    setup.appendChild(el('h2', 'fc-h', t.setup));
+    const grid = el('div', 'fc-grid');
+    const curveSel = el('select', 'fc-input');
     const ramp = numInput('6', '1', '1', '36');
     const horizon = numInput('12', '1', '1', '36');
     grid.append(field(t.curve, curveSel), field(t.ramp, ramp), field(t.horizon, horizon));
     setup.appendChild(grid);
-    const presetNote = el('p', 'sf-note');
+    const presetNote = el('p', 'fc-note');
     setup.appendChild(presetNote);
     // ---------- 2. keywords ----------
-    const kwCard = el('section', 'sf-card');
-    kwCard.append(el('h2', 'sf-h', t.keywords), el('p', 'sf-note', t.keywordsHelp), el('p', 'sf-note sf-example', t.example));
-    const kwWrap = el('div', 'sf-table-wrap');
-    const kwTable = el('table', 'sf-table sf-table--input');
+    const kwCard = el('section', 'fc-card');
+    kwCard.append(el('h2', 'fc-h', t.keywords), el('p', 'fc-note', t.keywordsHelp), el('p', 'fc-note fc-example', t.example));
+    const kwWrap = el('div', 'fc-table-wrap');
+    const kwTable = el('table', 'fc-table fc-table--input');
     kwWrap.appendChild(kwTable);
     kwCard.appendChild(kwWrap);
-    const kwActions = el('div', 'sf-actions');
-    const addBtn = button(t.addRow, 'sf-btn--outline');
+    const kwActions = el('div', 'fc-actions');
+    const addBtn = button(t.addRow, 'fc-btn--outline');
     const kwFile = el('input');
     kwFile.type = 'file';
     kwFile.accept = '.csv,text/csv,text/plain';
     kwFile.hidden = true;
-    const kwImport = button(t.importKeywords, 'sf-btn--outline');
+    const kwImport = button(t.importKeywords, 'fc-btn--outline');
     const gscFile = el('input');
     gscFile.type = 'file';
     gscFile.accept = '.csv,text/csv,text/plain';
     gscFile.hidden = true;
-    const gscImport = button(t.importGsc, 'sf-btn--outline');
-    const templateBtn = button(t.template, 'sf-btn--secondary');
+    const gscImport = button(t.importGsc, 'fc-btn--outline');
+    const templateBtn = button(t.template, 'fc-btn--secondary');
     kwActions.append(addBtn, kwImport, kwFile, gscImport, gscFile, templateBtn);
     kwCard.appendChild(kwActions);
-    const messages = el('div', 'sf-messages');
+    const messages = el('div', 'fc-messages');
     messages.setAttribute('role', 'status');
     messages.setAttribute('aria-live', 'polite');
     kwCard.appendChild(messages);
     // ---------- 3. funnel inputs ----------
-    const fCard = el('section', 'sf-card');
-    fCard.append(el('h2', 'sf-h', t.funnelH), el('p', 'sf-note', t.funnelHelp));
-    const basisSel = el('select', 'sf-input');
+    const fCard = el('section', 'fc-card');
+    fCard.append(el('h2', 'fc-h', t.funnelH), el('p', 'fc-note', t.funnelHelp));
+    const basisSel = el('select', 'fc-input');
     for (const [v, l] of [['additional', t.basisAdditional], ['total', t.basisTotal]]) {
         const o = el('option', undefined, l);
         o.value = v;
@@ -322,38 +336,38 @@ export function mount(root) {
     const margin = numInput('100', '0', 'any', '100');
     const invest = numInput('', '0', 'any');
     const oneOff = numInput('', '0', 'any');
-    const fGrid1 = el('div', 'sf-grid');
+    const fGrid1 = el('div', 'fc-grid');
     fGrid1.append(field(t.basis, basisSel), field(t.leadRate, leadRate, t.leadRateHelp), field(t.closeRate, closeRate, t.closeRateHelp), field(t.customerValue(curSym), custValue, t.customerValueHelp), field(t.margin, margin, t.marginHelp));
-    const fGrid2 = el('div', 'sf-grid');
+    const fGrid2 = el('div', 'fc-grid');
     fGrid2.append(field(t.leadRateIntent(t.intents.informational), leadInfo, t.leadRateIntentHelp), field(t.leadRateIntent(t.intents.commercial), leadComm), field(t.leadRateIntent(t.intents.transactional), leadTrans));
-    const fGrid3 = el('div', 'sf-grid');
+    const fGrid3 = el('div', 'fc-grid');
     fGrid3.append(field(t.invest(curSym), invest, t.investHelp), field(t.oneOff(curSym), oneOff));
     fCard.append(fGrid1, fGrid2, fGrid3);
     // ---------- 4. clicks result ----------
-    const resCard = el('section', 'sf-card');
-    resCard.appendChild(el('h2', 'sf-h', t.result));
-    const kpis = el('div', 'sf-kpis');
-    const chart = el('div', 'sf-chart');
+    const resCard = el('section', 'fc-card');
+    resCard.appendChild(el('h2', 'fc-h', t.result));
+    const kpis = el('div', 'fc-kpis');
+    const chart = el('div', 'fc-chart');
     const resTableHost = el('div');
-    const warnBox = el('div', 'sf-warnings');
-    const resActions = el('div', 'sf-actions');
-    const exportBtn = button(t.exportCsv, 'sf-btn--primary');
+    const warnBox = el('div', 'fc-warnings');
+    const resActions = el('div', 'fc-actions');
+    const exportBtn = button(t.exportCsv, 'fc-btn--primary');
     resActions.appendChild(exportBtn);
     resCard.append(kpis, chart, resTableHost, warnBox, resActions);
     // ---------- 5. funnel result ----------
-    const fRes = el('section', 'sf-card');
-    fRes.appendChild(el('h2', 'sf-h', t.funnelResult));
+    const fRes = el('section', 'fc-card');
+    fRes.appendChild(el('h2', 'fc-h', t.funnelResult));
     const fBody = el('div');
-    const fActions = el('div', 'sf-actions');
-    const exportFunnelBtn = button(t.exportFunnel, 'sf-btn--primary');
+    const fActions = el('div', 'fc-actions');
+    const exportFunnelBtn = button(t.exportFunnel, 'fc-btn--primary');
     fActions.appendChild(exportFunnelBtn);
     fRes.append(fBody, fActions);
     // ---------- 6. assumptions ----------
-    const assCard = el('section', 'sf-card');
-    assCard.appendChild(el('h2', 'sf-h', t.assumptions));
-    const assBody = el('div', 'sf-assumptions');
+    const assCard = el('section', 'fc-card');
+    assCard.appendChild(el('h2', 'fc-h', t.assumptions));
+    const assBody = el('div', 'fc-assumptions');
     assCard.appendChild(assBody);
-    root.append(setup, kwCard, fCard, resCard, fRes, assCard, el('p', 'sf-note sf-local', t.local));
+    root.append(setup, kwCard, fCard, resCard, fRes, assCard, el('p', 'fc-note fc-local', t.local));
     // ---------- keyword rows ----------
     const numOrNull = (v) => (v.trim() === '' ? null : Number(v.replace(',', '.')));
     function renderRows() {
@@ -373,20 +387,20 @@ export function mount(root) {
                 td.appendChild(input);
                 tr.appendChild(td);
             };
-            const kw = el('input', 'sf-input');
+            const kw = el('input', 'fc-input');
             kw.type = 'text';
             kw.value = r.keyword;
             kw.addEventListener('input', () => { r.keyword = kw.value.trim(); update(); });
             const vol = numInput(String(r.volume));
-            vol.classList.add('sf-input--num');
+            vol.classList.add('fc-input--num');
             vol.addEventListener('input', () => { r.volume = vol.value === '' ? NaN : Number(vol.value); update(); });
             const cur = numInput(r.currentPosition === null ? '' : String(r.currentPosition), '1', '0.1');
-            cur.classList.add('sf-input--num');
+            cur.classList.add('fc-input--num');
             cur.addEventListener('input', () => { r.currentPosition = numOrNull(cur.value); update(); });
             const tgt = numInput(String(r.targetPosition), '1', '1');
-            tgt.classList.add('sf-input--num');
+            tgt.classList.add('fc-input--num');
             tgt.addEventListener('input', () => { r.targetPosition = tgt.value === '' ? NaN : Number(tgt.value); update(); });
-            const intent = el('select', 'sf-input');
+            const intent = el('select', 'fc-input');
             for (const [v, l] of Object.entries(t.intents)) {
                 const o = el('option', undefined, l);
                 o.value = v;
@@ -402,7 +416,9 @@ export function mount(root) {
             aio.type = 'checkbox';
             aio.checked = r.aio;
             aio.addEventListener('change', () => { r.aio = aio.checked; update(); });
-            const del = button(t.remove, 'sf-btn--secondary sf-btn--small');
+            const del = button('×', 'fc-btn--secondary fc-btn--small fc-btn--icon');
+            del.setAttribute('aria-label', `${t.remove}: ${r.keyword || i + 1}`);
+            del.title = t.remove;
             del.addEventListener('click', () => { rows.splice(i, 1); renderRows(); update(); });
             cell(kw, t.colKeyword);
             cell(vol, t.colVolume);
@@ -435,16 +451,16 @@ export function mount(root) {
         messages.textContent = '';
         if (!list.length)
             return;
-        const box = el('div', 'sf-msg sf-msg--error');
-        box.appendChild(el('p', 'sf-label', t.errors));
+        const box = el('div', 'fc-msg fc-msg--error');
+        box.appendChild(el('p', 'fc-label', t.errors));
         const ul = el('ul');
         list.forEach((m) => ul.appendChild(el('li', undefined, m)));
         box.appendChild(ul);
         messages.appendChild(box);
     }
     const kpi = (host, value, label, accent = false) => {
-        const k = el('div', 'sf-kpi' + (accent ? ' sf-kpi--accent' : ''));
-        k.append(el('p', 'sf-kpi__value', value), el('p', 'sf-kpi__label', label));
+        const k = el('div', 'fc-kpi' + (accent ? ' fc-kpi--accent' : ''));
+        k.append(el('p', 'fc-kpi__value', value), el('p', 'fc-kpi__label', label));
         host.appendChild(k);
     };
     // ---------- clicks result ----------
@@ -454,8 +470,8 @@ export function mount(root) {
         kpi(kpis, t.nf0.format(result.totals.targetClicks), t.target);
         kpi(kpis, t.nf0.format(result.totals.additionalClicksOverHorizon), t.extra(result.settings.horizonMonths), true);
         lineChart(chart, t.chartClicks, [
-            { values: result.totals.monthly.map(() => result.totals.currentClicks), cls: 'sf-baseline' },
-            { values: result.totals.monthly, cls: 'sf-line' },
+            { values: result.totals.monthly.map(() => result.totals.currentClicks), cls: 'fc-baseline' },
+            { values: result.totals.monthly, cls: 'fc-line' },
         ], (n) => t.nf0.format(n));
         const preset = currentPreset();
         const curveName = (id) => { const c = preset.curves.find((x) => x.id === id); return c ? (c.shortLabel || c.label) : id; };
@@ -468,7 +484,7 @@ export function mount(root) {
         warnBox.textContent = '';
         const warns = result.keywords.flatMap((k) => k.warnings.map((w) => `${k.keyword}: ${w.type === 'beyond-data' ? t.warnBeyond(w.which, Math.round(w.position)) : w.type === 'no-aio-reduction' ? t.warnNoAio(w.position) : w.message}`));
         if (warns.length) {
-            warnBox.appendChild(el('p', 'sf-label', t.warnings));
+            warnBox.appendChild(el('p', 'fc-label', t.warnings));
             const ul = el('ul');
             warns.forEach((w) => ul.appendChild(el('li', undefined, w)));
             warnBox.appendChild(ul);
@@ -500,11 +516,11 @@ export function mount(root) {
         exportFunnelBtn.disabled = true;
         const fs = funnelSettings();
         if (!result || !fs) {
-            fBody.appendChild(el('p', 'sf-note', t.funnelMissing));
+            fBody.appendChild(el('p', 'fc-note', t.funnelMissing));
             return;
         }
         if (validateFunnel(fs).length) {
-            fBody.appendChild(el('p', 'sf-msg sf-msg--error', t.funnelInvalid));
+            fBody.appendChild(el('p', 'fc-msg fc-msg--error', t.funnelInvalid));
             return;
         }
         const f = funnel(result, fs);
@@ -512,7 +528,7 @@ export function mount(root) {
         exportFunnelBtn.disabled = false;
         const n = f.months.length;
         const hasInv = f.totals.investment > 0;
-        const k1 = el('div', 'sf-kpis');
+        const k1 = el('div', 'fc-kpis');
         kpi(k1, t.nf0.format(f.atTarget.clicks), t.kpiTraffic(fs.basis));
         kpi(k1, t.nf.format(f.atTarget.leads), t.kpiLeads);
         kpi(k1, t.nf.format(f.atTarget.customers), t.kpiCustomers);
@@ -522,19 +538,19 @@ export function mount(root) {
             kpi(k1, t.cur.format(f.atTarget.netProfit), t.kpiNet, true);
         fBody.appendChild(k1);
         if (hasInv) {
-            const k2 = el('div', 'sf-kpis sf-kpis--second');
+            const k2 = el('div', 'fc-kpis fc-kpis--second');
             kpi(k2, f.totals.roi === null ? '–' : t.pct(Math.round(f.totals.roi)), t.kpiRoi(n), true);
             kpi(k2, f.totals.returnPerEuro === null ? '–' : t.cur2.format(f.totals.returnPerEuro), t.kpiReturn(n));
             kpi(k2, f.totals.breakEvenMonth === null ? t.breakEvenNone(n) : t.breakEvenMonth(f.totals.breakEvenMonth), t.kpiBreakEven);
             fBody.appendChild(k2);
         }
-        const fc = el('div', 'sf-chart');
+        const fc = el('div', 'fc-chart');
         fBody.appendChild(fc);
         lineChart(fc, hasInv ? t.chartFunnel : t.rowGross, [
-            ...(hasInv ? [{ values: f.months.map((m) => m.cumulativeInvestment), cls: 'sf-line sf-line--invest' }] : []),
-            { values: f.months.map((m) => m.cumulativeGrossProfit), cls: 'sf-line' },
+            ...(hasInv ? [{ values: f.months.map((m) => m.cumulativeInvestment), cls: 'fc-line fc-line--invest' }] : []),
+            { values: f.months.map((m) => m.cumulativeGrossProfit), cls: 'fc-line' },
         ], (v) => t.cur.format(v));
-        fBody.appendChild(el('p', 'sf-label sf-gap', t.kpiTable));
+        fBody.appendChild(el('p', 'fc-label fc-gap', t.kpiTable));
         const rowsKpi = [
             [t.rowClicks, t.nf0.format(f.atTarget.clicks), t.nf0.format(f.totals.clicks)],
             [t.rowLeads, t.nf.format(f.atTarget.leads), t.nf0.format(f.totals.leads)],
@@ -546,8 +562,8 @@ export function mount(root) {
             rowsKpi.push([t.rowInvest, t.cur.format(fs.monthlyInvestment || 0), t.cur.format(f.totals.investment)]);
             rowsKpi.push([t.rowNet, t.cur.format(f.atTarget.netProfit), t.cur.format(f.totals.netProfit)]);
         }
-        fBody.appendChild(table(['', t.colPerMonth, t.colCumulative(n)], rowsKpi, 'sf-table sf-table--kpi'));
-        const det = el('details', 'sf-details');
+        fBody.appendChild(table(['', t.colPerMonth, t.colCumulative(n)], rowsKpi, 'fc-table fc-table--kpi'));
+        const det = el('details', 'fc-details');
         det.appendChild(el('summary', undefined, t.monthlyTable));
         det.appendChild(table([t.colMonth, t.rowClicks, t.rowLeads, t.rowCustomers, t.rowRevenue, t.rowGross, ...(hasInv ? [t.rowInvest, t.colCumNet, t.colRoi] : [])], f.months.map((m) => [String(m.month), t.nf0.format(m.clicks), t.nf.format(m.leads), t.nf2.format(m.customers), t.cur.format(m.revenue), t.cur.format(m.grossProfit),
             ...(hasInv ? [t.cur.format(m.investment), t.cur.format(m.cumulativeNetProfit), m.cumulativeRoi === null ? '–' : t.pct(Math.round(m.cumulativeRoi))] : [])])));
@@ -602,8 +618,8 @@ export function mount(root) {
                     return [b === null ? t.noData : t.pct(b), a === null ? t.noData : t.pct(Math.round(a * 100) / 100)];
                 })]);
         }
-        assBody.appendChild(table(headers, rowsA, 'sf-table sf-table--compact'));
-        const ul = el('ul', 'sf-caveats');
+        assBody.appendChild(table(headers, rowsA, 'fc-table fc-table--compact'));
+        const ul = el('ul', 'fc-caveats');
         file.caveats[lang].forEach((c) => ul.appendChild(el('li', undefined, c)));
         ul.appendChild(el('li', undefined, t.notTaken));
         assBody.appendChild(ul);
@@ -642,7 +658,8 @@ export function mount(root) {
         i.addEventListener('input', update);
     basisSel.addEventListener('change', update);
     let resizeTimer;
-    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(update, 150); });
+    const onResize = () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(update, 150); };
+    window.addEventListener('resize', onResize);
     addBtn.addEventListener('click', () => {
         rows.push({ keyword: '', volume: 0, currentPosition: null, targetPosition: 1, aio: false, brand: false, intent: null });
         renderRows();
@@ -704,7 +721,12 @@ export function mount(root) {
         update();
     })
         .catch(() => { root.textContent = t.loadFailed; });
+    return {
+        destroy() {
+            window.removeEventListener('resize', onResize);
+            clearTimeout(resizeTimer);
+            root.textContent = '';
+            root.classList.remove('fc');
+        },
+    };
 }
-const target = typeof document !== 'undefined' ? document.getElementById('seo-forecast') : null;
-if (target)
-    mount(target);

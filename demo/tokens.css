@@ -1,0 +1,86 @@
+/*
+ * Demo only: a copy of the design tokens of litzki-systems.com (assets/css/site.css,
+ * section "1. Tokens") and its self-hosted fonts, so the demo looks like the live page.
+ * The package itself (package/seo-forecast.css) defines no tokens and loads no fonts.
+ */
+/* ---------- 1. Tokens ---------- */
+:root {
+  --color-navy:        #0F1F3D;
+  --color-navy-dark:   #080F1E;
+  --color-navy-mid:    #162845;
+  --color-navy-light:  #1E3660;
+  --color-off-white:   #F8F7F4;
+  --color-white:       #FFFFFF;
+
+  --color-accent:       #C9A84C;
+  --color-accent-dark:  #A88A35;
+  --color-accent-light: #D9B86A;
+  --color-accent-bg:    #FBF7EE;
+
+  --color-gray-900: #0F172A;
+  --color-gray-700: #334155;
+  --color-gray-600: #475569;
+  --color-gray-500: #64748B;
+  --color-gray-400: #94A3B8;
+  --color-gray-300: #CBD5E1;
+  --color-gray-200: #E2E8F0;
+  --color-gray-100: #F1F5F9;
+
+  --font-serif: 'EB Garamond', Garamond, Georgia, 'Times New Roman', serif;
+  --font-sans:  'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  --text-xs:   0.875rem;  /* 14px, Minimum */
+  --text-sm:   0.925rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+
+  --gutter: clamp(1rem, 4vw, 3.5rem);
+  --nav-h: 4.5rem;
+  --container: 1200px;
+  --radius-pill: 999px;
+  --radius-md: 0.75rem;
+
+  --ease-out: cubic-bezier(.2,.7,.2,1);
+
+  /* Thema: wird per html[data-theme] umgeschaltet */
+  --bg:     var(--color-navy-dark);
+  --fg:     var(--color-off-white);
+  --muted:  var(--color-gray-400);
+  --line:   rgba(248, 247, 244, 0.14);
+  --surface: rgba(248, 247, 244, 0.04);
+  --bg-rgb: 8, 15, 30;
+  --scrim:  radial-gradient(ellipse 70% 60% at 40% 50%, rgba(var(--bg-rgb), .96) 0%, rgba(var(--bg-rgb), .88) 45%, rgba(var(--bg-rgb), 0) 100%);
+  --scrim-m: linear-gradient(0deg, rgba(var(--bg-rgb), .95) 60%, rgba(var(--bg-rgb), .75) 80%, rgba(var(--bg-rgb), 0));
+}
+html[data-theme="light"] {
+  --bg:     var(--color-off-white);
+  --fg:     var(--color-navy);
+  --muted:  var(--color-gray-600);
+  --line:   rgba(15, 31, 61, 0.14);
+  --surface: rgba(15, 31, 61, 0.04);
+  --bg-rgb: 248, 247, 244;
+}
+
+
+@font-face { font-family: 'EB Garamond'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/eb-garamond-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/inter-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/inter-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2'); }
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: var(--text-base); line-height: 1.6; }
+h1, h2, h3 { font-family: var(--font-serif); font-weight: 400; line-height: 1.08; letter-spacing: -0.012em; margin: 0 0 .6em; }
+a { color: inherit; }
+.demo { max-width: 1200px; margin: 0 auto; padding: 3rem var(--gutter) 4rem; }
+.demo__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem; }
+.demo__head h1 { font-size: clamp(2.4rem, 5vw, 3.8rem); margin: 0; }
+.demo__kicker { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--color-accent-dark); margin: 0 0 .75rem; }
+.demo__lead { font-size: var(--text-lg); color: var(--muted); max-width: 46rem; margin: 1rem 0 2rem; }
+.demo__lang, .demo__foot { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
+.demo__foot { margin-top: 2rem; }
+.demo__foot a, .demo__lang a { text-decoration: none; border-bottom: 1px solid var(--color-accent); }

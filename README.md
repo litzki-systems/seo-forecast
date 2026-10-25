@@ -63,7 +63,22 @@ python3 -m http.server 8000
 # German:  http://localhost:8000/index.de.html
 ```
 
-The compiled JavaScript in `dist/` is committed, so no build step is needed to run it.
+### In your website
+
+Each release tag (for example `v1.2.0`) contains three ready files in `package/`:
+
+| File | Content |
+| --- | --- |
+| `seo-forecast.js` | one ES module: `mount(el, { lang })` plus the calculation functions |
+| `seo-forecast.css` | `.fc-` classes, uses only your page's design tokens |
+| `ctr-curves.json` | CTR curves with source (name, URL, year) |
+
+```js
+import { mount } from './seo-forecast.js';
+mount(document.getElementById('forecast'), { lang: 'en' });
+```
+
+Works under `script-src 'self'; style-src 'self'` without `unsafe-inline`. Details: [`docs/integration.md`](docs/integration.md).
 
 ### Keyword CSV
 
@@ -86,11 +101,9 @@ In Search Console, open *Performance → Search results*, choose a period, expor
 ### As a library
 
 ```js
-import { forecast } from './dist/forecast.js';
-import { funnel } from './dist/funnel.js';
-import { presetsFromFile } from './dist/data.js';
+import { forecast, funnel, presetsFromFile } from './package/seo-forecast.js';
 
-const file = await (await fetch('data/ctr-curves.json')).json();
+const file = await (await fetch('./package/ctr-curves.json')).json();
 const [preset] = presetsFromFile(file, 'en');
 const clicks = forecast(preset.choice, [
   { keyword: 'how to write a brief', volume: 1900, currentPosition: null, targetPosition: 3, aio: true, intent: 'informational' },
@@ -101,13 +114,13 @@ const money = funnel(clicks, {
 });
 ```
 
-The core (`src/forecast.ts`, `src/funnel.ts`, `src/csv.ts`) has no dependencies and no I/O. It runs in browsers, Node and edge workers. Embedding notes for websites: [`docs/integration.md`](docs/integration.md).
+The core (`src/forecast.ts`, `src/funnel.ts`, `src/csv.ts`) has no dependencies and no I/O. It runs in browsers, Node and edge workers.
 
 ### Develop
 
 ```bash
 npm install
-npm test        # compiles TypeScript to dist/ and runs the tests
+npm test        # TypeScript → dist/, unit tests, package/ build, package gate
 ```
 
 ## Privacy
@@ -116,7 +129,7 @@ The calculator runs in the browser. No server, no cookies, no storage, no tracki
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Third-party fonts and data sources: [NOTICE.md](NOTICE.md).
+MIT, see [LICENSE](LICENSE). Data sources and demo fonts: [NOTICE.md](NOTICE.md).
 
 ## Author
 
@@ -175,13 +188,15 @@ python3 -m http.server 8000
 # Deutsch:  http://localhost:8000/index.de.html
 ```
 
+Einbindung in eine Website: Jeder Release-Tag (z. B. `v1.2.0`) enthält in `package/` drei fertige Dateien: `seo-forecast.js` (ES-Modul mit `mount(el, { lang })`), `seo-forecast.css` (Klassen mit Präfix `.fc-`, nur Design-Tokens der Seite) und `ctr-curves.json`. Läuft unter `script-src 'self'; style-src 'self'` ohne `unsafe-inline`. Details: [`docs/integration.md`](docs/integration.md).
+
 Keyword-CSV mit den Spalten `keyword`, `suchvolumen`, `aktuelle_position` (leer = rankt nicht), `zielposition`, `ai_overview` (ja/nein), `suchintention` (info/kommerziell/transaktional), `marke` (ja/nein), getrennt durch Komma oder Semikolon. Eigene Kurve: In der Search Console unter *Leistung → Suchergebnisse* die Suchanfragen als CSV exportieren und `Queries.csv` laden.
 
 Der Rechner läuft vollständig im Browser: kein Server, keine Cookies, kein Speicher, kein Tracking.
 
 ## Lizenz
 
-MIT, siehe [LICENSE](LICENSE). Schriften und Datenquellen: [NOTICE.md](NOTICE.md).
+MIT, siehe [LICENSE](LICENSE). Datenquellen und Demo-Schriften: [NOTICE.md](NOTICE.md).
 
 ## Autor
 

@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "updated": "2026-10-25",
-  "note": "CTR values in percent (clicks / impressions × 100). Every curve names its source, market, period and device. Values are copied from the sources as published; nothing is smoothed, extrapolated or estimated. Positions without published data are left out and count as 0 % in the calculator.",
+  "note": "CTR values in percent (clicks / impressions × 100). Every curve names its source, market, period and device. Values are copied from the sources as published; nothing is smoothed, extrapolated or estimated. Positions without published data are left out and count as 0 % in the calculator. Each curve carries source_ref (name, url, year) for its CTR values and, under aio, for its AI Overview model.",
   "sources": {
     "awr-2026-07": {
       "title": "Google Organic CTR by Position: 2026 Study + AI Overviews",
@@ -48,11 +48,21 @@
       },
       "aio": {
         "type": "reduction",
-        "source": "ahrefs-2025-12"
+        "source": "ahrefs-2025-12",
+        "source_ref": {
+          "name": "Ahrefs, Update: AI Overviews Reduce Clicks by 58%",
+          "url": "https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/",
+          "year": 2026
+        }
       },
       "short": {
         "en": "Non-brand",
         "de": "Ohne Marke"
+      },
+      "source_ref": {
+        "name": "Advanced Web Ranking, Google Organic CTR by Position: 2026 Study + AI Overviews",
+        "url": "https://www.advancedwebranking.com/seo/organic-ctr",
+        "year": 2026
       }
     },
     {
@@ -78,11 +88,21 @@
       },
       "aio": {
         "type": "reduction",
-        "source": "ahrefs-2025-12"
+        "source": "ahrefs-2025-12",
+        "source_ref": {
+          "name": "Ahrefs, Update: AI Overviews Reduce Clicks by 58%",
+          "url": "https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/",
+          "year": 2026
+        }
       },
       "short": {
         "en": "Brand",
         "de": "Marke"
+      },
+      "source_ref": {
+        "name": "Advanced Web Ranking, Google Organic CTR by Position: 2026 Study + AI Overviews",
+        "url": "https://www.advancedwebranking.com/seo/organic-ctr",
+        "year": 2026
       }
     },
     {
@@ -140,11 +160,21 @@
           "18": 0.56,
           "19": 0.54,
           "20": 0.22
+        },
+        "source_ref": {
+          "name": "Advanced Web Ranking, Google Organic CTR by Position: 2026 Study + AI Overviews",
+          "url": "https://www.advancedwebranking.com/seo/organic-ctr",
+          "year": 2026
         }
       },
       "short": {
         "en": "Desktop",
         "de": "Desktop"
+      },
+      "source_ref": {
+        "name": "Advanced Web Ranking, Google Organic CTR by Position: 2026 Study + AI Overviews",
+        "url": "https://www.advancedwebranking.com/seo/organic-ctr",
+        "year": 2026
       }
     },
     {
@@ -170,11 +200,21 @@
       },
       "aio": {
         "type": "reduction",
-        "source": "ahrefs-2025-12"
+        "source": "ahrefs-2025-12",
+        "source_ref": {
+          "name": "Ahrefs, Update: AI Overviews Reduce Clicks by 58%",
+          "url": "https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/",
+          "year": 2026
+        }
       },
       "short": {
         "en": "1 word",
         "de": "1 Wort"
+      },
+      "source_ref": {
+        "name": "Advanced Web Ranking, Google Organic CTR by Position: 2026 Study + AI Overviews",
+        "url": "https://www.advancedwebranking.com/seo/organic-ctr",
+        "year": 2026
       }
     },
     {
@@ -200,11 +240,21 @@
       },
       "aio": {
         "type": "reduction",
-        "source": "ahrefs-2025-12"
+        "source": "ahrefs-2025-12",
+        "source_ref": {
+          "name": "Ahrefs, Update: AI Overviews Reduce Clicks by 58%",
+          "url": "https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/",
+          "year": 2026
+        }
       },
       "short": {
         "en": "2 words",
         "de": "2 Wörter"
+      },
+      "source_ref": {
+        "name": "Advanced Web Ranking, Google Organic CTR by Position: 2026 Study + AI Overviews",
+        "url": "https://www.advancedwebranking.com/seo/organic-ctr",
+        "year": 2026
       }
     },
     {
@@ -230,11 +280,21 @@
       },
       "aio": {
         "type": "reduction",
-        "source": "ahrefs-2025-12"
+        "source": "ahrefs-2025-12",
+        "source_ref": {
+          "name": "Ahrefs, Update: AI Overviews Reduce Clicks by 58%",
+          "url": "https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/",
+          "year": 2026
+        }
       },
       "short": {
         "en": "3 words",
         "de": "3 Wörter"
+      },
+      "source_ref": {
+        "name": "Advanced Web Ranking, Google Organic CTR by Position: 2026 Study + AI Overviews",
+        "url": "https://www.advancedwebranking.com/seo/organic-ctr",
+        "year": 2026
       }
     },
     {
@@ -260,11 +320,21 @@
       },
       "aio": {
         "type": "reduction",
-        "source": "ahrefs-2025-12"
+        "source": "ahrefs-2025-12",
+        "source_ref": {
+          "name": "Ahrefs, Update: AI Overviews Reduce Clicks by 58%",
+          "url": "https://ahrefs.com/blog/ai-overviews-reduce-clicks-update/",
+          "year": 2026
+        }
       },
       "short": {
         "en": "4 words",
         "de": "4 Wörter"
+      },
+      "source_ref": {
+        "name": "Advanced Web Ranking, Google Organic CTR by Position: 2026 Study + AI Overviews",
+        "url": "https://www.advancedwebranking.com/seo/organic-ctr",
+        "year": 2026
       }
     }
   ],

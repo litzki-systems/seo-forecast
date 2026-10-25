@@ -9,13 +9,16 @@ The CTR values in `data/ctr-curves.json` are published figures, cited with sourc
 
 All rights in those studies remain with their publishers. Please cite them when you reuse the figures.
 
-## Fonts
+## Demo fonts
 
-| Font | License | Files |
+The package loads no fonts. The demo pages use the fonts of the host page, copied to `demo/fonts/`:
+
+| Font | License | File |
 | --- | --- | --- |
-| [Inter](https://github.com/rsms/inter) | SIL Open Font License 1.1 | `assets/fonts/inter-*.woff`, see `assets/fonts/Inter-OFL.txt` |
-| [EB Garamond](https://github.com/octaviopardo/EBGaramond12) | SIL Open Font License 1.1 | `assets/fonts/eb-garamond-*.woff`, see `assets/fonts/EB-Garamond-OFL.txt` |
+| EB Garamond | SIL Open Font License 1.1 | `demo/fonts/LICENSE-eb-garamond.txt` |
+| Inter | SIL Open Font License 1.1 | `demo/fonts/LICENSE-inter.txt` |
+| JetBrains Mono | SIL Open Font License 1.1 | `demo/fonts/LICENSE-jetbrains-mono.txt` |
 
 ## Development dependency
 
-TypeScript (Apache License 2.0) compiles `src/` to `dist/`. It is not shipped.
+TypeScript (Apache License 2.0) compiles `src/` to `dist/`, esbuild (MIT) bundles `package/seo-forecast.js`. Neither is shipped.

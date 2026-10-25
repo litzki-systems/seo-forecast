@@ -1,26 +1,26 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SEO-Prognose</title>
-  <meta name="description" content="Transparente SEO-Prognose: Ihr Suchvolumen × CTR-Kurven mit Quelle × Einfluss der AI Overviews. Alle Annahmen sichtbar, nichts wird im Hintergrund geschätzt.">
-  <link rel="stylesheet" href="css/seo-forecast.css">
-  <script type="module" src="dist/ui.js"></script>
+  <meta name="description" content="Transparente SEO-Prognose: Ihr Suchvolumen × CTR-Kurven mit Quelle × Einfluss der AI Overviews, durch Ihren eigenen Funnel bis Umsatz, Gewinn und ROI. Alle Annahmen sichtbar.">
+  <link rel="stylesheet" href="demo/tokens.css">
+  <link rel="stylesheet" href="package/seo-forecast.css">
+  <script type="module" src="demo/main.js"></script>
 </head>
 <body>
-<main class="page">
-  <header class="page__head">
-    <h1 class="page__title">SEO-Prognose</h1>
-    <span><a href="index.html" hreflang="en" lang="en">English</a></span>
+<main class="demo">
+  <p class="demo__kicker">Open Source · MIT</p>
+  <header class="demo__head">
+    <h1>SEO-Prognose</h1>
+    <span class="demo__lang"><a href="index.html" hreflang="en" lang="en">English</a></span>
   </header>
-  <p class="page__intro">Wie viele organische Klicks, Leads, Kunden und wie viel Gewinn bringt ein besseres Ranking? Tragen Sie Ihre Keywords mit Suchvolumen, heutiger Position und Zielposition ein, dazu auf Wunsch Ihre eigenen Conversion-Zahlen. Der Rechner nutzt veröffentlichte CTR-Kurven mit Quellenangabe und den gemessenen Einfluss der AI Overviews und zeigt jede Annahme offen.</p>
+  <p class="demo__lead">Wie viele organische Klicks, Leads, Kunden und wie viel Gewinn bringt ein besseres Ranking? Tragen Sie Ihre Keywords mit Suchvolumen, heutiger Position und Zielposition ein, dazu auf Wunsch Ihre eigenen Conversion-Zahlen. Der Rechner nutzt veröffentlichte CTR-Kurven mit Quellenangabe und den gemessenen Einfluss der AI Overviews und zeigt jede Annahme offen.</p>
 
-  <div id="seo-forecast" data-src="data/ctr-curves.json">
-    <noscript>Der Rechner benötigt JavaScript.</noscript>
-  </div>
+  <div id="forecast"></div>
 
-  <p class="page__foot">Open Source unter MIT-Lizenz · <a href="https://github.com/litzki-systems/seo-forecast">Quellcode auf GitHub</a> · Thorsten Litzki · <a href="https://litzki-systems.com">Litzki Systems</a></p>
+  <p class="demo__foot">Demo des Pakets · <a href="https://github.com/litzki-systems/seo-forecast">Quellcode auf GitHub</a> · MIT · Thorsten Litzki · <a href="https://litzki-systems.com">Litzki Systems</a></p>
 </main>
 </body>
 </html>

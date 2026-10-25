@@ -1,0 +1,121 @@
+/*
+ * seo-forecast · https://github.com/litzki-systems/seo-forecast
+ *
+ * Uses only the design tokens of the host page (litzki-systems.com, assets/css/site.css,
+ * section "1. Tokens"): --color-navy, --color-navy-*, --color-white, --color-off-white,
+ * --color-accent, --color-accent-*, --color-gray-*, --font-serif/sans/mono,
+ * --text-xs … --text-3xl, --radius-md, --radius-pill, --line, --surface.
+ * No colour values of its own, no fonts loaded, nothing below 14 px (--text-xs).
+ * All classes use the fc- prefix. MIT License.
+ */
+
+.fc { display: grid; gap: 1.25rem; color: var(--color-navy); font-family: var(--font-sans); font-size: var(--text-base); line-height: 1.6; }
+.fc *, .fc *::before, .fc *::after { box-sizing: border-box; }
+
+/* ---------- cards ---------- */
+.fc-card { background: var(--color-white); border: 1px solid var(--line); border-radius: var(--radius-md); padding: clamp(1.25rem, 3vw, 1.75rem); min-width: 0; }
+.fc .fc-h { font-family: var(--font-serif); font-weight: 400; font-size: var(--text-2xl); line-height: 1.2; letter-spacing: -0.01em; color: var(--color-navy); margin: 0 0 1rem; }
+.fc-note { font-size: var(--text-sm); color: var(--color-gray-600); margin: 0.5rem 0 0; }
+.fc-note:empty { display: none; }
+.fc-example { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-accent-dark); }
+.fc-local { text-align: center; font-family: var(--font-mono); font-size: var(--text-xs); }
+
+/* ---------- form ---------- */
+.fc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem 1.25rem; }
+.fc-card > .fc-note + .fc-grid { margin-top: 1.25rem; }
+.fc-card > .fc-grid + .fc-grid { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.fc-field { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+.fc-label { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-gray-600); margin: 0; }
+.fc-help { font-size: var(--text-xs); line-height: 1.45; color: var(--color-gray-600); margin: 0; }
+.fc-input { width: 100%; min-width: 0; font-family: var(--font-sans); font-size: var(--text-base); color: var(--color-navy); background: var(--color-off-white); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 0.55rem 0.75rem; }
+.fc-input[type="number"] { font-family: var(--font-mono); }
+.fc-input:hover { border-color: var(--color-gray-400); }
+.fc-input:focus { border-color: var(--color-accent); background: var(--color-white); outline: none; }
+.fc-input:focus-visible, .fc-btn:focus-visible, .fc input[type="checkbox"]:focus-visible, .fc-details summary:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.fc-input--num { width: 6.5rem; }
+.fc-table--input .fc-input { padding: 0.45rem 0.6rem; }
+.fc-table--input select.fc-input { width: auto; min-width: 9.5rem; }
+.fc-table--input td { padding: 0.45rem 0.35rem; }
+.fc-table.fc-table--input th { white-space: normal; vertical-align: bottom; padding: 0.5rem 0.35rem; }
+.fc-table--input td:last-child { text-align: right; }
+.fc input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--color-accent-dark); margin: 0; }
+
+/* ---------- buttons (like .btn on the host page) ---------- */
+.fc-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.25rem; }
+.fc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.55rem 1.1rem; border-radius: var(--radius-pill); border: 1px solid transparent; font-family: var(--font-sans); font-weight: 500; font-size: var(--text-xs); line-height: 1.3; text-align: center; cursor: pointer; transition: transform .2s, background-color .2s, border-color .2s, color .2s; }
+.fc-btn:hover { transform: translateY(-1px); }
+.fc-btn--primary { background: var(--color-accent); color: var(--color-navy); }
+.fc-btn--primary:hover { background: var(--color-accent-light); }
+.fc-btn--outline { background: var(--surface); color: var(--color-navy); border-color: var(--line); }
+.fc-btn--outline:hover { border-color: var(--color-accent); }
+.fc-btn--secondary { background: transparent; color: var(--color-gray-600); border-color: var(--line); }
+.fc-btn--secondary:hover { color: var(--color-navy); border-color: var(--color-accent); }
+.fc-btn--small { padding: 0.35rem 0.8rem; }
+.fc-btn--icon { width: 2.25rem; height: 2.25rem; padding: 0; font-size: var(--text-lg); line-height: 1; }
+.fc-btn:disabled { cursor: not-allowed; transform: none; background: var(--surface); color: var(--color-gray-500); border-color: var(--line); }
+
+/* ---------- tables ---------- */
+.fc-table-wrap { overflow-x: auto; margin-top: 1rem; }
+.fc-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.fc-table th { text-align: left; font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-gray-600); border-bottom: 1px solid var(--color-navy); padding: 0.5rem; white-space: nowrap; }
+.fc-table td { border-bottom: 1px solid var(--line); padding: 0.5rem; vertical-align: middle; }
+.fc-table:not(.fc-table--input) td:not(:first-child) { font-family: var(--font-mono); font-size: var(--text-xs); }
+.fc-table--input td:first-child { min-width: 11rem; }
+.fc-table:not(.fc-table--input) td:first-child { min-width: 9rem; }
+.fc-table--compact { max-width: 46rem; }
+.fc-table--kpi td:not(:first-child), .fc-table--kpi th:not(:first-child) { text-align: right; }
+.fc-table--kpi td:first-child { font-weight: 500; }
+
+/* ---------- messages ---------- */
+.fc-msg { margin: 1rem 0 0; padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: var(--text-sm); background: var(--color-accent-bg); border-left: 2px solid var(--color-navy); }
+.fc-msg:empty { display: none; }
+.fc-msg ul, .fc-warnings ul, .fc-caveats { margin: 0.35rem 0 0; padding-left: 1.25rem; font-size: var(--text-sm); }
+.fc-warnings { margin-top: 1rem; padding: 0.75rem 1rem; background: var(--color-accent-bg); border-left: 2px solid var(--color-accent); border-radius: var(--radius-md); }
+.fc-warnings:empty { display: none; }
+
+/* ---------- key figures ---------- */
+.fc-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: 1rem; }
+.fc-kpis--second { margin-top: 1rem; }
+.fc-kpi { border-top: 1px solid var(--line); padding-top: 0.75rem; }
+.fc-kpi--accent { border-top: 2px solid var(--color-accent); }
+.fc-kpi__value { font-family: var(--font-mono); font-size: var(--text-3xl); line-height: 1.15; color: var(--color-navy); margin: 0; overflow-wrap: anywhere; }
+.fc-kpi__label { font-size: var(--text-xs); color: var(--color-gray-600); margin: 0.3rem 0 0; }
+
+/* ---------- charts (SVG, styled only through classes) ---------- */
+.fc-chart { margin-top: 1.5rem; }
+.fc-chart:empty { display: none; }
+.fc-svg { display: block; width: 100%; height: auto; margin-top: 0.5rem; }
+.fc-grid-line { stroke: var(--color-gray-200); stroke-width: 1; }
+.fc-baseline { fill: none; stroke: var(--color-gray-400); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.fc-line { fill: none; stroke: var(--color-navy); stroke-width: 2.5; stroke-linejoin: round; }
+.fc-line--invest { stroke: var(--color-gray-500); stroke-width: 2; stroke-dasharray: 7 6; }
+.fc-dot { fill: var(--color-accent); stroke: var(--color-navy); stroke-width: 1.5; }
+.fc-axis { font-family: var(--font-mono); font-size: var(--text-xs); fill: var(--color-gray-600); }
+
+/* ---------- details, assumptions ---------- */
+.fc-gap { margin-top: 1.5rem; }
+.fc-details { margin-top: 1.25rem; }
+.fc-details summary { cursor: pointer; font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-navy); }
+.fc-assumptions p { margin: 0 0 0.75rem; }
+.fc-assumptions a { color: var(--color-navy); text-decoration: none; border-bottom: 1px solid var(--color-accent); }
+.fc-assumptions a:hover { color: var(--color-accent-dark); }
+.fc-caveats { margin-top: 1rem; color: var(--color-gray-600); }
+.fc-caveats li + li { margin-top: 0.35rem; }
+
+/* ---------- phones: keyword rows as stacked cards ---------- */
+@media (max-width: 640px) {
+  .fc-table--input thead { display: none; }
+  .fc-table--input, .fc-table--input tbody { display: block; }
+  .fc-table--input tr { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.75rem; padding: 0.9rem 0; border-bottom: 1px solid var(--line); }
+  .fc-table--input td { display: flex; flex-direction: column; gap: 0.25rem; border: 0; padding: 0; min-width: 0; }
+  .fc-table--input td:first-child { grid-column: 1 / -1; min-width: 0; }
+  .fc-table--input td[data-label]::before { content: attr(data-label); font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-gray-600); }
+  .fc-table--input td:last-child { justify-content: flex-end; }
+  .fc-input--num, .fc-table--input select.fc-input { width: 100%; min-width: 0; }
+  .fc-table--input td:last-child { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-btn { transition: none; }
+  .fc-btn:hover { transform: none; }
+}

@@ -1,26 +1,33 @@
 {
   "name": "seo-forecast",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Transparent SEO forecast: search volume × sourced CTR curves × AI Overview impact, through your own business funnel to revenue, profit and ROI. Every assumption visible.",
   "type": "module",
   "license": "MIT",
   "author": "Thorsten Litzki (Litzki Systems)",
-  "main": "dist/forecast.js",
-  "types": "dist/forecast.d.ts",
+  "main": "package/seo-forecast.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/forecast.js",
-    "./csv": "./dist/csv.js",
-    "./data": "./dist/data.js",
-    "./funnel": "./dist/funnel.js",
-    "./ctr-curves.json": "./data/ctr-curves.json"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./package/seo-forecast.js"
+    },
+    "./seo-forecast.css": "./package/seo-forecast.css",
+    "./ctr-curves.json": "./package/ctr-curves.json"
   },
-  "files": ["dist", "data"],
+  "files": [
+    "package",
+    "dist",
+    "data"
+  ],
   "scripts": {
-    "build": "tsc",
-    "test": "tsc && node --test tests/*.test.mjs",
+    "build": "tsc && node scripts/build-package.mjs",
+    "test": "tsc && node --test tests/*.test.mjs && node scripts/build-package.mjs && node scripts/check-package.mjs",
     "serve": "python3 -m http.server 8000"
   },
   "devDependencies": {
+    "esbuild": "^0.24.2",
     "typescript": "^5.6.0"
-  }
+  },
+  "module": "package/seo-forecast.js"
 }

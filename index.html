@@ -1,26 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SEO Forecast</title>
-  <meta name="description" content="Transparent SEO traffic forecast: your search volume × sourced CTR curves × AI Overview impact. Every assumption visible, nothing estimated behind your back.">
-  <link rel="stylesheet" href="css/seo-forecast.css">
-  <script type="module" src="dist/ui.js"></script>
+  <meta name="description" content="Transparent SEO forecast: your search volume × sourced CTR curves × AI Overview impact, through your own funnel to revenue, profit and ROI. Every assumption visible.">
+  <link rel="stylesheet" href="demo/tokens.css">
+  <link rel="stylesheet" href="package/seo-forecast.css">
+  <script type="module" src="demo/main.js"></script>
 </head>
 <body>
-<main class="page">
-  <header class="page__head">
-    <h1 class="page__title">SEO Forecast</h1>
-    <span><a href="index.de.html" hreflang="de" lang="de">Deutsch</a></span>
+<main class="demo">
+  <p class="demo__kicker">Open source · MIT</p>
+  <header class="demo__head">
+    <h1>SEO Forecast</h1>
+    <span class="demo__lang"><a href="index.de.html" hreflang="de" lang="de">Deutsch</a></span>
   </header>
-  <p class="page__intro">How many organic clicks, leads, customers and how much profit can a better ranking bring? Enter your keywords with search volume, today's position and your target position, and optionally your own conversion figures. The calculator uses published CTR curves with their sources and the measured effect of AI Overviews, and shows every assumption.</p>
+  <p class="demo__lead">How many organic clicks, leads, customers and how much profit can a better ranking bring? Enter your keywords with search volume, today's position and your target position, and optionally your own conversion figures. The calculator uses published CTR curves with their sources and the measured effect of AI Overviews, and shows every assumption.</p>
 
-  <div id="seo-forecast" data-src="data/ctr-curves.json">
-    <noscript>The calculator needs JavaScript.</noscript>
-  </div>
+  <div id="forecast"></div>
 
-  <p class="page__foot">Open source under the MIT license · <a href="https://github.com/litzki-systems/seo-forecast">Source on GitHub</a> · Thorsten Litzki · <a href="https://litzki-systems.com">Litzki Systems</a></p>
+  <p class="demo__foot">Demo of the package · <a href="https://github.com/litzki-systems/seo-forecast">Source on GitHub</a> · MIT · Thorsten Litzki · <a href="https://litzki-systems.com">Litzki Systems</a></p>
 </main>
 </body>
 </html>
