@@ -1,10 +1,12 @@
 # SEO Forecast
 
-**English** · [Deutsch](#deutsch)
+**English** · [Deutsch](#seo-prognose-deutsch)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests](https://github.com/litzki-systems/seo-forecast/actions/workflows/test.yml/badge.svg)](https://github.com/litzki-systems/seo-forecast/actions/workflows/test.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 How many organic clicks, leads, customers and how much profit can a better ranking bring? SEO Forecast multiplies **your** search volume with **published, sourced** click-through rates per position and the **measured** effect of Google AI Overviews, ramps the result up linearly to your target month, and, if you enter your own conversion figures, follows it through the business funnel to revenue, profit, ROI and break-even. Every number it uses is shown next to the result, with its source.
+
+Live: [litzki-systems.com/tools/seo-forecast](https://litzki-systems.com/tools/seo-forecast/) (English) · [litzki-systems.com/de/werkzeuge/seo-prognose](https://litzki-systems.com/de/werkzeuge/seo-prognose/) (German)
 
 ## Screenshots
 
@@ -76,7 +78,7 @@ python3 -m http.server 8000
 
 ### In your website
 
-Each release tag (for example `v1.2.0`) contains three ready files in `package/`:
+Each release tag (for example `v1.4.1`) contains three ready files in `package/`:
 
 | File | Content |
 | --- | --- |
@@ -154,9 +156,11 @@ Thorsten Litzki · [Litzki Systems](https://litzki-systems.com)
 
 [English](#seo-forecast) · **Deutsch**
 
-[![Lizenz: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests](https://github.com/litzki-systems/seo-forecast/actions/workflows/test.yml/badge.svg)](https://github.com/litzki-systems/seo-forecast/actions/workflows/test.yml) [![Lizenz: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Wie viele organische Klicks, Leads, Kunden und wie viel Gewinn bringt ein besseres Ranking? Die SEO-Prognose multipliziert **Ihr** Suchvolumen mit **veröffentlichten, belegten** Klickraten je Position und dem **gemessenen** Einfluss der Google AI Overviews, lässt das Ergebnis linear bis zum Zielmonat ansteigen und rechnet es mit Ihren eigenen Conversion-Zahlen durch den Business-Funnel bis zu Umsatz, Gewinn, ROI und Break-even. Jede verwendete Zahl steht mit Quelle neben dem Ergebnis.
+
+Live: [litzki-systems.com/de/werkzeuge/seo-prognose](https://litzki-systems.com/de/werkzeuge/seo-prognose/) (Deutsch) · [litzki-systems.com/tools/seo-forecast](https://litzki-systems.com/tools/seo-forecast/) (Englisch)
 
 ## Screenshots
 
@@ -210,7 +214,7 @@ python3 -m http.server 8000
 # Deutsch:  http://localhost:8000/index.de.html
 ```
 
-Einbindung in eine Website: Jeder Release-Tag (z. B. `v1.2.0`) enthält in `package/` drei fertige Dateien: `seo-forecast.js` (ES-Modul mit `mount(el, { lang })`), `seo-forecast.css` (Klassen mit Präfix `.fc-`, nur Design-Tokens der Seite) und `ctr-curves.json`. Läuft unter `script-src 'self'; style-src 'self'` ohne `unsafe-inline`. Details: [`docs/integration.md`](docs/integration.md).
+Einbindung in eine Website: Jeder Release-Tag (z. B. `v1.4.1`) enthält in `package/` drei fertige Dateien: `seo-forecast.js` (ES-Modul mit `mount(el, { lang })`), `seo-forecast.css` (Klassen mit Präfix `.fc-`, nur Design-Tokens der Seite) und `ctr-curves.json`. Läuft unter `script-src 'self'; style-src 'self'` ohne `unsafe-inline`. Details: [`docs/integration.md`](docs/integration.md).
 
 Keyword-CSV mit den Spalten `keyword`, `suchvolumen`, `aktuelle_position` (leer = rankt nicht), `zielposition`, `ai_overview` (ja/nein), `suchintention` (info/kommerziell/transaktional), `marke` (ja/nein), getrennt durch Komma oder Semikolon. Eigene Kurve: In der Search Console unter *Leistung → Suchergebnisse* die Suchanfragen als CSV exportieren und `Queries.csv` laden.
 
